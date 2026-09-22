@@ -63,16 +63,36 @@ Architettura: il **banditore è l'unico che scrive** lo stato canonico
 dell'asta; giocatori e tabellone lo ricevono in tempo reale; i giocatori
 inviano i rilanci come "azioni" che il banditore valida e applica.
 
-Setup:
+Il layer real-time è **già implementato**: finché `public/config.js` ha le
+chiavi vuote l'app gira in **modalità locale** (come il prototipo); appena
+inserisci le chiavi Supabase si attiva il **multiplayer**.
+
+Setup (una volta):
 
 1. Crea un progetto gratuito su [supabase.com](https://supabase.com).
 2. SQL Editor → esegui `supabase/schema.sql`.
 3. Project Settings → API: copia **Project URL** e **anon public key**.
-4. Inseriscile in `public/config.js` (verrà aggiunto in questo step), oppure
-   come variabili in Netlify.
+4. Incollale in **`public/config.js`** (`SUPABASE_URL`, `SUPABASE_ANON_KEY`);
+   `ROOM` è il codice stanza.
 
 > La `anon key` è pubblica per definizione: la sicurezza dell'evento è data dal
 > **codice stanza** riservato. Sufficiente per un'asta privata.
+
+### Come entrano i partecipanti (multiplayer)
+
+Aprendo il sito compare una schermata d'ingresso con il **codice stanza** e tre
+pulsanti:
+
+- **🎙️ Banditore** — un solo dispositivo (il PC che conduce). È l'unico che
+  scrive lo stato: chiama, batte, assegna. Alla riapertura riprende l'asta in
+  corso (per ricominciare da zero: Setup → Ripristina).
+- **📺 Tabellone** — il dispositivo collegato al maxischermo (sola lettura).
+- **📱 Giocatore** — ogni partecipante sceglie **chi è** e rilancia dal proprio
+  telefono; i rilanci arrivano al banditore che li valida e li applica.
+
+Il ruolo scelto viene ricordato sul dispositivo (refresh-safe). Per cambiarlo:
+aggiungi `?join` all'URL. Condividi lo stesso link (`*.netlify.app`) a tutti;
+volendo genera un QR del link.
 
 ## Sviluppo locale
 
