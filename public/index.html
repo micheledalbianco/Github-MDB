@@ -1729,7 +1729,7 @@
     var you=teams[st.youIdx],R=st.lot.player.r;
     if(you.f[R]>=SLOTS[R]){toast("Hai già completato i "+ROLE_PLUR[R]);return;}
     if(st.lot.bid+1>maxBid(you)){toast("Oltre il tuo massimo ("+maxBid(you)+")");return;}
-    Sync.sendAction("raise",{teamIdx:st.youIdx});toast("Rilancio inviato…");
+    sendAction("raise",{teamIdx:st.youIdx});toast("Rilancio inviato…");
   });
   $("g-custom").addEventListener("click",function(){
     if(!st.lot){toast("Nessun giocatore all'asta");return;}
@@ -1737,7 +1737,7 @@
     if(v==null)return;v=parseInt(v,10);
     if(isNaN(v)||v<=st.lot.bid){toast("Deve superare "+st.lot.bid);return;}
     if(v>maxBid(you)){toast("Oltre il tuo massimo ("+maxBid(you)+")");return;}
-    if(amPlayer()){Sync.sendAction("raise_to",{teamIdx:st.youIdx,amount:v});toast("Rilancio a "+v+" inviato…");}
+    if(amPlayer()){sendAction("raise_to",{teamIdx:st.youIdx,amount:v});toast("Rilancio a "+v+" inviato…");}
     else {st.lot.bid=v;st.lot.leaderIdx=st.youIdx;stopBattuta();renderAll();toast("Rilancio a "+v);}
   });
 
@@ -1830,37 +1830,38 @@
   }
   function syncPush(){
     if(!Sync||!Sync.ready||Sync.role!=="operator")return;
-    clearTimeout(Sync._t);
-    Sync._t=setTimeout(function(){try{Sync.sb.from("rooms").upsert({id:Sync.room,state:serialize(),updated_at:new Date().toISOString()});}catch(e){}},70);
+    var s=serialize();
+    try{Sync.ch.send({type:"broadcast",event:"state",payload:s});}catch(e){}   // live istantaneo
+    clearTimeout(Sync._t);                                                       // persistenza per chi entra dopo
+    Sync._t=setTimeout(function(){try{Sync.sb.from("rooms").upsert({id:Sync.room,state:s,updated_at:new Date().toISOString()});}catch(e){}},250);
   }
-  function handleAction(a){
-    if(!a||!Sync||Sync.role!=="operator"||!st.lot)return;
-    var p=a.payload||{},idx=p.teamIdx;if(idx==null||!teams[idx])return;
+  function handleAction(p){
+    if(!p||!Sync||Sync.role!=="operator"||!st.lot)return;
+    var idx=p.teamIdx;if(idx==null||!teams[idx])return;
     var R=st.lot.player.r,t=teams[idx];if(t.f[R]>=SLOTS[R])return;
-    if(a.kind==="raise"){if(st.lot.bid+1>maxBid(t))return;st.lot.bid+=1;st.lot.leaderIdx=idx;stopBattuta();renderAll();}
-    else if(a.kind==="raise_to"){var v=parseInt(p.amount,10);if(isNaN(v)||v<=st.lot.bid||v>maxBid(t))return;st.lot.bid=v;st.lot.leaderIdx=idx;stopBattuta();renderAll();}
+    if(p.kind==="raise"){if(st.lot.bid+1>maxBid(t))return;st.lot.bid+=1;st.lot.leaderIdx=idx;stopBattuta();renderAll();}
+    else if(p.kind==="raise_to"){var v=parseInt(p.amount,10);if(isNaN(v)||v<=st.lot.bid||v>maxBid(t))return;st.lot.bid=v;st.lot.leaderIdx=idx;stopBattuta();renderAll();}
   }
   function gateRoom(){return (($("gate-room").value||CFG.ROOM||"ASTA").trim().toUpperCase())||"ASTA";}
-  function makeSync(role){return {role:role,room:gateRoom(),sb:window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY),ready:false,applying:false,_t:null,
-    sendAction:function(kind,payload){try{this.sb.from("actions").insert({room_id:this.room,kind:kind,payload:payload});}catch(e){}}};}
+  function makeSync(role){return {role:role,room:gateRoom(),sb:window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY),ch:null,ready:false,applying:false,_t:null};}
+  function sendAction(kind,payload){if(!Sync||!Sync.ch)return;try{Sync.ch.send({type:"broadcast",event:"action",payload:{kind:kind,teamIdx:payload.teamIdx,amount:payload.amount}});}catch(e){}}
   function connect(role,onReady){
-    Sync=makeSync(role);
+    Sync=makeSync(role);var sb=Sync.sb;
+    var ch=sb.channel("asta-"+Sync.room,{config:{broadcast:{self:false}}});Sync.ch=ch;
     if(role==="operator"){
-      Sync.sb.from("rooms").select("state").eq("id",Sync.room).maybeSingle().then(function(res){
+      ch.on("broadcast",{event:"action"},function(m){handleAction(m.payload);});
+      ch.on("broadcast",{event:"hello"},function(){syncPush();});   // ri-invia lo stato a chi entra
+      sb.from("rooms").select("state").eq("id",Sync.room).maybeSingle().then(function(res){
         if(res&&res.data&&res.data.state&&res.data.state.teams){Sync.applying=true;applyState(res.data.state);Sync.applying=false;}
         else{var d=demoParam();if(["P","D","C","A"].indexOf(d)>=0)seedMidRole(d);else freshStart();}
-        try{Sync.sb.from("actions").delete().eq("room_id",Sync.room);}catch(e){}
-        Sync.sb.channel("act-"+Sync.room).on("postgres_changes",{event:"INSERT",schema:"public",table:"actions",filter:"room_id=eq."+Sync.room},function(pl){handleAction(pl.new);}).subscribe();
-        Sync.ready=true;syncPush();onReady&&onReady();
+        ch.subscribe(function(status){if(status==="SUBSCRIBED"){Sync.ready=true;syncPush();onReady&&onReady();}});
       });
     } else {
-      Sync.sb.from("rooms").select("state").eq("id",Sync.room).maybeSingle().then(function(res){
+      ch.on("broadcast",{event:"state"},function(m){if(m.payload){Sync.applying=true;applyState(m.payload);Sync.applying=false;renderAll();}});
+      sb.from("rooms").select("state").eq("id",Sync.room).maybeSingle().then(function(res){
         if(res&&res.data&&res.data.state){Sync.applying=true;applyState(res.data.state);Sync.applying=false;renderAll();}
-        Sync.ready=true;onReady&&onReady();
+        ch.subscribe(function(status){if(status==="SUBSCRIBED"){Sync.ready=true;try{ch.send({type:"broadcast",event:"hello",payload:{}});}catch(e){}onReady&&onReady();}});
       });
-      Sync.sb.channel("room-"+Sync.room).on("postgres_changes",{event:"*",schema:"public",table:"rooms",filter:"id=eq."+Sync.room},function(pl){
-        if(pl.new&&pl.new.state){Sync.applying=true;applyState(pl.new.state);Sync.applying=false;renderAll();}
-      }).subscribe();
     }
   }
   function setNav(list){document.querySelectorAll(".seg button").forEach(function(b){b.hidden=list.indexOf(b.dataset.view)<0;});}
