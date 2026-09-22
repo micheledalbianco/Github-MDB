@@ -1,0 +1,12 @@
+# Configurazione Netlify — sito statico (nessun build necessario)
+[build]
+  publish = "public"
+
+# La app è statica: Netlify serve i file in /public così come sono.
+# Il real-time (12 telefoni) è gestito da Supabase (vedi README).
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
