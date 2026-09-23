@@ -211,7 +211,7 @@
   .rgi{display:flex;align-items:center;gap:10px;font-size:14.5px;padding:6px 10px;border-radius:8px}
   .rgi:nth-child(odd){background:color-mix(in srgb,var(--surface-2) 55%,transparent)}
   .rgi .rgnm{flex:1 1 auto;font-weight:600}
-  .rgi .rgp{flex:0 0 auto;color:var(--gold);font-variant-numeric:tabular-nums;font-weight:700;font-family:var(--ff-disp);font-size:15px}
+  .rgi .rgp{flex:0 0 auto;color:var(--text);font-variant-numeric:tabular-nums;font-weight:700;font-family:var(--ff-disp);font-size:15px}
   .rgempty{font-size:12.5px;color:var(--faint);padding:5px 10px}
 
   .board-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
@@ -315,7 +315,7 @@
   .board-hero .bid-leader b{font-size:30px}
 
   /* moneta oro sui crediti */
-  .credits::before,.cr::before,.fcr::before,.recap-cred::before,.crank-cr::before,.stat.gold .v::before,.regia-cur .v::before,.rgi .rgp::before{
+  .credits::before,.cr::before,.fcr::before,.recap-cred::before,.crank-cr::before,.stat.gold .v::before,.regia-cur .v::before{
     content:"";display:inline-block;width:.72em;height:.72em;border-radius:50%;margin-right:.32em;vertical-align:baseline;
     background:radial-gradient(circle at 35% 30%,#fff6cf,var(--gold) 55%,#a9740a);
     box-shadow:inset 0 0 0 1px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.4)}
@@ -414,7 +414,6 @@
   .crank-row{display:flex;align-items:center;gap:9px;padding:6px 6px;border-radius:8px;font-size:14.5px}
   .crank-row + .crank-row{border-top:1px solid var(--border)}
   .crank-n{font-family:var(--ff-disp);font-weight:700;color:var(--faint);width:20px;text-align:center;font-variant-numeric:tabular-nums}
-  .crank-row.top .crank-n{color:var(--gold)}
   .crank-row .dot{width:11px;height:11px;border-radius:50%;flex:none}
   .crank-name{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .crank-cr{font-family:var(--ff-disp);font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums;font-size:16px}
