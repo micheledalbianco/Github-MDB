@@ -1753,13 +1753,12 @@
     var html="";
     teams.forEach(function(t,i){
       var cls=["tcard","card"];if(st.drawn&&i===ic)cls.push("calling");if(isDim(i))cls.push("out");
-      var badge=(isDim(i))?"<span class='fuori-badge'>fuori</span>":"";
       var slots=ROLE_SLOTS.map(function(x){var r=x[0],tt=x[1],got=t.f[r],cur=(r===phase),pips="";
         for(var k=0;k<tt;k++)pips+="<i class='"+(k<got?"on":"")+"'></i>";
         return "<div class='slotrow sr-"+r+(cur?" cur":"")+(got>=tt?" full":"")+"'><span class='rl'>"+r+"</span>"+
           "<span class='sp'>"+pips+"</span><span class='rc'>"+got+"/"+tt+"</span></div>";}).join("");
       html+="<div class='"+cls.join(" ")+"' data-i='"+i+"'>"+
-        "<div class='th'><b>"+t.name+"</b>"+badge+
+        "<div class='th'><b>"+t.name+"</b>"+
           "<div class='th-stats'><span class='cr'>"+t.cred+"</span><span class='th-max'><i>max</i>"+maxBid(t)+"</span></div></div>"+
         "<div class='slotgrid'>"+slots+"</div></div>";
     });
