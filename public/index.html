@@ -193,10 +193,14 @@
   .rgh{display:flex;align-items:center;gap:8px}
   .rgh b{font-size:13px}
   .rgh .rgc{margin-left:auto;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
-  .rglist{margin-top:6px;display:flex;flex-direction:column;gap:2px}
-  .rgi{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;padding:2px 0}
-  .rgi .rgp{color:var(--gold);font-variant-numeric:tabular-nums;font-weight:600;font-family:var(--ff-disp)}
-  .rgempty{font-size:12.5px;color:var(--faint);padding:2px 0}
+  .rglist{margin-top:7px;display:flex;flex-direction:column}
+  .rgi{display:flex;align-items:center;gap:10px;font-size:14px;padding:6px 8px;border-radius:8px}
+  .rgi:nth-child(odd){background:color-mix(in srgb,var(--surface-2) 55%,transparent)}
+  .rgi .rgn{flex:0 0 auto;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;background:var(--surface-2);border:1px solid var(--border);font-size:11px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+  .rgi .rgnm{flex:1 1 auto;font-weight:600}
+  .rgi .rgp{flex:0 0 auto;color:var(--gold);font-variant-numeric:tabular-nums;font-weight:700;font-family:var(--ff-disp);font-size:15px}
+  .rgi:first-child .rgn{background:var(--gold-soft);border-color:color-mix(in srgb,var(--gold) 45%,transparent);color:var(--gold)}
+  .rgempty{font-size:12.5px;color:var(--faint);padding:4px 8px}
 
   .board-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
   .tcard{padding:11px 12px;border-radius:12px;cursor:pointer}
@@ -300,7 +304,7 @@
   .board-hero .bid-leader b{font-size:30px}
 
   /* moneta oro sui crediti */
-  .credits::before,.cr::before,.fcr::before,.recap-cred::before,.crank-cr::before,.stat.gold .v::before,.regia-cur .v::before{
+  .credits::before,.cr::before,.fcr::before,.recap-cred::before,.crank-cr::before,.stat.gold .v::before,.regia-cur .v::before,.rgi .rgp::before{
     content:"";display:inline-block;width:.72em;height:.72em;border-radius:50%;margin-right:.32em;vertical-align:baseline;
     background:radial-gradient(circle at 35% 30%,#fff6cf,var(--gold) 55%,#a9740a);
     box-shadow:inset 0 0 0 1px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.4)}
@@ -409,7 +413,7 @@
   /* tabellone: a tutta larghezza (esce dal contenitore da 1120px) per usare il maxischermo */
   #v-tabellone{width:100vw;margin-left:calc(50% - 50vw);padding-inline:24px;overflow-x:hidden}
   /* tabellone: compattazione per stare in UNA schermata (target 1080p) */
-  #v-tabellone .section-title{margin:12px 2px 8px}
+  #v-tabellone .section-title{display:none}
   #v-tabellone #t-callorder{margin-bottom:10px}
   .board-hero{display:flex;align-items:center;gap:0;padding:14px 30px;
     background:radial-gradient(130% 200% at 50% -30%,color-mix(in srgb,var(--accent) 13%,transparent),transparent 60%)}
@@ -429,10 +433,8 @@
   .board-hero .bh-player .role-pill{width:54px;height:54px;font-size:26px;border-radius:14px;flex:0 0 auto}
   .board-hero .role-pill.role-none{background:var(--border-strong);opacity:.5}
   .board-hero .bh-ptext{min-width:0}
-  .board-hero .bh-nameline{display:flex;align-items:center;gap:13px}
-  .board-hero .lot-name{font-size:42px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .board-hero .lot-meta{font-size:16px;margin-top:6px}
-  .board-hero .club-crest{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:42px;padding:0 9px;border-radius:10px;font-family:var(--ff-disp);font-weight:700;font-size:17px;letter-spacing:.3px;box-shadow:0 2px 9px rgba(0,0,0,.32)}
+  .board-hero .lot-name{font-size:48px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .board-hero .lot-meta{font-size:16px;margin-top:7px}
   /* offerta */
   .board-hero .bh-bid{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
   .board-hero .bh-bid .bid-amount{font-size:78px;color:var(--gold)}
@@ -440,15 +442,21 @@
   .board-hero.no-lot .bid-amount{color:var(--faint)}
   .board-hero.no-lot .bh-player .role-pill{display:none}
   .board-hero.no-lot .bid-leader{opacity:.45}
+  /* countdown finito: offerta in verde */
+  .board-hero.pending .bid-amount{color:var(--good)}
   /* divisori */
   .board-hero .bh-div{width:1px;height:78px;align-self:center;flex:0 0 auto;
     background:linear-gradient(180deg,transparent,var(--border-strong) 20%,var(--border-strong) 80%,transparent)}
   /* cerchio "in asta": centrato nel suo spazio */
-  .board-hero .board-side{flex:0 0 22%;display:flex;flex-direction:column;align-items:center;justify-content:center;align-self:center}
+  .board-hero{position:relative}
+  .board-hero .board-side{flex:0 0 22%;display:flex;align-items:center;justify-content:center;align-self:stretch}
   .board-hero .ring,.board-hero .ring svg{width:126px;height:126px}
   .board-hero .ring .num{font-size:48px}
   .board-hero .ring.waiting circle:first-of-type{stroke:color-mix(in srgb,var(--accent) 40%,var(--border))}
   .board-hero .ring.waiting .num{font-size:19px!important;letter-spacing:1px;text-transform:uppercase}
+  .board-hero .ring.done circle:first-of-type{stroke:color-mix(in srgb,var(--good) 60%,var(--border))}
+  .board-hero .ring.done .num{color:var(--good)!important;letter-spacing:.3px;text-transform:uppercase;font-weight:700}
+  .t-roletag{position:absolute;top:10px;right:16px;z-index:2;font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:700;color:var(--accent-ink);background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 34%,transparent);border-radius:20px;padding:3px 12px}
   /* post-assegnazione: niente cerchio, "ora chiama" grande e in evidenza */
   .board-hero.sold .board-side,.board-hero.sold #t-ringdiv{display:none}
   .board-hero.sold .bh-call.big .eyebrow{color:var(--accent-ink);font-size:12px}
@@ -786,6 +794,7 @@
     <div class="section-title"><h2>Tabellone</h2><span class="hint">Ruolo in chiamata: <b id="t-phase">Portieri</b></span></div>
 
     <div class="card board-hero" id="t-hero">
+      <span class="t-roletag" id="t-roletag"></span>
       <div class="bh-zones" id="t-zones"></div>
       <div class="bh-div" id="t-ringdiv"></div>
       <div class="board-side" id="t-side">
@@ -796,7 +805,6 @@
           </svg>
           <div class="num" id="t-count">—</div>
         </div>
-        <div class="pips big" id="t-pips"></div>
       </div>
     </div>
 
@@ -1492,7 +1500,7 @@
       var r=rr[0],tt=rr[1],arr=byrole[r].slice().sort(function(a,b){return b.price-a.price;}),miss=tt-arr.length;
       var meta=miss>0?(arr.length+"/"+tt+" · manca "+miss):("completo "+tt+"/"+tt);
       body+="<div class='rgroup'><div class='rgh'><span class='role-pill role-"+r+"'>"+r+"</span><b>"+ROLE_PLUR[r]+"</b><span class='rgc"+(miss>0?"":" done")+"'>"+meta+"</span></div>";
-      if(arr.length){body+="<div class='rglist'>";arr.forEach(function(p){body+="<div class='rgi'><span>"+p.n+"</span><span class='rgp'>"+p.price+"</span></div>";});body+="</div>";}
+      if(arr.length){body+="<div class='rglist'>";arr.forEach(function(p,pi){body+="<div class='rgi'><span class='rgn'>"+(pi+1)+"</span><span class='rgnm'>"+p.n+"</span><span class='rgp'>"+p.price+"</span></div>";});body+="</div>";}
       else body+="<div class='rgempty'>— ancora nessuno —</div>";
       body+="</div>";
     });
@@ -1520,6 +1528,8 @@
       else{ring.classList.remove("waiting","done");numEl.textContent=(prefix==="t-"?"—":"attesa");}
       renderPips(prefix);return;}
     ring.classList.remove("done");
+    if(st.pending){ring.classList.remove("idle","blink","waiting");ring.classList.add("done");fg.setAttribute("stroke-dashoffset",0);fg.setAttribute("stroke","var(--good)");
+      numEl.textContent="venduto";numEl.style.color="var(--good)";numEl.style.fontFamily="var(--ff-body)";numEl.style.fontSize=(prefix==="t-"?"16px":"12px");renderPips(prefix);return;}
     if(!active()){ring.classList.remove("idle","blink");fg.setAttribute("stroke-dashoffset",circ);
       if(prefix==="t-"){ring.classList.add("waiting");numEl.textContent="in asta";}
       else{ring.classList.remove("waiting");numEl.textContent="batti";numEl.style.fontSize="15px";}
@@ -1704,34 +1714,36 @@
     }
     function playerBlock(eyeb,p){
       return "<div class='bh-player'><span class='role-pill role-"+p.r+"'>"+p.r+"</span>"+
-        "<div class='bh-ptext'><div class='eyebrow'>"+eyeb+"</div>"+
-        "<div class='bh-nameline'><span class='lot-name'>"+p.n+"</span>"+clubCrest(p.sq)+"</div>"+
+        "<div class='bh-ptext'>"+(eyeb?"<div class='eyebrow'>"+eyeb+"</div>":"")+
+        "<div class='lot-name'>"+p.n+"</div>"+
         "<div class='lot-meta'>"+p.sq+"</div></div></div>";
     }
     function bidBlock(eyeb,amount,tName,tColor){
-      return "<div class='bh-bid'><div class='eyebrow'>"+eyeb+"</div>"+
+      return "<div class='bh-bid'>"+(eyeb?"<div class='eyebrow'>"+eyeb+"</div>":"")+
         "<div class='bid-amount tnum'>"+amount+"</div>"+
         "<div class='bid-leader'><span class='lead-dot' style='background:"+(tColor||"")+"'></span><b>"+tName+"</b></div></div>";
     }
     var DIV="<div class='bh-div'></div>";
     $("t-hero").classList.toggle("no-lot",!L&&!sold);
     $("t-hero").classList.toggle("sold",!!sold);
+    $("t-hero").classList.toggle("pending",!!(L&&st.pending));
+    $("t-roletag").textContent=ROLE_PLUR[phase];
     if(L){
-      $("t-zones").innerHTML=callBlock(false)+DIV+playerBlock("Giocatore all'asta",L.player)+DIV+
-        bidBlock("Offerta più alta",L.bid,teams[L.leaderIdx].name,teams[L.leaderIdx].color);
+      $("t-zones").innerHTML=callBlock(false)+DIV+playerBlock("",L.player)+DIV+
+        bidBlock("",L.bid,teams[L.leaderIdx].name,teams[L.leaderIdx].color);
     }else if(sold){
       $("t-zones").innerHTML=playerBlock("Ultimo chiamato",sold)+DIV+
         bidBlock("Aggiudicato a",sold.price,sold.tName,sold.tColor)+DIV+callBlock(true);
     }else{
       $("t-zones").innerHTML=callBlock(false)+DIV+
-        "<div class='bh-player'><span class='role-pill role-none'></span><div class='bh-ptext'><div class='eyebrow'>Giocatore all'asta</div>"+
-        "<div class='bh-nameline'><span class='lot-name'>—</span></div><div class='lot-meta'>In attesa di chiamata</div></div></div>"+DIV+
-        bidBlock("Offerta più alta","—","nessuno","");
+        "<div class='bh-player'><span class='role-pill role-none'></span><div class='bh-ptext'>"+
+        "<div class='lot-name'>—</div><div class='lot-meta'>In attesa di chiamata</div></div></div>"+DIV+
+        bidBlock("","—","nessuno","");
     }
     var html="";
     teams.forEach(function(t,i){
       var cls=["tcard","card"];if(i===ic)cls.push("calling");if(isDim(i))cls.push("out");
-      var badge=(i===ic)?"<span class='chiama-badge'>chiama</span>":(isDim(i)?"<span class='fuori-badge'>fuori</span>":"");
+      var badge=(isDim(i))?"<span class='fuori-badge'>fuori</span>":"";
       var slots=ROLE_SLOTS.map(function(x){var r=x[0],tt=x[1],got=t.f[r],cur=(r===phase),pips="";
         for(var k=0;k<tt;k++)pips+="<i class='"+(k<got?"on":"")+"'></i>";
         return "<div class='slotrow sr-"+r+(cur?" cur":"")+(got>=tt?" full":"")+"'><span class='rl'>"+r+"</span>"+
