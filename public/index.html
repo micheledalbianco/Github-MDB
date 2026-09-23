@@ -16,6 +16,7 @@
     --accent:#3b82f6;--accent-ink:#93c5fd;--accent-soft:#132650;
     --gold:#f5b301;--gold-soft:#2a2410;
     --good:#22c55e;--warn:#f0b23a;--crit:#ff6b57;--crit-soft:#3a1e18;
+    --evid:#ff8a3d;--evid-ink:#ffb682;--evid-soft:#3a2412;
     --cta1:#22c55e;--cta2:#16a34a;
     --shadow:0 1px 2px rgba(0,0,0,.5),0 16px 38px rgba(0,0,0,.5);
     --r:16px;--r-sm:10px;
@@ -423,13 +424,15 @@
   .board-hero .bh-last{display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px}
   .board-hero .bh-last .eyebrow{margin:0}
   .board-hero .bl-name{font-family:var(--ff-disp);font-weight:700;font-size:30px;line-height:1;color:var(--text)}
+  .board-hero .bl-name.bl-empty{color:var(--faint)}
   .board-hero .bl-to{display:inline-flex;align-items:center;gap:8px;margin-top:4px;font-size:17px;color:var(--muted);font-weight:600}
   .board-hero .bl-to .dot{width:11px;height:11px;flex:0 0 auto}
   .board-hero .bl-to b{color:var(--text);font-family:var(--ff-disp);font-weight:700}
   /* chiamata in corso */
   .board-hero .bh-call{display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px}
   .board-hero .bh-call .eyebrow{margin:0}
-  .board-hero .bc-now{display:inline-flex;align-items:center;gap:11px;font-family:var(--ff-disp);font-weight:700;font-size:32px;line-height:1;color:var(--accent-ink)}
+  .board-hero .bc-now{display:inline-flex;align-items:center;gap:11px;font-family:var(--ff-disp);font-weight:700;font-size:32px;line-height:1;color:var(--evid-ink)}
+  .board-hero .bh-call.undrawn .bc-now{color:var(--faint);font-size:40px}
   .board-hero .bc-now .dot{width:16px;height:16px;flex:0 0 auto}
   .board-hero .bc-next{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-weight:600;font-size:15px;margin-top:7px;padding-top:9px;border-top:1px solid color-mix(in srgb,var(--border-strong) 65%,transparent)}
   .board-hero .bc-lab{font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--faint);font-weight:700}
@@ -446,9 +449,6 @@
   .board-hero .bh-bid{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
   .board-hero .bh-bid .bid-amount{font-size:78px;color:var(--gold)}
   .board-hero .bh-bid .bid-leader{font-size:21px;margin-top:8px}
-  .board-hero.no-lot .bid-amount{color:var(--faint)}
-  .board-hero.no-lot .bh-player .role-pill{display:none}
-  .board-hero.no-lot .bid-leader{opacity:.45}
   /* countdown finito: offerta in verde */
   .board-hero.pending .bid-amount{color:var(--good)}
   /* divisori */
@@ -464,8 +464,8 @@
   .board-hero .ring.done circle:first-of-type{stroke:color-mix(in srgb,var(--good) 60%,var(--border))}
   .board-hero .ring.done .num{color:var(--good)!important;letter-spacing:.3px;text-transform:uppercase;font-weight:700}
   .t-roletag{position:absolute;top:10px;right:16px;z-index:2;font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:700;color:var(--accent-ink);background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 34%,transparent);border-radius:20px;padding:3px 12px}
-  /* post-assegnazione: niente cerchio (l'ultimo assegnato prende quello spazio) */
-  .board-hero.sold .board-side,.board-hero.sold #t-ringdiv{display:none}
+  /* stati non attivi (pre-asta / attesa / post-aggiudicato): niente cerchio */
+  .board-hero.resting .board-side,.board-hero.resting #t-ringdiv{display:none}
   .board-main{margin-top:10px}
   .board-grid.big{grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:10px}
   .board-grid.big .tcard{padding:9px 11px}
@@ -496,8 +496,8 @@
   .slotrow.sr-D .sp i.on{background:#3b82f6;box-shadow:0 0 7px rgba(59,130,246,.55)}
   .slotrow.sr-C .sp i.on{background:#22c55e;box-shadow:0 0 7px rgba(34,197,94,.55)}
   .slotrow.sr-A .sp i.on{background:#ef4444;box-shadow:0 0 7px rgba(239,68,68,.55)}
-  .slotrow.cur{background:color-mix(in srgb,var(--accent) 15%,transparent);border-color:color-mix(in srgb,var(--accent) 42%,transparent)}
-  .slotrow.cur .rl,.slotrow.cur .rc{color:var(--accent-ink)}
+  .slotrow.cur{background:color-mix(in srgb,var(--evid) 16%,transparent);border-color:color-mix(in srgb,var(--evid) 46%,transparent)}
+  .slotrow.cur .rl,.slotrow.cur .rc{color:var(--evid-ink)}
   .slotrow.cur .sp i{width:13px;height:13px}
   .slotrow.full .rc{color:var(--muted)}
   .slotrow.full .rl{color:var(--text)}
@@ -516,21 +516,13 @@
   .intesta-badge{margin-left:6px;font-size:10px;text-transform:uppercase;letter-spacing:.4px;font-weight:700;color:#0b1a10;background:var(--gold);border-radius:20px;padding:1px 7px}
   .tcard.out{opacity:.4;filter:grayscale(.45)}
   .tcard.lead{box-shadow:inset 4px 0 0 var(--gold),0 0 22px color-mix(in srgb,var(--gold) 20%,transparent),var(--shadow);border-color:color-mix(in srgb,var(--gold) 45%,transparent)}
-  /* evidenza: chi sta chiamando (griglia) in accent, distinta dal leader (oro, in classifica) */
-  .chiama-badge{margin-left:6px;font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;color:#fff;background:var(--accent);border-radius:20px;padding:1px 8px}
-  .tcard.calling{box-shadow:inset 4px 0 0 var(--accent),0 0 22px color-mix(in srgb,var(--accent) 24%,transparent),var(--shadow);border-color:color-mix(in srgb,var(--accent) 55%,transparent)}
-  .tcard.calling .th b{color:var(--accent-ink)}
-  /* leader (chi sta vincendo l'asta) evidenziato in classifica, in oro */
+  /* evidenza: chi sta chiamando (griglia) in arancio, distinta dal leader (oro, in classifica) */
+  .tcard.calling{box-shadow:inset 4px 0 0 var(--evid),0 0 22px color-mix(in srgb,var(--evid) 26%,transparent),var(--shadow);border-color:color-mix(in srgb,var(--evid) 58%,transparent)}
+  .tcard.calling .th b{color:var(--evid-ink)}
+  /* leader (chi ha l'offerta più alta) evidenziato in classifica, in oro */
   .crank-row.leader{background:color-mix(in srgb,var(--gold) 16%,transparent);border:1px solid color-mix(in srgb,var(--gold) 48%,transparent)}
   .crank-row.leader + .crank-row{border-top:0}
   .crank-row.leader .crank-name{color:var(--text);font-weight:700}
-  .crank-lead{margin-left:auto;font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;font-weight:700;color:#0b1a10;background:var(--gold);border-radius:20px;padding:1px 7px}
-  .crank-row.leader .crank-cr{margin-left:9px}
-  /* stato "appena assegnato" sul tabellone */
-  .board-hero.sold{background:radial-gradient(130% 200% at 50% -30%,color-mix(in srgb,var(--ok,#22c55e) 15%,transparent),transparent 60%)}
-  .board-hero.sold .bid-amount{color:var(--ok,#22c55e)}
-  .ring.done circle:first-of-type{stroke:color-mix(in srgb,var(--ok,#22c55e) 55%,var(--border))}
-  .ring.done .num{color:var(--ok,#22c55e)!important}
 
   /* modal ingrandimento squadra */
   .tmodal{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(3px)}
@@ -1475,7 +1467,7 @@
   });
 
   var st={view:"banditore",phase:"A",turnIdx:0,lot:null,count:0,counting:false,pending:false,timer:null,
-          speed:"veloce",selPlayer:null,youIdx:0,step:1,modalIdx:null,lastSale:null,
+          speed:"veloce",selPlayer:null,youIdx:0,step:1,modalIdx:null,lastSale:null,drawn:false,
           sort:"alfa",listRole:"P",gSort:"alfa",gListRole:"P"};
 
   var $=function(id){return document.getElementById(id);};
@@ -1574,6 +1566,7 @@
   }
   function callPlayer(){
     if(!st.selPlayer||st.selPlayer.taken)return;var base=1;
+    st.drawn=true;
     st.lot={player:st.selPlayer,bid:base,base:base,leaderIdx:st.turnIdx};
     stopBattuta();st.selPlayer=null;$("b-search").value="";renderAll();
     toast("Chiamato "+st.lot.player.n+" — base "+base+" · premi Batti");
@@ -1653,7 +1646,6 @@
     var rows=sorted.map(function(o,r){var t=o.t;
       return "<div class='crank-row"+(r===0?" top":"")+(o.i===meIdx?" me":"")+(o.i===leadIdx?" leader":"")+"'><span class='crank-n'>"+(r+1)+"</span>"+
         "<span class='dot' style='background:"+t.color+"'></span><span class='crank-name'>"+t.name+"</span>"+
-        (o.i===leadIdx?"<span class='crank-lead'>in testa</span>":"")+
         "<span class='crank-cr'>"+t.cred+"</span></div>";
     }).join("");
     el.innerHTML="<div class='crank-title'>Crediti</div>"+rows;
@@ -1704,15 +1696,17 @@
     $("t-phase").textContent=ROLE_PLUR[phase];
     $("t-recap").hidden=!recap;$("t-hero").hidden=recap;$("t-main").hidden=recap;
     if(recap){renderRecap();if(st.modalIdx!=null)renderTeamModal(st.modalIdx);return;}
-    var sold=(!L&&st.lastSale)?st.lastSale:null;
-    var leadIdx=L?L.leaderIdx:(sold?sold.tIdx:-1);
+    var leadIdx=L?L.leaderIdx:-1;
     renderRank("t-rank",-1,leadIdx);
     var ic=inCorsoIdx();
     var upc=upcoming(1),nextI=upc.length?upc[0]:null;
-    function callBlock(big){
+    function callBlock(){
+      var head="<div class='eyebrow'>Chiamata in corso</div>";
+      if(!st.drawn) return "<div class='bh-call undrawn'>"+head+"<div class='bc-now'>—</div>"+
+        "<div class='bc-next'><span class='bc-lab'>Sorteggio da fare</span></div></div>";
       var nx=(nextI!=null)?("<div class='bc-next'><span class='bc-lab'>Prossima</span>"+
         "<span class='bc-nx'><span class='dot' style='background:"+teams[nextI].color+"'></span>"+teams[nextI].name+"</span></div>"):"";
-      return "<div class='bh-call"+(big?" big":"")+"'><div class='eyebrow'>"+(big?"Ora chiama":"Chiamata in corso")+"</div>"+
+      return "<div class='bh-call'>"+head+
         "<div class='bc-now'><span class='dot' style='background:"+teams[ic].color+"'></span>"+teams[ic].name+"</div>"+nx+"</div>";
     }
     function playerBlock(eyeb,p){
@@ -1731,26 +1725,24 @@
         "<div class='lot-name'>—</div><div class='lot-meta'>In attesa di chiamata</div></div></div>";
     }
     function lastBlock(s){
+      if(!s) return "<div class='bh-last'><div class='eyebrow'>Ultimo chiamato</div><div class='bl-name bl-empty'>—</div></div>";
       return "<div class='bh-last'><div class='eyebrow'>Ultimo chiamato</div>"+
         "<div class='bl-name'>"+s.n+"</div>"+
         "<div class='bl-to'><span class='dot' style='background:"+s.tColor+"'></span>"+s.tName+" · <b>"+s.price+"</b></div></div>";
     }
     var DIV="<div class='bh-div'></div>";
-    $("t-hero").classList.toggle("no-lot",!L&&!sold);
-    $("t-hero").classList.toggle("sold",!!sold);
+    $("t-hero").classList.toggle("resting",!L);
     $("t-hero").classList.toggle("pending",!!(L&&st.pending));
     $("t-roletag").textContent=ROLE_PLUR[phase];
     if(L){
-      $("t-zones").innerHTML=callBlock(false)+DIV+playerBlock("",L.player)+DIV+
+      $("t-zones").innerHTML=callBlock()+DIV+playerBlock("",L.player)+DIV+
         bidBlock("",L.bid,teams[L.leaderIdx].name,teams[L.leaderIdx].color);
-    }else if(sold){
-      $("t-zones").innerHTML=callBlock(false)+DIV+waitingBlock()+DIV+lastBlock(sold);
     }else{
-      $("t-zones").innerHTML=callBlock(false)+DIV+waitingBlock()+DIV+bidBlock("","—","nessuno","");
+      $("t-zones").innerHTML=callBlock()+DIV+waitingBlock()+DIV+lastBlock(st.lastSale);
     }
     var html="";
     teams.forEach(function(t,i){
-      var cls=["tcard","card"];if(i===ic)cls.push("calling");if(isDim(i))cls.push("out");
+      var cls=["tcard","card"];if(st.drawn&&i===ic)cls.push("calling");if(isDim(i))cls.push("out");
       var badge=(isDim(i))?"<span class='fuori-badge'>fuori</span>":"";
       var slots=ROLE_SLOTS.map(function(x){var r=x[0],tt=x[1],got=t.f[r],cur=(r===phase),pips="";
         for(var k=0;k<tt;k++)pips+="<i class='"+(k<got?"on":"")+"'></i>";
@@ -1894,11 +1886,11 @@
   $("b-call").addEventListener("click",callPlayer);
   $("r-grid").addEventListener("click",function(e){var c=e.target.closest(".tchip");if(!c||c.classList.contains("out"))return;regiaPick(parseInt(c.dataset.i,10));});
   // forza turno: tocca una squadra nella coda del banditore
-  $("b-callorder").addEventListener("click",function(e){var c=e.target.closest(".railchip");if(!c)return;st.turnIdx=parseInt(c.dataset.i,10);renderAll();toast("Turno forzato: "+teams[inCorsoIdx()].name);});
+  $("b-callorder").addEventListener("click",function(e){var c=e.target.closest(".railchip");if(!c)return;st.turnIdx=parseInt(c.dataset.i,10);st.drawn=true;renderAll();toast("Turno forzato: "+teams[inCorsoIdx()].name);});
   $("b-sorteggio").addEventListener("click",function(){
     var valid=[],i;for(i=0;i<N;i++)if(validCaller(i))valid.push(i);
     if(!valid.length){toast("Nessuna squadra può chiamare in questo ruolo");return;}
-    st.turnIdx=valid[Math.floor(Math.random()*valid.length)];st.lot=null;stopBattuta();renderAll();
+    st.turnIdx=valid[Math.floor(Math.random()*valid.length)];st.lot=null;st.drawn=true;stopBattuta();renderAll();
     toast("Sorteggio: inizia "+teams[st.turnIdx].name);
   });
   $("b-reset").addEventListener("click",function(){
@@ -1991,14 +1983,14 @@
       t.bought.forEach(function(p,i){p.price=prices[i];});
       t.cred=BUDGET-target;t.f=f;
     });
-    st.listRole=phaseRole;st.turnIdx=0;st.lot=null;st.lastSale=null;st.count=0;st.counting=false;st.pending=false;
+    st.listRole=phaseRole;st.turnIdx=0;st.lot=null;st.lastSale=null;st.drawn=true;st.count=0;st.counting=false;st.pending=false;
     document.querySelectorAll("#b-phasesel button").forEach(function(x){x.setAttribute("aria-pressed",x.dataset.r===phaseRole?"true":"false");});
   }
 
   function freshStart(){
     teams.forEach(function(t){t.cred=BUDGET;t.f={P:0,D:0,C:0,A:0};t.bought=[];});
     LISTONE.forEach(function(p){p.taken=false;});
-    st.listRole="P";st.turnIdx=0;st.lot=null;st.lastSale=null;st.count=0;st.counting=false;st.pending=false;
+    st.listRole="P";st.turnIdx=0;st.lot=null;st.lastSale=null;st.drawn=false;st.count=0;st.counting=false;st.pending=false;
     document.querySelectorAll("#b-phasesel button").forEach(function(x){x.setAttribute("aria-pressed",x.dataset.r==="P"?"true":"false");});
   }
   function demoParam(){try{return (new URLSearchParams(location.search).get("demo")||"").toUpperCase();}catch(e){return "";}}
@@ -2009,7 +2001,7 @@
       teams:teams.map(function(t){return {name:t.name,fanta:t.fanta,cred:t.cred,f:t.f,bought:t.bought};}),
       taken:LISTONE.filter(function(p){return p.taken;}).map(function(p){return p.id;}),
       listRole:st.listRole,turnIdx:st.turnIdx,speed:st.speed,
-      counting:st.counting,pending:st.pending,count:st.count,lastSale:st.lastSale,
+      counting:st.counting,pending:st.pending,count:st.count,lastSale:st.lastSale,drawn:st.drawn,
       lot:st.lot?{n:st.lot.player.n,r:st.lot.player.r,sq:st.lot.player.sq,id:st.lot.player.id,q:st.lot.player.q,bid:st.lot.bid,base:st.lot.base,leaderIdx:st.lot.leaderIdx}:null};
   }
   function applyState(d){
@@ -2020,7 +2012,7 @@
     st.listRole=d.listRole||"P";st.turnIdx=d.turnIdx||0;st.speed=d.speed||"veloce";
     st.counting=!!d.counting;st.pending=!!d.pending;st.count=d.count||0;
     st.lot=d.lot?{player:{n:d.lot.n,r:d.lot.r,sq:d.lot.sq,id:d.lot.id,q:d.lot.q},bid:d.lot.bid,base:d.lot.base,leaderIdx:d.lot.leaderIdx}:null;
-    st.lastSale=d.lastSale||null;
+    st.lastSale=d.lastSale||null;st.drawn=!!d.drawn;
     document.querySelectorAll("#b-phasesel button").forEach(function(x){x.setAttribute("aria-pressed",x.dataset.r===st.listRole?"true":"false");});
   }
   function syncPush(){
