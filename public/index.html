@@ -411,9 +411,21 @@
   /* tabellone: compattazione per stare in UNA schermata (target 1080p) */
   #v-tabellone .section-title{margin:12px 2px 8px}
   #v-tabellone #t-callorder{margin-bottom:10px}
-  .board-hero{display:flex;align-items:center;justify-content:center;gap:56px;padding:14px 40px;
+  .board-hero{display:flex;align-items:center;justify-content:space-between;gap:30px;padding:14px 42px;
     background:radial-gradient(130% 200% at 50% -30%,color-mix(in srgb,var(--accent) 13%,transparent),transparent 60%)}
+  .board-hero .bh-call{flex:0 1 auto;min-width:0;display:flex;flex-direction:column;gap:9px}
+  .board-hero .bh-call .eyebrow{margin:0}
+  .board-hero .bc-now{display:inline-flex;align-items:center;gap:11px;font-family:var(--ff-disp);font-weight:700;font-size:30px;line-height:1;color:var(--accent-ink)}
+  .board-hero .bc-now .dot{width:15px;height:15px;flex:0 0 auto}
+  .board-hero .bc-next{display:flex;align-items:center;gap:9px;flex-wrap:wrap;color:var(--muted);font-weight:600;font-size:16px}
+  .board-hero .bc-nx{display:inline-flex;align-items:center;gap:7px}
+  .board-hero .bc-nx .dot{width:10px;height:10px;flex:0 0 auto}
+  .board-hero .bc-arr{color:var(--faint)}
   .board-hero .bh-player{display:flex;align-items:center;gap:18px;flex:0 1 auto;min-width:0}
+  .board-hero .role-pill.role-none{background:var(--border-strong);opacity:.5}
+  .board-hero.no-lot .bh-bid .bid-amount{color:var(--faint)}
+  .board-hero.no-lot .bh-player .role-pill{display:none}
+  .board-hero.no-lot .bid-leader{opacity:.45}
   .board-hero .bh-player .role-pill{width:54px;height:54px;font-size:26px;border-radius:14px;flex:0 0 auto}
   .board-hero .bh-ptext{min-width:0}
   .board-hero .lot-name{font-size:44px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:34vw}
@@ -744,9 +756,9 @@
   <section id="v-tabellone" hidden>
     <div class="section-title"><h2>Tabellone</h2><span class="hint">Ruolo in chiamata: <b id="t-phase">Portieri</b></span></div>
 
-    <div class="card" id="t-callorder" style="margin-bottom:8px"></div>
-
     <div class="card board-hero" id="t-hero">
+      <div class="bh-call" id="t-call"></div>
+      <div class="bh-div"></div>
       <div class="bh-player">
         <span class="role-pill role-A" id="t-role">A</span>
         <div class="bh-ptext">
@@ -1640,13 +1652,24 @@
   function renderTabellone(){
     var L=st.lot,phase=st.listRole,recap=(!L&&roleComplete(phase));
     $("t-phase").textContent=ROLE_PLUR[phase];
-    $("t-recap").hidden=!recap;$("t-hero").hidden=recap||!L;$("t-main").hidden=recap;
+    $("t-recap").hidden=!recap;$("t-hero").hidden=recap;$("t-main").hidden=recap;
     if(recap){renderRecap();if(st.modalIdx!=null)renderTeamModal(st.modalIdx);return;}
     renderRank("t-rank",-1);
+    var ic=inCorsoIdx();
+    var nx=upcoming(2).map(function(i){var t=teams[i];
+      return "<span class='bc-nx'><span class='dot' style='background:"+t.color+"'></span>"+t.name+"</span>";}).join("<span class='bc-arr'>▸</span>");
+    $("t-call").innerHTML="<div class='eyebrow'>Chiamata in corso</div>"+
+      "<div class='bc-now'><span class='dot' style='background:"+teams[ic].color+"'></span>"+teams[ic].name+"</div>"+
+      (nx?"<div class='bc-next'>"+nx+"</div>":"");
+    $("t-hero").classList.toggle("no-lot",!L);
     if(L){
       $("t-name").textContent=L.player.n;$("t-meta").textContent=ROLE_NAME[L.player.r]+" · "+L.player.sq;
       $("t-role").textContent=L.player.r;$("t-role").className="role-pill role-"+L.player.r;
       $("t-bid").textContent=L.bid;$("t-leader").textContent=teams[L.leaderIdx].name;$("t-leaddot").style.background=teams[L.leaderIdx].color;
+    }else{
+      $("t-name").textContent="—";$("t-meta").textContent="In attesa di chiamata";
+      $("t-role").textContent="";$("t-role").className="role-pill role-none";
+      $("t-bid").textContent="—";$("t-leader").textContent="nessuno";$("t-leaddot").style.background="";
     }
     var html="";
     teams.forEach(function(t,i){
@@ -1704,7 +1727,6 @@
   }
   function renderCallOrder(){
     $("b-callorder").innerHTML=callBannerHTML({rail:true});
-    $("t-callorder").innerHTML=callBannerHTML({rail:true});
     $("g-callorder").innerHTML=callBannerHTML({you:true,rail:true});
   }
   function renderAll(){renderBanditore();renderGiocatore();renderTabellone();renderCallOrder();renderRings();
