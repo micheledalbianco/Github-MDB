@@ -206,7 +206,8 @@
   .rgh .rgc{margin-left:auto;font-family:var(--ff-disp);font-weight:700;font-size:15px;color:var(--text);font-variant-numeric:tabular-nums}
   .rglist{margin-top:8px;display:flex;flex-direction:column}
   .rgtot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 10px 2px;margin-top:2px;border-top:1px solid var(--border)}
-  .rgtot .rgtl{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--faint);font-weight:700}
+  .rgtot .rgtl,.rgtot .rgtv{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--faint);font-weight:700}
+  .rgtot .rgtv{font-variant-numeric:tabular-nums;letter-spacing:0}
   .rgi{display:flex;align-items:center;gap:10px;font-size:14.5px;padding:6px 10px;border-radius:8px}
   .rgi:nth-child(odd){background:color-mix(in srgb,var(--surface-2) 55%,transparent)}
   .rgi .rgnm{flex:1 1 auto;font-weight:600}
@@ -314,7 +315,7 @@
   .board-hero .bid-leader b{font-size:30px}
 
   /* moneta oro sui crediti */
-  .credits::before,.cr::before,.fcr::before,.recap-cred::before,.crank-cr::before,.stat.gold .v::before,.regia-cur .v::before,.rgi .rgp::before,.rgtot .rgp::before{
+  .credits::before,.cr::before,.fcr::before,.recap-cred::before,.crank-cr::before,.stat.gold .v::before,.regia-cur .v::before,.rgi .rgp::before{
     content:"";display:inline-block;width:.72em;height:.72em;border-radius:50%;margin-right:.32em;vertical-align:baseline;
     background:radial-gradient(circle at 35% 30%,#fff6cf,var(--gold) 55%,#a9740a);
     box-shadow:inset 0 0 0 1px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.4)}
@@ -1509,7 +1510,7 @@
       body+="<div class='rgroup'><div class='rgh'><span class='role-pill role-"+r+"'>"+r+"</span><b>"+ROLE_PLUR[r]+"</b>"+
         "<span class='rgc'>"+arr.length+"/"+tt+"</span></div>";
       if(arr.length){body+="<div class='rglist'>";arr.forEach(function(p){body+="<div class='rgi'><span class='rgnm'>"+p.n+"</span><span class='rgp'>"+p.price+"</span></div>";});
-        body+="<div class='rgtot'><span class='rgtl'>Totale ruolo</span><span class='rgp'>"+spent+"</span></div></div>";}
+        body+="<div class='rgtot'><span class='rgtl'>Totale ruolo</span><span class='rgtv'>"+spent+"</span></div></div>";}
       else body+="<div class='rgempty'>— nessuno —</div>";
       body+="</div>";
     });
