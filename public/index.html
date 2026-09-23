@@ -411,36 +411,49 @@
   /* tabellone: compattazione per stare in UNA schermata (target 1080p) */
   #v-tabellone .section-title{margin:12px 2px 8px}
   #v-tabellone #t-callorder{margin-bottom:10px}
-  .board-hero{display:flex;align-items:center;justify-content:space-between;gap:30px;padding:14px 60px;
+  .board-hero{display:flex;align-items:center;gap:0;padding:14px 30px;
     background:radial-gradient(130% 200% at 50% -30%,color-mix(in srgb,var(--accent) 13%,transparent),transparent 60%)}
-  .board-hero .bh-call{flex:0 1 auto;min-width:0;display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px}
+  .board-hero .bh-zones{flex:1 1 auto;min-width:0;display:flex;align-items:center}
+  .board-hero .bh-zones>.bh-call,.board-hero .bh-zones>.bh-player,.board-hero .bh-zones>.bh-bid{flex:1 1 0;min-width:0}
+  /* chiamata in corso */
+  .board-hero .bh-call{display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px}
   .board-hero .bh-call .eyebrow{margin:0}
   .board-hero .bc-now{display:inline-flex;align-items:center;gap:11px;font-family:var(--ff-disp);font-weight:700;font-size:32px;line-height:1;color:var(--accent-ink)}
   .board-hero .bc-now .dot{width:16px;height:16px;flex:0 0 auto}
-  .board-hero .bc-next{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-weight:600;font-size:16px}
-  .board-hero .bc-lab{font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--faint);font-weight:700}
+  .board-hero .bc-next{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-weight:600;font-size:15px;margin-top:7px;padding-top:9px;border-top:1px solid color-mix(in srgb,var(--border-strong) 65%,transparent)}
+  .board-hero .bc-lab{font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--faint);font-weight:700}
   .board-hero .bc-nx{display:inline-flex;align-items:center;gap:7px}
   .board-hero .bc-nx .dot{width:11px;height:11px;flex:0 0 auto}
-  .board-side{align-self:center}
-  .board-hero .bh-player{display:flex;align-items:center;gap:18px;flex:0 1 auto;min-width:0}
+  /* giocatore all'asta */
+  .board-hero .bh-player{display:flex;align-items:center;justify-content:center;gap:16px}
+  .board-hero .bh-player .role-pill{width:54px;height:54px;font-size:26px;border-radius:14px;flex:0 0 auto}
   .board-hero .role-pill.role-none{background:var(--border-strong);opacity:.5}
-  .board-hero.no-lot .bh-bid .bid-amount{color:var(--faint)}
+  .board-hero .bh-ptext{min-width:0}
+  .board-hero .bh-nameline{display:flex;align-items:center;gap:13px}
+  .board-hero .lot-name{font-size:42px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .board-hero .lot-meta{font-size:16px;margin-top:6px}
+  .board-hero .club-crest{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:42px;padding:0 9px;border-radius:10px;font-family:var(--ff-disp);font-weight:700;font-size:17px;letter-spacing:.3px;box-shadow:0 2px 9px rgba(0,0,0,.32)}
+  /* offerta */
+  .board-hero .bh-bid{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+  .board-hero .bh-bid .bid-amount{font-size:78px;color:var(--gold)}
+  .board-hero .bh-bid .bid-leader{font-size:21px;margin-top:8px}
+  .board-hero.no-lot .bid-amount{color:var(--faint)}
   .board-hero.no-lot .bh-player .role-pill{display:none}
   .board-hero.no-lot .bid-leader{opacity:.45}
-  .board-hero .bh-player .role-pill{width:54px;height:54px;font-size:26px;border-radius:14px;flex:0 0 auto}
-  .board-hero .bh-ptext{min-width:0}
-  .board-hero .lot-name{font-size:44px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:34vw}
-  .board-hero .lot-meta{font-size:16px;margin-top:6px}
-  .board-hero .bh-div{width:1px;align-self:stretch;margin:6px 0;flex:0 0 auto;
-    background:linear-gradient(180deg,transparent,var(--border-strong) 22%,var(--border-strong) 78%,transparent)}
-  .board-hero .bh-bid{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;flex:0 0 auto}
-  .board-hero .bh-bid .bid-amount{font-size:82px;color:var(--gold)}
-  .board-hero .bh-bid .bid-leader{font-size:21px;margin-top:8px}
-  .board-hero .board-side{flex:0 0 auto;display:flex;flex-direction:column;align-items:center}
+  /* divisori */
+  .board-hero .bh-div{width:1px;height:78px;align-self:center;flex:0 0 auto;
+    background:linear-gradient(180deg,transparent,var(--border-strong) 20%,var(--border-strong) 80%,transparent)}
+  /* cerchio "in asta": centrato nel suo spazio */
+  .board-hero .board-side{flex:0 0 22%;display:flex;flex-direction:column;align-items:center;justify-content:center;align-self:center}
   .board-hero .ring,.board-hero .ring svg{width:126px;height:126px}
   .board-hero .ring .num{font-size:48px}
   .board-hero .ring.waiting circle:first-of-type{stroke:color-mix(in srgb,var(--accent) 40%,var(--border))}
   .board-hero .ring.waiting .num{font-size:19px!important;letter-spacing:1px;text-transform:uppercase}
+  /* post-assegnazione: niente cerchio, "ora chiama" grande e in evidenza */
+  .board-hero.sold .board-side,.board-hero.sold #t-ringdiv{display:none}
+  .board-hero.sold .bh-call.big .eyebrow{color:var(--accent-ink);font-size:12px}
+  .board-hero.sold .bh-call.big .bc-now{font-size:46px}
+  .board-hero.sold .bh-call.big .bc-now .dot{width:19px;height:19px}
   .board-main{margin-top:10px}
   .board-grid.big{grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:10px}
   .board-grid.big .tcard{padding:9px 11px}
@@ -773,24 +786,9 @@
     <div class="section-title"><h2>Tabellone</h2><span class="hint">Ruolo in chiamata: <b id="t-phase">Portieri</b></span></div>
 
     <div class="card board-hero" id="t-hero">
-      <div class="bh-call" id="t-call"></div>
-      <div class="bh-div"></div>
-      <div class="bh-player">
-        <span class="role-pill role-A" id="t-role">A</span>
-        <div class="bh-ptext">
-          <div class="eyebrow" id="t-eyb-player">Giocatore all'asta</div>
-          <div class="lot-name" id="t-name">—</div>
-          <div class="lot-meta" id="t-meta">In attesa di chiamata</div>
-        </div>
-      </div>
-      <div class="bh-div"></div>
-      <div class="bh-bid">
-        <div class="eyebrow" id="t-eyb-bid">Offerta più alta</div>
-        <div class="bid-amount tnum"><span id="t-bid">—</span></div>
-        <div class="bid-leader"><span class="lead-dot" id="t-leaddot"></span><b id="t-leader">nessuno</b></div>
-      </div>
-      <div class="bh-div"></div>
-      <div class="board-side">
+      <div class="bh-zones" id="t-zones"></div>
+      <div class="bh-div" id="t-ringdiv"></div>
+      <div class="board-side" id="t-side">
         <div class="ring idle" id="t-ring">
           <svg width="184" height="184" viewBox="0 0 184 184">
             <circle cx="92" cy="92" r="80" fill="none" stroke="var(--border)" stroke-width="15"/>
@@ -863,6 +861,23 @@
   var SLOTS={P:3,D:8,C:8,A:6},BUDGET=500;
   var ROLE_NAME={P:"Portiere",D:"Difensore",C:"Centrocampista",A:"Attaccante"};
   var ROLE_PLUR={P:"Portieri",D:"Difensori",C:"Centrocampisti",A:"Attaccanti"};
+  // Stemmi squadre Serie A (colore club + sigla): affidabile e offline.
+  var CLUBS={
+    atalanta:{a:"ATA",bg:"#1961ac",fg:"#fff"},bologna:{a:"BOL",bg:"#9f1b32",fg:"#fff"},
+    cagliari:{a:"CAG",bg:"#00224f",fg:"#fff"},como:{a:"COM",bg:"#0b4da2",fg:"#fff"},
+    cremonese:{a:"CRE",bg:"#7a1f2b",fg:"#fff"},empoli:{a:"EMP",bg:"#1e63b3",fg:"#fff"},
+    fiorentina:{a:"FIO",bg:"#5a2d82",fg:"#fff"},frosinone:{a:"FRO",bg:"#0d4aa0",fg:"#ffd400"},
+    genoa:{a:"GEN",bg:"#a3132a",fg:"#fff"},"hellas verona":{a:"VER",bg:"#0a2340",fg:"#ffd400"},verona:{a:"VER",bg:"#0a2340",fg:"#ffd400"},
+    inter:{a:"INT",bg:"#0a1a52",fg:"#fff"},juventus:{a:"JUV",bg:"#111",fg:"#fff"},
+    lazio:{a:"LAZ",bg:"#87c9ec",fg:"#0a2340"},lecce:{a:"LEC",bg:"#c8102e",fg:"#ffd400"},
+    milan:{a:"MIL",bg:"#e2001a",fg:"#fff"},monza:{a:"MON",bg:"#e2001a",fg:"#fff"},
+    napoli:{a:"NAP",bg:"#199fdb",fg:"#fff"},parma:{a:"PAR",bg:"#ffd400",fg:"#12284b"},
+    pisa:{a:"PIS",bg:"#0a2a5e",fg:"#fff"},roma:{a:"ROM",bg:"#8e1b2e",fg:"#f0bc42"},
+    sassuolo:{a:"SAS",bg:"#009a44",fg:"#111"},torino:{a:"TOR",bg:"#7a1220",fg:"#fff"},
+    udinese:{a:"UDI",bg:"#111",fg:"#fff"},venezia:{a:"VEN",bg:"#0a0a0a",fg:"#f77f00"}};
+  function clubCrest(sq){var k=(sq||"").trim().toLowerCase(),c=CLUBS[k];
+    if(!c){var ab=(sq||"?").replace(/[^A-Za-zÀ-ÿ]/g,"").slice(0,3).toUpperCase();c={a:ab||"?",bg:"#25324a",fg:"#cdd8ea"};}
+    return "<span class='club-crest' style='background:"+c.bg+";color:"+c.fg+"' title='"+(sq||"")+"'>"+c.a+"</span>";}
   var STARTS={veloce:3,lenta:5},INTERVAL=1900;
 
   var COLORS=["#c4472f","#2f77c9","#2f9e6b","#d6a419","#8e44ad","#16a085","#e67e22","#34506b","#b03a2e","#1e8449","#2471a3","#ba4a00"];
@@ -1681,27 +1696,37 @@
     renderRank("t-rank",-1,leadIdx);
     var ic=inCorsoIdx();
     var upc=upcoming(1),nextI=upc.length?upc[0]:null;
-    var nextHTML=(nextI!=null)?("<div class='bc-next'><span class='bc-lab'>Prossima</span>"+
-      "<span class='bc-nx'><span class='dot' style='background:"+teams[nextI].color+"'></span>"+teams[nextI].name+"</span></div>"):"";
-    $("t-call").innerHTML="<div class='eyebrow'>Chiamata in corso</div>"+
-      "<div class='bc-now'><span class='dot' style='background:"+teams[ic].color+"'></span>"+teams[ic].name+"</div>"+nextHTML;
+    function callBlock(big){
+      var nx=(nextI!=null)?("<div class='bc-next'><span class='bc-lab'>Prossima</span>"+
+        "<span class='bc-nx'><span class='dot' style='background:"+teams[nextI].color+"'></span>"+teams[nextI].name+"</span></div>"):"";
+      return "<div class='bh-call"+(big?" big":"")+"'><div class='eyebrow'>"+(big?"Ora chiama":"Chiamata in corso")+"</div>"+
+        "<div class='bc-now'><span class='dot' style='background:"+teams[ic].color+"'></span>"+teams[ic].name+"</div>"+nx+"</div>";
+    }
+    function playerBlock(eyeb,p){
+      return "<div class='bh-player'><span class='role-pill role-"+p.r+"'>"+p.r+"</span>"+
+        "<div class='bh-ptext'><div class='eyebrow'>"+eyeb+"</div>"+
+        "<div class='bh-nameline'><span class='lot-name'>"+p.n+"</span>"+clubCrest(p.sq)+"</div>"+
+        "<div class='lot-meta'>"+p.sq+"</div></div></div>";
+    }
+    function bidBlock(eyeb,amount,tName,tColor){
+      return "<div class='bh-bid'><div class='eyebrow'>"+eyeb+"</div>"+
+        "<div class='bid-amount tnum'>"+amount+"</div>"+
+        "<div class='bid-leader'><span class='lead-dot' style='background:"+(tColor||"")+"'></span><b>"+tName+"</b></div></div>";
+    }
+    var DIV="<div class='bh-div'></div>";
     $("t-hero").classList.toggle("no-lot",!L&&!sold);
     $("t-hero").classList.toggle("sold",!!sold);
     if(L){
-      $("t-eyb-player").textContent="Giocatore all'asta";$("t-eyb-bid").textContent="Offerta più alta";
-      $("t-name").textContent=L.player.n;$("t-meta").textContent=ROLE_NAME[L.player.r]+" · "+L.player.sq;
-      $("t-role").textContent=L.player.r;$("t-role").className="role-pill role-"+L.player.r;
-      $("t-bid").textContent=L.bid;$("t-leader").textContent=teams[L.leaderIdx].name;$("t-leaddot").style.background=teams[L.leaderIdx].color;
+      $("t-zones").innerHTML=callBlock(false)+DIV+playerBlock("Giocatore all'asta",L.player)+DIV+
+        bidBlock("Offerta più alta",L.bid,teams[L.leaderIdx].name,teams[L.leaderIdx].color);
     }else if(sold){
-      $("t-eyb-player").textContent="Ultimo assegnato";$("t-eyb-bid").textContent="Aggiudicato a";
-      $("t-name").textContent=sold.n;$("t-meta").textContent=ROLE_NAME[sold.r]+" · "+sold.sq;
-      $("t-role").textContent=sold.r;$("t-role").className="role-pill role-"+sold.r;
-      $("t-bid").textContent=sold.price;$("t-leader").textContent=sold.tName;$("t-leaddot").style.background=sold.tColor;
+      $("t-zones").innerHTML=playerBlock("Ultimo chiamato",sold)+DIV+
+        bidBlock("Aggiudicato a",sold.price,sold.tName,sold.tColor)+DIV+callBlock(true);
     }else{
-      $("t-eyb-player").textContent="Giocatore all'asta";$("t-eyb-bid").textContent="Offerta più alta";
-      $("t-name").textContent="—";$("t-meta").textContent="In attesa di chiamata";
-      $("t-role").textContent="";$("t-role").className="role-pill role-none";
-      $("t-bid").textContent="—";$("t-leader").textContent="nessuno";$("t-leaddot").style.background="";
+      $("t-zones").innerHTML=callBlock(false)+DIV+
+        "<div class='bh-player'><span class='role-pill role-none'></span><div class='bh-ptext'><div class='eyebrow'>Giocatore all'asta</div>"+
+        "<div class='bh-nameline'><span class='lot-name'>—</span></div><div class='lot-meta'>In attesa di chiamata</div></div></div>"+DIV+
+        bidBlock("Offerta più alta","—","nessuno","");
     }
     var html="";
     teams.forEach(function(t,i){
