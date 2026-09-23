@@ -31,7 +31,7 @@
       radial-gradient(900px 480px at 100% 0%, #0f1c40 0%, transparent 55%),
       var(--bg);
     background-attachment:fixed}
-  .wrap{max-width:1120px;margin:0 auto;padding-inline:16px;padding-block:0 40px}
+  .wrap{max-width:1120px;margin:0 auto;padding-inline:16px;padding-block:0 16px}
   h1,h2,h3{margin:0;font-family:var(--ff-disp);font-weight:700;letter-spacing:.2px;text-wrap:balance}
   .tnum{font-variant-numeric:tabular-nums}
   button{font-family:inherit}
@@ -411,11 +411,17 @@
   /* tabellone: compattazione per stare in UNA schermata (target 1080p) */
   #v-tabellone .section-title{margin:12px 2px 8px}
   #v-tabellone #t-callorder{margin-bottom:10px}
-  .board-hero{padding:16px;gap:16px}
-  .board-hero .lot-name{font-size:34px}
-  .board-hero .bid-amount{font-size:58px}
+  .board-hero{display:flex;align-items:center;justify-content:space-between;gap:28px;padding:16px 28px}
+  .board-hero .bh-player{flex:1 1 0;min-width:0}
+  .board-hero .bh-player .role-pill{width:46px;height:46px;font-size:23px;border-radius:12px}
+  .board-hero .lot-name{font-size:38px}
+  .board-hero .lot-meta{font-size:16px;margin-top:8px}
+  .board-hero .bh-bid{flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center}
+  .board-hero .bh-bid .bid-amount{font-size:74px}
+  .board-hero .bh-bid .bid-leader{font-size:22px;margin-top:8px}
+  .board-hero .board-side{flex:0 0 auto;display:flex;flex-direction:column;align-items:center}
   .board-hero .ring,.board-hero .ring svg{width:150px;height:150px}
-  .board-hero .ring .num{font-size:58px}
+  .board-hero .ring .num{font-size:56px}
   .board-main{margin-top:10px}
   .board-grid.big{grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:10px}
   .board-grid.big .tcard{padding:9px 11px}
@@ -425,8 +431,25 @@
   .board-grid.big .th{margin-bottom:5px}
   .crank-row{padding:5px 6px;font-size:14px}
 
+  /* tabellone a tutta altezza: riempi lo schermo, niente spazi vuoti */
+  #v-tabellone{height:calc(100vh - 82px);display:flex;flex-direction:column;padding-bottom:8px}
+  #v-tabellone .section-title,#v-tabellone #t-callorder,#t-hero{flex:0 0 auto}
+  .board-main{flex:1 1 auto;min-height:0;grid-template-columns:260px 1fr}
+  .board-main .board-grid{height:100%}
+  .board-grid.big{grid-template-columns:repeat(4,1fr);grid-auto-rows:1fr;height:100%}
+  @media(max-width:1200px){.board-grid.big{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:820px){#v-tabellone{height:auto}.board-grid.big{grid-template-columns:repeat(2,1fr);grid-auto-rows:auto}}
+  .board-grid.big .tcard{display:flex;flex-direction:column;gap:12px}
+  .board-grid.big .tcard .th{flex:0 0 auto}
+  .board-grid.big .tcard .rolerow{flex:1 1 auto;align-content:center;flex-wrap:wrap;align-items:center}
+  .board-grid.big .tcard .minibar{flex:0 0 auto;margin-top:0}
+  .board-grid.big .th b{font-size:16px}
+  #t-rank{height:100%;display:flex;flex-direction:column}
+  #t-rank .crank-title{flex:0 0 auto}
+  #t-rank .crank-row{flex:1 1 0;min-height:0}
+
   /* tabellone: griglia compatta una-schermata + evidenza dentro/fuori */
-  .board-grid.big{grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:11px}
+  .board-grid.big{gap:11px}
   .tcard{cursor:pointer;transition:transform .06s}
   .tcard:hover{border-color:var(--accent)}
   .tcard:active{transform:scale(.99)}
@@ -704,18 +727,18 @@
     <div class="card" id="t-callorder" style="margin-bottom:14px"></div>
 
     <div class="card board-hero" id="t-hero">
-      <div>
+      <div class="bh-player">
         <div class="eyebrow">Giocatore all'asta</div>
-        <div class="lot-head" style="margin-top:4px">
-          <span class="role-pill role-A" id="t-role" style="width:30px;height:30px;font-size:17px">A</span>
+        <div class="lot-head" style="margin-top:6px">
+          <span class="role-pill role-A" id="t-role">A</span>
           <span class="lot-name" id="t-name">—</span>
         </div>
-        <div class="lot-meta" id="t-meta" style="font-size:15px;margin-top:6px">In attesa di chiamata</div>
-        <div style="margin-top:16px" class="bid-block">
-          <div class="eyebrow">Offerta più alta</div>
-          <div class="bid-amount tnum"><span id="t-bid">—</span></div>
-          <div class="bid-leader" style="font-size:18px"><span class="lead-dot" id="t-leaddot"></span><b id="t-leader">nessuno</b></div>
-        </div>
+        <div class="lot-meta" id="t-meta">In attesa di chiamata</div>
+      </div>
+      <div class="bh-bid">
+        <div class="eyebrow">Offerta più alta</div>
+        <div class="bid-amount tnum"><span id="t-bid">—</span></div>
+        <div class="bid-leader"><span class="lead-dot" id="t-leaddot"></span><b id="t-leader">nessuno</b></div>
       </div>
       <div class="board-side">
         <div class="ring idle" id="t-ring">
@@ -778,8 +801,6 @@
 
     </div>
   </section>
-
-  <div class="foot">Prototipo di interfaccia · dati fittizi (rose e listone d'esempio) · nessuna logica di rete collegata — serve a validare layout e flusso.</div>
 </main>
 <div class="toast" id="toast"></div>
 <div class="assegnato" id="assegnato" aria-live="polite"></div>
@@ -1594,15 +1615,13 @@
   function renderTabellone(){
     var L=st.lot,phase=st.listRole,recap=(!L&&roleComplete(phase));
     $("t-phase").textContent=ROLE_PLUR[phase];
-    $("t-recap").hidden=!recap;$("t-hero").hidden=recap;$("t-main").hidden=recap;
+    $("t-recap").hidden=!recap;$("t-hero").hidden=recap||!L;$("t-main").hidden=recap;
     if(recap){renderRecap();if(st.modalIdx!=null)renderTeamModal(st.modalIdx);return;}
     renderRank("t-rank",-1);
     if(L){
       $("t-name").textContent=L.player.n;$("t-meta").textContent=ROLE_NAME[L.player.r]+" · "+L.player.sq;
-      $("t-role").textContent=L.player.r;$("t-role").className="role-pill role-"+L.player.r;$("t-role").style.width="30px";$("t-role").style.height="30px";$("t-role").style.fontSize="17px";
+      $("t-role").textContent=L.player.r;$("t-role").className="role-pill role-"+L.player.r;
       $("t-bid").textContent=L.bid;$("t-leader").textContent=teams[L.leaderIdx].name;$("t-leaddot").style.background=teams[L.leaderIdx].color;
-    } else {
-      $("t-name").textContent="—";$("t-meta").textContent="In attesa della prossima chiamata";$("t-bid").textContent="—";$("t-leader").textContent="nessuno";$("t-leaddot").style.background="var(--faint)";
     }
     var html="";
     teams.forEach(function(t,i){
