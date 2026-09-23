@@ -42,7 +42,7 @@
   .logo{width:30px;height:30px;border-radius:8px;background:var(--accent);color:#fff;display:grid;place-items:center;font-family:var(--ff-disp);font-weight:700;font-size:18px}
   .brand b{font-family:var(--ff-disp);font-size:19px;font-weight:700;letter-spacing:.3px}
   .brand .proto{font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--warn);border:1px solid color-mix(in srgb,var(--warn) 45%,transparent);padding:1px 6px;border-radius:20px;font-weight:600}
-  .seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:3px;gap:2px}
+  .seg{display:inline-flex;margin-left:auto;background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:3px;gap:2px}
   .seg button{border:0;background:transparent;color:var(--muted);padding:7px 13px;border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer;letter-spacing:.2px}
   .seg button[aria-current="true"]{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
 
@@ -418,7 +418,14 @@
   .board-hero{display:flex;align-items:center;gap:0;padding:14px 30px;
     background:radial-gradient(130% 200% at 50% -30%,color-mix(in srgb,var(--accent) 13%,transparent),transparent 60%)}
   .board-hero .bh-zones{flex:1 1 auto;min-width:0;display:flex;align-items:center}
-  .board-hero .bh-zones>.bh-call,.board-hero .bh-zones>.bh-player,.board-hero .bh-zones>.bh-bid{flex:1 1 0;min-width:0}
+  .board-hero .bh-zones>.bh-call,.board-hero .bh-zones>.bh-player,.board-hero .bh-zones>.bh-bid,.board-hero .bh-zones>.bh-last{flex:1 1 0;min-width:0}
+  /* ultimo giocatore assegnato (schermata post-aggiudicato): bianco, più piccolo */
+  .board-hero .bh-last{display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px}
+  .board-hero .bh-last .eyebrow{margin:0}
+  .board-hero .bl-name{font-family:var(--ff-disp);font-weight:700;font-size:30px;line-height:1;color:var(--text)}
+  .board-hero .bl-to{display:inline-flex;align-items:center;gap:8px;margin-top:4px;font-size:17px;color:var(--muted);font-weight:600}
+  .board-hero .bl-to .dot{width:11px;height:11px;flex:0 0 auto}
+  .board-hero .bl-to b{color:var(--text);font-family:var(--ff-disp);font-weight:700}
   /* chiamata in corso */
   .board-hero .bh-call{display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px}
   .board-hero .bh-call .eyebrow{margin:0}
@@ -431,7 +438,7 @@
   /* giocatore all'asta */
   .board-hero .bh-player{display:flex;align-items:center;justify-content:center;gap:16px}
   .board-hero .bh-player .role-pill{width:54px;height:54px;font-size:26px;border-radius:14px;flex:0 0 auto}
-  .board-hero .role-pill.role-none{background:var(--border-strong);opacity:.5}
+  .board-hero .role-pill.role-none{display:none}
   .board-hero .bh-ptext{min-width:0}
   .board-hero .lot-name{font-size:48px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .board-hero .lot-meta{font-size:16px;margin-top:7px}
@@ -457,11 +464,8 @@
   .board-hero .ring.done circle:first-of-type{stroke:color-mix(in srgb,var(--good) 60%,var(--border))}
   .board-hero .ring.done .num{color:var(--good)!important;letter-spacing:.3px;text-transform:uppercase;font-weight:700}
   .t-roletag{position:absolute;top:10px;right:16px;z-index:2;font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:700;color:var(--accent-ink);background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 34%,transparent);border-radius:20px;padding:3px 12px}
-  /* post-assegnazione: niente cerchio, "ora chiama" grande e in evidenza */
+  /* post-assegnazione: niente cerchio (l'ultimo assegnato prende quello spazio) */
   .board-hero.sold .board-side,.board-hero.sold #t-ringdiv{display:none}
-  .board-hero.sold .bh-call.big .eyebrow{color:var(--accent-ink);font-size:12px}
-  .board-hero.sold .bh-call.big .bc-now{font-size:46px}
-  .board-hero.sold .bh-call.big .bc-now .dot{width:19px;height:19px}
   .board-main{margin-top:10px}
   .board-grid.big{grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:10px}
   .board-grid.big .tcard{padding:9px 11px}
@@ -623,7 +627,6 @@
 </div>
 <header class="top">
   <div class="top-inner">
-    <div class="brand"><span class="logo">A</span><b>Asta&nbsp;Live</b><span class="proto">Prototipo</span></div>
     <div class="seg" role="tablist" aria-label="Vista">
       <button data-view="banditore" aria-current="true">Banditore</button>
       <button data-view="giocatore">Giocatore</button>
@@ -1653,7 +1656,7 @@
         (o.i===leadIdx?"<span class='crank-lead'>in testa</span>":"")+
         "<span class='crank-cr'>"+t.cred+"</span></div>";
     }).join("");
-    el.innerHTML="<div class='crank-title'>Crediti — classifica</div>"+rows;
+    el.innerHTML="<div class='crank-title'>Crediti</div>"+rows;
   }
 
   function renderGiocatore(){
@@ -1723,6 +1726,15 @@
         "<div class='bid-amount tnum'>"+amount+"</div>"+
         "<div class='bid-leader'><span class='lead-dot' style='background:"+(tColor||"")+"'></span><b>"+tName+"</b></div></div>";
     }
+    function waitingBlock(){
+      return "<div class='bh-player'><span class='role-pill role-none'></span><div class='bh-ptext'>"+
+        "<div class='lot-name'>—</div><div class='lot-meta'>In attesa di chiamata</div></div></div>";
+    }
+    function lastBlock(s){
+      return "<div class='bh-last'><div class='eyebrow'>Ultimo chiamato</div>"+
+        "<div class='bl-name'>"+s.n+"</div>"+
+        "<div class='bl-to'><span class='dot' style='background:"+s.tColor+"'></span>"+s.tName+" · <b>"+s.price+"</b></div></div>";
+    }
     var DIV="<div class='bh-div'></div>";
     $("t-hero").classList.toggle("no-lot",!L&&!sold);
     $("t-hero").classList.toggle("sold",!!sold);
@@ -1732,13 +1744,9 @@
       $("t-zones").innerHTML=callBlock(false)+DIV+playerBlock("",L.player)+DIV+
         bidBlock("",L.bid,teams[L.leaderIdx].name,teams[L.leaderIdx].color);
     }else if(sold){
-      $("t-zones").innerHTML=playerBlock("Ultimo chiamato",sold)+DIV+
-        bidBlock("Aggiudicato a",sold.price,sold.tName,sold.tColor)+DIV+callBlock(true);
+      $("t-zones").innerHTML=callBlock(false)+DIV+waitingBlock()+DIV+lastBlock(sold);
     }else{
-      $("t-zones").innerHTML=callBlock(false)+DIV+
-        "<div class='bh-player'><span class='role-pill role-none'></span><div class='bh-ptext'>"+
-        "<div class='lot-name'>—</div><div class='lot-meta'>In attesa di chiamata</div></div></div>"+DIV+
-        bidBlock("","—","nessuno","");
+      $("t-zones").innerHTML=callBlock(false)+DIV+waitingBlock()+DIV+bidBlock("","—","nessuno","");
     }
     var html="";
     teams.forEach(function(t,i){
