@@ -1656,6 +1656,8 @@
     // toglie la vendita dallo storico: se era l'ultima, la precedente torna "ultimo assegnato"
     for(i=st.saleLog.length-1;i>=0;i--){var s=st.saleLog[i];
       if(s.tIdx===teamIdx&&((b.id!=null&&s.id!=null&&String(s.id)===String(b.id))||s.n===b.n)){st.saleLog.splice(i,1);break;}}
+    // il turno torna indietro: la squadra a cui e' stato tolto il giocatore chiama di nuovo
+    st.turnIdx=teamIdx;
     return true;
   }
   function stateText(){
