@@ -117,13 +117,16 @@
   .exact label{font-size:12px;color:var(--muted);font-weight:600}
   .exact input{width:78px}
   .regia-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:8px}
+  .regia-hint{margin-top:10px;font-size:11.5px;color:var(--faint);line-height:1.4}
   .tchip{display:flex;align-items:center;gap:8px;padding:10px 11px;border:1px solid var(--border-strong);border-radius:11px;background:var(--surface);cursor:pointer;text-align:left;font-size:13.5px;font-weight:600;color:var(--text);transition:transform .05s}
   .tchip:hover{border-color:var(--faint)}
   .tchip:active{transform:scale(.96)}
   .tchip .dot{width:11px;height:11px;border-radius:50%;flex:none}
   .tchip .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .tchip.lead{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
-  .tchip .cr{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--gold);font-family:var(--ff-disp);font-weight:700;font-size:14px}
+  .tchip.turn{border-color:var(--evid);box-shadow:inset 0 0 0 1px var(--evid)}
+  .tchip .slot{margin-left:auto;font-variant-numeric:tabular-nums;font-size:11.5px;color:var(--faint);letter-spacing:.3px;flex:none}
+  .tchip .cr{margin-left:10px;font-variant-numeric:tabular-nums;color:var(--gold);font-family:var(--ff-disp);font-weight:700;font-size:14px;flex:none}
   .regia-hint{font-size:12px;color:var(--faint);margin-top:10px}
 
   input[type=text],input[type=number]{font-family:inherit;font-size:15px;padding:10px 12px;border:1px solid var(--border-strong);border-radius:10px;background:var(--surface-2);color:var(--text);width:100%}
@@ -386,6 +389,14 @@
   .setup-table td{padding:5px 8px;border-bottom:1px solid var(--border)}
   .setup-table td.idx{color:var(--faint);width:26px;font-variant-numeric:tabular-nums}
   .setup-table input{padding:7px 9px}
+  .setup-table td.drag{width:22px;color:var(--faint);cursor:grab;text-align:center;font-size:15px;user-select:none}
+  .setup-table td.drag:active{cursor:grabbing}
+  .setup-table tr.dragging{opacity:.5}
+  .setup-table tr.dragover td{box-shadow:inset 0 2px 0 var(--accent)}
+  .setup-table td.ord{width:66px;white-space:nowrap;text-align:right}
+  .ordbtn{border:1px solid var(--border-strong);background:var(--surface);color:var(--muted);border-radius:7px;width:26px;height:26px;cursor:pointer;font-size:11px;line-height:1;padding:0}
+  .ordbtn:hover:not(:disabled){border-color:var(--faint);color:var(--text)}
+  .ordbtn:disabled{opacity:.3;cursor:default}
   input[type=file]{font-family:inherit;font-size:13.5px;color:var(--muted)}
   .export-preview{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;white-space:pre;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;overflow-x:auto;color:var(--muted);margin-bottom:12px;line-height:1.5}
 
@@ -447,7 +458,7 @@
   /* squadre "spente" (fuori budget o ruolo pieno) */
   .stand tr.out{opacity:.34}
   .stand tr.out .credits::before{filter:grayscale(1)}
-  .tchip.out{opacity:.34;pointer-events:none}
+  .tchip.out{opacity:.42}
   .tchip.out::after{content:"✕";margin-left:auto;color:var(--crit);font-weight:700}
   .tcard.out{opacity:.42}
 
@@ -807,30 +818,25 @@
             <div class="exact"><label for="r-exact">a…</label><input type="number" id="r-exact" placeholder="importo" min="1"></div>
           </div>
           <div class="regia-grid" id="r-grid"></div>
-        </div>
-
-        <!-- LISTONE / CHIAMATA -->
-        <div class="card" style="padding:16px" id="b-chiamata">
-          <div class="eyebrow" style="margin-bottom:2px">Listone</div>
-          <div class="list-controls">
-            <div class="sortpick" id="b-sort" role="group" aria-label="Ordinamento">
-              <button data-sort="alfa" aria-pressed="true">A‑Z</button>
-              <button data-sort="quot">Quotazione</button>
-            </div>
-          </div>
-          <input type="text" id="b-search" placeholder="Cerca nel listone…" autocomplete="off">
-          <div class="plist" id="b-plist" style="margin-top:8px"></div>
-          <div class="btn-row" style="margin-top:12px">
-            <button class="btn primary big" id="b-call" disabled>Chiama giocatore</button>
-          </div>
+          <div class="regia-hint" id="r-hint">Durante l'asta: tocca una squadra per rilanciare. A riposo: tocca per aprire la rosa e correggere un'assegnazione.</div>
         </div>
       </div>
 
-      <div class="card" style="overflow:hidden">
-        <div style="padding:12px 14px 4px"><div class="eyebrow">Situazione rose · 12 squadre</div></div>
-        <table class="stand"><thead>
-          <tr><th>Squadra</th><th class="num">Cred.</th><th class="num">P</th><th class="num">D</th><th class="num">C</th><th class="num">A</th></tr>
-        </thead><tbody id="b-stand"></tbody></table>
+      <!-- LISTONE / CHIAMATA (colonna destra) -->
+      <div class="card" style="padding:16px" id="b-chiamata">
+        <div class="eyebrow" style="margin-bottom:8px">Listone · <span id="b-list-role">attaccanti</span></div>
+        <div class="g-list-filters">
+          <select id="b-list-club" aria-label="Squadra"></select>
+          <div class="sortpick" id="b-sort" role="group" aria-label="Ordinamento">
+            <button data-sort="quot" aria-pressed="true">Quot.</button>
+            <button data-sort="alfa">A‑Z</button>
+          </div>
+        </div>
+        <input type="text" id="b-search" placeholder="Cerca giocatore…" autocomplete="off">
+        <div class="plist" id="b-plist" style="margin-top:8px"></div>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn primary big" id="b-call" disabled>Chiama giocatore</button>
+        </div>
       </div>
     </div>
   </section>
@@ -959,7 +965,8 @@
       <div class="card" style="padding:16px">
         <div class="eyebrow">2 · Partecipanti e squadre</div>
         <p class="setup-p">Nell'asta identifichi ognuno con il <b>nome della persona</b>; l'export usa il <b>nome della squadra</b> registrata su fantacalcio.it (es. Michele → Partizan Degrado).</p>
-        <table class="setup-table"><thead><tr><th>#</th><th>Persona (nell'asta)</th><th>Squadra fantacalcio.it (per l'export)</th></tr></thead><tbody id="setup-teams"></tbody></table>
+        <p class="setup-p" style="color:var(--faint)">Trascina le righe (o usa ▲▼) per metterle nell'<b>ordine in cui siedono</b>: questo ordine vale ovunque — banditore, tabellone, rose — e detta la sequenza dei turni dopo il sorteggio.</p>
+        <table class="setup-table"><thead><tr><th></th><th>#</th><th>Persona (nell'asta)</th><th>Squadra fantacalcio.it (per l'export)</th><th>Ordine</th></tr></thead><tbody id="setup-teams"></tbody></table>
       </div>
 
       <div class="card" style="padding:16px">
@@ -1035,7 +1042,7 @@
     fresh("Pupi","Rolando United"),
     fresh("Paolo","Botafiga")
   ];
-  teams.forEach(function(t,i){t.color=COLORS[i];});
+  teams.forEach(function(t,i){t.color=COLORS[i];t.id="tm"+i;});   // id stabile: sopravvive al riordino
 
   // ---- LISTONE (giocatori chiamabili, con quotazione) ----
   var LISTONE=[
@@ -1602,7 +1609,7 @@
 
   var st={view:"banditore",phase:"A",turnIdx:0,lot:null,count:0,counting:false,pending:false,timer:null,
           speed:"veloce",selPlayer:null,youIdx:0,step:1,modalIdx:null,modalOp:false,saleLog:[],drawn:false,
-          sort:"alfa",listRole:"P",gSort:"quot",gListRole:"",gClub:"",rosterTeamIdx:null};
+          sort:"quot",bClub:"",listRole:"P",gSort:"quot",gListRole:"",gClub:"",rosterTeamIdx:null};
 
   // ultima assegnazione = cima dello storico vendite (stack cronologico)
   function lastSaleRec(){return (st.saleLog&&st.saleLog.length)?st.saleLog[st.saleLog.length-1]:null;}
@@ -1722,7 +1729,7 @@
     t.cred-=price;t.f[p.r]+=1;t.bought.push({n:p.n,r:p.r,price:price,id:bid});
     var entry=findP(p.n);if(entry)entry.taken=true;
     stopBattuta();showAssegnato(p.n,t.name,price);
-    st.saleLog.push({n:p.n,r:p.r,sq:p.sq,price:price,tIdx:li,tName:t.name,tColor:t.color,id:bid});
+    st.saleLog.push({n:p.n,r:p.r,sq:p.sq,price:price,tIdx:li,tId:t.id,tName:t.name,tColor:t.color,id:bid});
     st.lot=null;st.turnIdx=(li+1)%teams.length;st.selPlayer=null;renderAll(); // turno a chi segue chi ha preso
   }
   function callPlayer(){
@@ -1745,7 +1752,6 @@
     toast(t.name+" · "+st.lot.bid);
   }
 
-  function slotCell(t,r){return "<span class='tnum'>"+t.f[r]+"/"+SLOTS[r]+"</span>";}
 
   function renderBanditore(){
     var ic=inCorsoIdx(),nx=prossimaIdx();
@@ -1761,28 +1767,22 @@
       $("b-leader").textContent="nessuno";
       $("b-assign").disabled=true;$("b-assignwho").textContent="—";
     }
-    var rows="";
-    teams.forEach(function(t,i){
-      var cls=[];if(i===ic)cls.push("turn");if(L&&i===L.leaderIdx)cls.push("leadrow");if(isDim(i))cls.push("out");
-      var tag=i===ic?" <span class=\"turn-badge\">chiama</span>":(isDim(i)?" <span class=\"fuori-badge\">fuori</span>":"");
-      rows+="<tr class='"+cls.join(" ")+"' data-i='"+i+"'><td><div class='team'>"+t.name+tag+"</div></td>"+
-        "<td class='num'><span class='credits'>"+t.cred+"</span></td>"+
-        "<td class='num'>"+slotCell(t,"P")+"</td><td class='num'>"+slotCell(t,"D")+"</td><td class='num'>"+slotCell(t,"C")+"</td><td class='num'>"+slotCell(t,"A")+"</td></tr>";
-    });
-    $("b-stand").innerHTML=rows;
     renderRegiaGrid();renderPlist();
   }
   function renderRegiaGrid(){
-    var L=st.lot,html="";
+    var L=st.lot,ic=inCorsoIdx(),R=st.listRole,html="";
     teams.forEach(function(t,i){
-      var lead=L&&i===L.leaderIdx;
-      html+="<button class='tchip"+(lead?" lead":"")+(isDim(i)?" out":"")+"' data-i='"+i+"'><span class='nm'>"+t.name+"</span><span class='cr'>"+t.cred+"</span></button>";
+      var lead=L&&i===L.leaderIdx,turn=(!L&&i===ic);
+      html+="<button class='tchip"+(lead?" lead":"")+(turn?" turn":"")+(isDim(i)?" out":"")+"' data-i='"+i+"'>"+
+        "<span class='nm'>"+t.name+"</span>"+
+        "<span class='slot'>"+R+" "+t.f[R]+"/"+SLOTS[R]+"</span>"+
+        "<span class='cr'>"+t.cred+"</span></button>";
     });
     $("r-grid").innerHTML=html;
   }
-  function listoneRows(role,sort,search,selectable){
+  function listoneRows(role,sort,search,selectable,club){
     var q=(search||"").toLowerCase();
-    var list=LISTONE.filter(function(p){return p.r===role && p.n.toLowerCase().indexOf(q)>=0;});
+    var list=LISTONE.filter(function(p){return p.r===role && (!club||p.sq===club) && p.n.toLowerCase().indexOf(q)>=0;});
     list.sort(sort==="quot"?function(a,b){return b.q-a.q||a.n.localeCompare(b.n);}:function(a,b){return a.n.localeCompare(b.n);});
     var html="";
     list.forEach(function(p){
@@ -1795,12 +1795,12 @@
     return html||"<div class='prow faint' style='cursor:default'>Nessun giocatore</div>";
   }
   function renderPlist(){
-    $("b-plist").innerHTML=listoneRows(st.listRole,st.sort,$("b-search").value,true);
+    var sel=$("b-list-club");
+    if(sel&&!sel.dataset.done){sel.innerHTML="<option value=''>Tutte le squadre</option>"+clubList().map(function(c){return "<option value='"+c+"'>"+c+"</option>";}).join("");sel.dataset.done="1";}
+    var rl=$("b-list-role");if(rl)rl.textContent=ROLE_PLUR[st.listRole].toLowerCase();
+    $("b-plist").innerHTML=listoneRows(st.listRole,st.sort,$("b-search").value,true,st.bClub||"");
     $("b-call").disabled=!st.selPlayer||!!st.selPlayer.taken;
     $("b-call").textContent=st.selPlayer?("Chiama "+st.selPlayer.n):"Chiama giocatore";
-  }
-  function renderGiocatoreListone(){
-    $("g-plist2").innerHTML=listoneRows(st.gListRole,st.gSort,$("g-search2").value,false);
   }
   function renderRank(elId,meIdx,leadIdx){
     var el=$(elId);if(!el)return;if(leadIdx==null)leadIdx=-1;
@@ -2028,11 +2028,29 @@
   // ---------- SETUP: import listone / mappa squadre / export rose ----------
   function escAttr(s){return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");}
   function safeName(s){return (String(s).replace(/[\\/:*?"<>|]+/g,"").replace(/\s+/g,"_").trim())||"squadra";}
+  // Sposta una squadra da una posizione all'altra: l'ordine dell'array vale ovunque
+  // (banditore, tabellone, rose giocatore) e detta la sequenza dei turni dopo il sorteggio.
+  function moveTeam(from,to){
+    if(from===to||from<0||to<0||from>=teams.length||to>=teams.length)return;
+    var youId=(teams[st.youIdx]||{}).id,turnId=(teams[st.turnIdx]||{}).id,
+        leadId=st.lot?(teams[st.lot.leaderIdx]||{}).id:null;
+    var item=teams.splice(from,1)[0];teams.splice(to,0,item);
+    function idxOf(id){for(var i=0;i<teams.length;i++)if(teams[i].id===id)return i;return 0;}
+    if(youId!=null)st.youIdx=idxOf(youId);
+    if(turnId!=null)st.turnIdx=idxOf(turnId);
+    if(leadId!=null&&st.lot)st.lot.leaderIdx=idxOf(leadId);
+    if(st.saleLog)st.saleLog.forEach(function(s){if(s.tId!=null)s.tIdx=idxOf(s.tId);});
+    renderSetupTeams();renderAll();renderExportPreview();
+  }
   function renderSetupTeams(){
     var h="";teams.forEach(function(t,i){
-      h+="<tr><td class='idx'>"+(i+1)+"</td>"+
+      h+="<tr draggable='true' data-i='"+i+"'>"+
+         "<td class='drag' title='Trascina per riordinare'>⠿</td>"+
+         "<td class='idx'>"+(i+1)+"</td>"+
          "<td><input type='text' data-i='"+i+"' data-k='name' value='"+escAttr(t.name)+"'></td>"+
-         "<td><input type='text' data-i='"+i+"' data-k='fanta' value='"+escAttr(t.fanta)+"'></td></tr>";
+         "<td><input type='text' data-i='"+i+"' data-k='fanta' value='"+escAttr(t.fanta)+"'></td>"+
+         "<td class='ord'><button class='ordbtn' data-mv='up' data-i='"+i+"' aria-label='Su'"+(i===0?" disabled":"")+">▲</button>"+
+         "<button class='ordbtn' data-mv='down' data-i='"+i+"' aria-label='Giù'"+(i===teams.length-1?" disabled":"")+">▼</button></td></tr>";
     });
     $("setup-teams").innerHTML=h;
   }
@@ -2119,11 +2137,15 @@
     if(unassign(s.tIdx,s.id,s.n)){renderAll();toast("Annullata: "+s.n+" torna disponibile"+(rest>0?" · ora premi ancora Annulla per la precedente":""));}
   });
   $("b-search").addEventListener("input",renderPlist);
+  $("b-list-club").addEventListener("change",function(){st.bClub=this.value;renderPlist();});
   $("b-plist").addEventListener("click",function(e){var row=e.target.closest(".prow");if(!row||!row.dataset.p)return;var p=findP(row.dataset.p);if(!p)return;if(p.taken){toast("Già assegnato");return;}st.selPlayer=p;renderPlist();});
   $("b-phasesel").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.listRole=b.dataset.r;st.selPlayer=null;document.querySelectorAll("#b-phasesel button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});renderAll();});
   $("b-sort").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.sort=b.dataset.sort;document.querySelectorAll("#b-sort button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});renderPlist();});
   $("b-call").addEventListener("click",callPlayer);
-  $("r-grid").addEventListener("click",function(e){var c=e.target.closest(".tchip");if(!c||c.classList.contains("out"))return;regiaPick(parseInt(c.dataset.i,10));});
+  $("r-grid").addEventListener("click",function(e){var c=e.target.closest(".tchip");if(!c)return;var i=parseInt(c.dataset.i,10);
+    if(st.lot){if(c.classList.contains("out"))return;regiaPick(i);}          // asta in corso: rilancio manuale
+    else{st.modalIdx=i;st.modalOp=true;renderTeamModal(i);}                  // a riposo: apri la rosa per correggere
+  });
   // forza turno: tocca una squadra nella coda del banditore
   $("b-callorder").addEventListener("click",function(e){var c=e.target.closest(".railchip");if(!c)return;st.turnIdx=parseInt(c.dataset.i,10);st.drawn=true;renderAll();toast("Turno forzato: "+teams[inCorsoIdx()].name);});
   $("b-sorteggio").addEventListener("click",function(){
@@ -2164,11 +2186,18 @@
       return;}
     if(e.target===$("t-modal"))closeModal();
   });
-  // banditore: clic su una squadra nella tabella rose -> annulla assegnazioni
-  $("b-stand").addEventListener("click",function(e){var tr=e.target.closest("tr[data-i]");if(!tr)return;st.modalIdx=parseInt(tr.dataset.i,10);st.modalOp=true;renderTeamModal(st.modalIdx);});
 
   // setup
   $("setup-teams").addEventListener("input",function(e){var el=e.target;if(el.tagName!=="INPUT")return;var i=+el.dataset.i;teams[i][el.dataset.k]=el.value;renderAll();renderExportPreview();});
+  // riordino squadre: pulsanti ▲▼
+  $("setup-teams").addEventListener("click",function(e){var b=e.target.closest(".ordbtn");if(!b)return;var i=+b.dataset.i;moveTeam(i,b.dataset.mv==="up"?i-1:i+1);});
+  // riordino squadre: drag & drop
+  (function(){var dragI=null;var tb=$("setup-teams");
+    tb.addEventListener("dragstart",function(e){var tr=e.target.closest("tr");if(!tr)return;dragI=+tr.dataset.i;try{e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",String(dragI));}catch(x){}tr.classList.add("dragging");});
+    tb.addEventListener("dragend",function(e){var tr=e.target.closest("tr");if(tr)tr.classList.remove("dragging");dragI=null;[].forEach.call(tb.querySelectorAll("tr"),function(r){r.classList.remove("dragover");});});
+    tb.addEventListener("dragover",function(e){e.preventDefault();try{e.dataTransfer.dropEffect="move";}catch(x){}var tr=e.target.closest("tr");if(!tr)return;[].forEach.call(tb.querySelectorAll("tr"),function(r){r.classList.toggle("dragover",r===tr);});});
+    tb.addEventListener("drop",function(e){e.preventDefault();var tr=e.target.closest("tr");if(!tr||dragI==null)return;var to=+tr.dataset.i;moveTeam(dragI,to);dragI=null;});
+  })();
   $("imp-file").addEventListener("change",function(e){
     var f=e.target.files&&e.target.files[0];if(!f)return;
     var rd=new FileReader();
@@ -2234,7 +2263,7 @@
   // ================= REAL-TIME (Supabase) =================
   function serialize(){
     return {v:1,
-      teams:teams.map(function(t){return {name:t.name,fanta:t.fanta,cred:t.cred,f:t.f,bought:t.bought};}),
+      teams:teams.map(function(t){return {id:t.id,name:t.name,fanta:t.fanta,cred:t.cred,f:t.f,bought:t.bought};}),
       taken:LISTONE.filter(function(p){return p.taken;}).map(function(p){return p.id;}),
       listRole:st.listRole,turnIdx:st.turnIdx,speed:st.speed,
       counting:st.counting,pending:st.pending,count:st.count,saleLog:st.saleLog,drawn:st.drawn,
@@ -2242,7 +2271,18 @@
   }
   function applyState(d){
     if(!d||!d.teams)return;
-    d.teams.forEach(function(td,i){if(teams[i]){teams[i].name=td.name;teams[i].fanta=td.fanta;teams[i].cred=td.cred;teams[i].f=td.f;teams[i].bought=td.bought||[];}});
+    // ricostruisce l'array squadre nell'ordine ricevuto (il riordino del banditore vale per tutti)
+    var old=teams,oldYouId=(old[st.youIdx]||{}).id,byId={};
+    old.forEach(function(t){byId[t.id]=t;});
+    teams=d.teams.map(function(td,i){
+      var t=(td.id&&byId[td.id])||old[i]||fresh(td.name,td.fanta);
+      t.id=td.id||t.id||("tm"+i);
+      t.name=td.name;t.fanta=td.fanta;t.cred=td.cred;t.f=td.f;t.bought=td.bought||[];
+      if(t.color==null)t.color=COLORS[i%COLORS.length];
+      return t;
+    });
+    N=teams.length;
+    if(oldYouId!=null){for(var yi=0;yi<teams.length;yi++){if(teams[yi].id===oldYouId){st.youIdx=yi;break;}}}
     var tk={};(d.taken||[]).forEach(function(id){tk[id]=1;});
     LISTONE.forEach(function(p){p.taken=!!tk[p.id];});
     st.listRole=d.listRole||"P";st.turnIdx=d.turnIdx||0;st.speed=d.speed||"veloce";
