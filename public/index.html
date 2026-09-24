@@ -234,6 +234,8 @@
   .g-bidcustom input{flex:1 1 auto;min-width:0;height:52px;border-radius:12px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text);font-size:17px;padding:0 14px;font-family:var(--ff-disp);font-weight:700}
   .g-bidcustom .btn{flex:0 0 auto;min-height:52px;padding:0 20px}
   .g-bidcustom input:disabled{opacity:.4}
+  .g-rolefull{margin-top:14px;padding:11px 14px;border-radius:12px;text-align:center;font-weight:700;font-size:14.5px;
+    color:var(--good);background:color-mix(in srgb,var(--good) 13%,transparent);border:1px solid color-mix(in srgb,var(--good) 40%,transparent)}
   /* sezioni collassabili */
   .g-sec{padding:0}
   .g-sec>summary{list-style:none;cursor:pointer;padding:15px 16px;font-family:var(--ff-disp);font-weight:700;font-size:16px;
@@ -872,6 +874,7 @@
           <input type="number" id="g-cust" inputmode="numeric" placeholder="Rilancio a…" min="1">
           <button class="btn" id="g-custgo">Invia</button>
         </div>
+        <div class="g-rolefull" id="g-rolefull" hidden></div>
       </div>
 
       <!-- COLLASSABILE: listone giocatori -->
@@ -1697,7 +1700,8 @@
   function callPlayer(){
     if(!st.selPlayer||st.selPlayer.taken)return;var base=1;
     st.drawn=true;
-    st.lot={player:st.selPlayer,bid:base,base:base,leaderIdx:st.turnIdx};
+    var caller=inCorsoIdx();st.turnIdx=caller;   // salta chi ha completato il ruolo
+    st.lot={player:st.selPlayer,bid:base,base:base,leaderIdx:caller};
     stopBattuta();st.selPlayer=null;$("b-search").value="";renderAll();
     toast("Chiamato "+st.lot.player.n+" — base "+base+" · premi Batti");
   }
@@ -1845,6 +1849,9 @@
       $("g-bid").textContent="—";$("g-leader").textContent="nessuno";$("g-leaderwrap").classList.remove("me");
       setBidEnabled(false);
     }
+    var rf=$("g-rolefull"),youRoleFull=you.f[st.listRole]>=SLOTS[st.listRole];
+    rf.hidden=!youRoleFull;
+    if(youRoleFull)rf.textContent="Hai completato i "+ROLE_PLUR[st.listRole]+": in questo ruolo verrai saltato.";
     renderMyRoster();
     if($("g-sec-list")&&$("g-sec-list").open)renderGiocListone();
     renderRank("g-rank",st.youIdx,-1);
