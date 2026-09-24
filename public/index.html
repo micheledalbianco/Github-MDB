@@ -180,16 +180,27 @@
 
   /* ===== Vista Giocatore (mobile-first) ===== */
   .g-wrap{display:flex;flex-direction:column;gap:12px;max-width:720px;margin:0 auto}
-  /* chiamata in corso */
-  .g-callstrip{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-radius:14px;
-    background:var(--surface);border:1px solid var(--border)}
-  .g-callstrip .gc-lab{font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--faint);font-weight:700}
-  .g-callstrip .gc-team{font-family:var(--ff-disp);font-weight:700;font-size:18px;color:var(--text)}
-  .g-callstrip .gc-sub{margin-left:auto;font-size:13px;color:var(--muted);font-weight:600}
-  .g-callstrip.mine{background:color-mix(in srgb,var(--evid) 16%,var(--surface));border-color:color-mix(in srgb,var(--evid) 45%,transparent)}
-  .g-callstrip.mine .gc-team{color:var(--evid-ink)}
+  /* top: squadra + composizione */
+  .g-top{padding:14px 16px;display:grid;grid-template-columns:1fr auto;gap:10px 14px;align-items:center}
+  .g-top-id{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .g-top-id b{font-family:var(--ff-disp);font-size:22px;font-weight:700;line-height:1}
+  .g-top-id span{font-size:12.5px;color:var(--muted)}
+  .g-top-right{display:flex;gap:20px;justify-self:end}
+  .g-top-right .stat{align-items:flex-end}
+  .g-roles{grid-column:1 / -1;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .grole{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 4px;border-radius:11px;background:var(--surface-2);border:1px solid transparent}
+  .grole .gr-l{font-family:var(--ff-disp);font-weight:700;font-size:14px;color:var(--muted)}
+  .grole .gr-v{font-family:var(--ff-disp);font-weight:700;font-size:16px;font-variant-numeric:tabular-nums}
+  .grole.cur{background:color-mix(in srgb,var(--evid) 16%,transparent);border-color:color-mix(in srgb,var(--evid) 46%,transparent)}
+  .grole.cur .gr-l{color:var(--evid-ink)}
+  .grole.done .gr-v{color:var(--good)}
   /* asta in corso */
   .g-lot{padding:16px}
+  .g-callline{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:11px;border-bottom:1px solid var(--border)}
+  .g-callline .gc-lab{font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--faint);font-weight:700}
+  .g-callline .gc-team{font-family:var(--ff-disp);font-weight:700;font-size:16px;color:var(--text)}
+  .g-callline .gc-sub{margin-left:auto;font-size:12.5px;color:var(--muted);font-weight:600}
+  .g-callline.mine .gc-team{color:var(--evid-ink)}
   .g-lot-top{display:flex;align-items:center;gap:14px}
   .g-lot-top .role-pill{width:48px;height:48px;font-size:23px;border-radius:13px;flex:0 0 auto}
   .g-lot-id{flex:1 1 auto;min-width:0}
@@ -203,8 +214,8 @@
   .g-ring.waiting circle:first-of-type{stroke:color-mix(in srgb,var(--accent) 40%,var(--border))}
   .g-ring.done circle:first-of-type{stroke:color-mix(in srgb,var(--good) 60%,var(--border))}
   .g-ring.done .num{color:var(--good)!important;font-size:12px!important}
-  .g-bidinfo{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:14px}
-  .g-bidinfo .eyebrow{flex-basis:100%}
+  .g-bidinfo{margin-top:14px}
+  .g-bidrow{display:flex;align-items:center;gap:14px;margin-top:4px}
   .g-bidinfo .bid-amount{font-size:52px;color:var(--gold);line-height:.9}
   .g-lot.g-idle .bid-amount{color:var(--faint)}
   .g-bidinfo .bid-leader{margin:0}
@@ -219,33 +230,20 @@
   .g-bidcustom input{flex:1 1 auto;min-width:0;height:52px;border-radius:12px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text);font-size:17px;padding:0 14px;font-family:var(--ff-disp);font-weight:700}
   .g-bidcustom .btn{flex:0 0 auto;min-height:52px;padding:0 20px}
   .g-bidcustom input:disabled{opacity:.4}
-  /* la mia squadra */
-  .g-me{padding:16px}
-  .g-me-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-  .g-me-head b{font-family:var(--ff-disp);font-size:22px;font-weight:700}
-  .g-me-head span{font-size:13px;color:var(--muted)}
-  .g-me-stats{display:flex;gap:24px;margin-top:12px}
-  .g-roles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
-  .grole{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:11px;background:var(--surface-2);border:1px solid transparent}
-  .grole .gr-l{font-family:var(--ff-disp);font-weight:700;font-size:15px;color:var(--muted)}
-  .grole .gr-v{font-family:var(--ff-disp);font-weight:700;font-size:17px;font-variant-numeric:tabular-nums}
-  .grole.cur{background:color-mix(in srgb,var(--evid) 16%,transparent);border-color:color-mix(in srgb,var(--evid) 46%,transparent)}
-  .grole.cur .gr-l{color:var(--evid-ink)}
-  .grole.done .gr-v{color:var(--good)}
-  /* rose */
-  .g-rose{padding:16px}
-  .g-rose-filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
-  .g-rose-filters select{flex:1 1 180px;min-width:0;height:42px;border-radius:11px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text);font-size:15px;font-weight:600;padding:0 12px}
-  .g-rose-filters .roletabs{flex:0 0 auto}
-  .g-rose-list{display:flex;flex-direction:column}
-  .g-rose-item{display:flex;align-items:center;gap:10px;padding:8px 8px;border-radius:9px;font-size:15px}
-  .g-rose-item:nth-child(odd){background:color-mix(in srgb,var(--surface-2) 55%,transparent)}
-  .g-rose-item .role-pill{width:22px;height:22px;font-size:12px;border-radius:6px;flex:0 0 auto}
-  .g-rose-item .gri-n{flex:1 1 auto;font-weight:600}
-  .g-rose-item .gri-t{color:var(--muted);font-size:12.5px}
-  .g-rose-item .gri-p{flex:0 0 auto;font-family:var(--ff-disp);font-weight:700;font-variant-numeric:tabular-nums;min-width:30px;text-align:right}
-  .g-rose-empty{padding:8px;color:var(--faint);font-size:13px}
-  #g-rank.crank{padding:14px 16px}
+  /* sezioni collassabili */
+  .g-sec{padding:0}
+  .g-sec>summary{list-style:none;cursor:pointer;padding:15px 16px;font-family:var(--ff-disp);font-weight:700;font-size:16px;
+    display:flex;align-items:center;gap:8px}
+  .g-sec>summary::-webkit-details-marker{display:none}
+  .g-sec>summary::after{content:"▾";margin-left:auto;color:var(--faint);font-size:13px;transition:transform .2s}
+  .g-sec[open]>summary::after{transform:rotate(180deg)}
+  .g-sec>summary:hover{color:var(--accent-ink)}
+  .g-sec-body{padding:0 16px 16px}
+  .g-sec-body #g-rank.crank,.g-sec-body .crank{padding:0}
+  .g-list-filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+  .g-list-filters select{flex:1 1 150px;min-width:0;height:40px;border-radius:11px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text);font-size:14.5px;font-weight:600;padding:0 12px}
+  .g-list-out{max-height:52vh;overflow:auto}
+  #g-rank.crank{padding:0}
   /* PC: hero più orizzontale */
   @media(min-width:721px){
     .g-lot-id .lot-name{font-size:36px}
@@ -258,9 +256,10 @@
     .top-inner{padding:8px 48px 8px 12px}
     .seg{gap:1px;padding:2px}
     .seg button{padding:6px 9px;font-size:12.5px}
+    .g-top-right{gap:14px}
     .g-lot-top .role-pill{width:44px;height:44px;font-size:21px}
     .g-ring{width:70px;height:70px}
-    .g-lot-id .lot-name{font-size:27px}
+    .g-lot-id .lot-name{font-size:26px}
   }
 
   .board-hero{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;padding:24px}
@@ -821,11 +820,19 @@
   <!-- ================= GIOCATORE ================= -->
   <section id="v-giocatore" hidden>
     <div class="g-wrap">
-      <!-- chiamata in corso -->
-      <div class="g-callstrip" id="g-callstrip"></div>
+      <!-- TOP: squadra + composizione -->
+      <div class="card g-top">
+        <div class="g-top-id"><b id="g-name2">—</b><span id="g-owner">—</span></div>
+        <div class="g-top-right">
+          <div class="stat gold"><span class="v tnum" id="g-cred">—</span><span class="l">crediti</span></div>
+          <div class="stat"><span class="v tnum" id="g-maxbid">—</span><span class="l">max rilancio</span></div>
+        </div>
+        <div class="g-roles" id="g-roles"></div>
+      </div>
 
       <!-- ASTA IN CORSO -->
       <div class="card g-lot" id="g-lotcard">
+        <div class="g-callline" id="g-callstrip"></div>
         <div class="g-lot-top">
           <span class="role-pill role-A" id="g-role">A</span>
           <div class="g-lot-id">
@@ -842,8 +849,7 @@
         </div>
         <div class="g-bidinfo">
           <span class="eyebrow">Offerta più alta</span>
-          <span class="bid-amount tnum" id="g-bid">—</span>
-          <span class="bid-leader" id="g-leaderwrap"><b id="g-leader">nessuno</b></span>
+          <div class="g-bidrow"><span class="bid-amount tnum" id="g-bid">—</span><span class="bid-leader" id="g-leaderwrap"><b id="g-leader">nessuno</b></span></div>
         </div>
         <div class="g-bidbtns" id="g-bidbtns">
           <button class="bidb" data-inc="1">+1</button>
@@ -857,33 +863,37 @@
         <div class="max-note">Puoi arrivare a <b id="g-maxbid2">—</b> cr · il resto è bloccato per completare la rosa</div>
       </div>
 
-      <!-- LA MIA SQUADRA -->
-      <div class="card g-me">
-        <div class="g-me-head"><b id="g-name2">—</b><span id="g-owner">—</span></div>
-        <div class="g-me-stats">
-          <div class="stat gold"><span class="v tnum" id="g-cred">—</span><span class="l">crediti residui</span></div>
-          <div class="stat"><span class="v tnum" id="g-maxbid">—</span><span class="l">rilancio massimo</span></div>
-        </div>
-        <div class="g-roles" id="g-roles"></div>
-      </div>
+      <!-- COLLASSABILE: la mia rosa -->
+      <details class="card g-sec">
+        <summary>La mia rosa <span class="g-sec-x" id="g-rosa-x"></span></summary>
+        <div class="g-sec-body" id="g-myroster"></div>
+      </details>
 
-      <!-- ROSE (tutte le squadre) -->
-      <div class="card g-rose">
-        <div class="eyebrow" style="margin-bottom:9px">Rose</div>
-        <div class="g-rose-filters">
-          <select id="g-rose-team" aria-label="Squadra"></select>
-          <div class="roletabs" id="g-rose-role" role="group" aria-label="Ruolo">
-            <button data-r="" aria-pressed="true">Tutti</button>
-            <button data-r="P">P</button><button data-r="D">D</button><button data-r="C">C</button><button data-r="A">A</button>
+      <!-- COLLASSABILE: listone giocatori -->
+      <details class="card g-sec" id="g-sec-list">
+        <summary>Listone giocatori</summary>
+        <div class="g-sec-body">
+          <div class="g-list-filters">
+            <select id="g-list-club" aria-label="Squadra"></select>
+            <div class="roletabs" id="g-list-role" role="group" aria-label="Ruolo">
+              <button data-r="" aria-pressed="true">Tutti</button>
+              <button data-r="P">P</button><button data-r="D">D</button><button data-r="C">C</button><button data-r="A">A</button>
+            </div>
+            <div class="sortpick" id="g-list-sort" role="group" aria-label="Ordinamento">
+              <button data-sort="quot" aria-pressed="true">Quot.</button>
+              <button data-sort="alfa">A‑Z</button>
+            </div>
           </div>
+          <input type="text" id="g-list-search" placeholder="Cerca giocatore…" autocomplete="off">
+          <div class="plist g-list-out" id="g-list-out" style="margin-top:8px"></div>
         </div>
-        <div class="g-rose-list" id="g-rose-list"></div>
-      </div>
+      </details>
 
-      <!-- CREDITI -->
-      <div class="card crank" id="g-rank"></div>
-
-      <div class="g-hint" id="g-teamname" hidden></div>
+      <!-- COLLASSABILE: crediti -->
+      <details class="card g-sec">
+        <summary>Crediti</summary>
+        <div class="g-sec-body"><div class="crank" id="g-rank"></div></div>
+      </details>
     </div>
   </section>
 
@@ -1571,7 +1581,7 @@
 
   var st={view:"banditore",phase:"A",turnIdx:0,lot:null,count:0,counting:false,pending:false,timer:null,
           speed:"veloce",selPlayer:null,youIdx:0,step:1,modalIdx:null,lastSale:null,drawn:false,
-          sort:"alfa",listRole:"P",gSort:"alfa",gListRole:"P",roseTeamIdx:null,roseRole:""};
+          sort:"alfa",listRole:"P",gSort:"quot",gListRole:"",gClub:""};
 
   var $=function(id){return document.getElementById(id);};
   var N=teams.length;
@@ -1759,12 +1769,12 @@
 
   function renderGiocCall(){
     var el=$("g-callstrip");if(!el)return;
-    if(!st.drawn){el.className="g-callstrip";el.innerHTML="<span class='gc-lab'>Chiamata in corso</span><span class='gc-team'>—</span><span class='gc-sub'>Sorteggio da fare</span>";return;}
+    if(!st.drawn){el.className="g-callline";el.innerHTML="<span class='gc-lab'>Chiamata</span><span class='gc-team'>—</span><span class='gc-sub'>Sorteggio da fare</span>";return;}
     var ic=inCorsoIdx(),upc=upcoming(1),nx=upc.length?upc[0]:null,mine=(ic===st.youIdx);
-    el.className="g-callstrip"+(mine?" mine":"");
-    el.innerHTML="<span class='gc-lab'>Chiamata in corso</span>"+
+    el.className="g-callline"+(mine?" mine":"");
+    el.innerHTML="<span class='gc-lab'>Chiamata</span>"+
       "<span class='gc-team'>"+(mine?"Tocca a te":teams[ic].name)+"</span>"+
-      (nx!=null?"<span class='gc-sub'>Prossimo "+teams[nx].name+"</span>":"");
+      (nx!=null?"<span class='gc-sub'>Poi "+teams[nx].name+"</span>":"");
   }
   function setBidEnabled(baseOk){
     var you=teams[st.youIdx];
@@ -1774,22 +1784,22 @@
     });
     $("g-cust").disabled=!baseOk;$("g-custgo").disabled=!baseOk;
   }
-  function renderRoseBrowser(){
-    var sel=$("g-rose-team");
-    if(sel.dataset.n!==String(teams.length)){
-      sel.innerHTML="<option value='-1'>Tutte le squadre</option>"+teams.map(function(t,i){return "<option value='"+i+"'>"+t.name+"</option>";}).join("");
-      sel.dataset.n=String(teams.length);
-      if(st.roseTeamIdx==null)st.roseTeamIdx=st.youIdx;
-      sel.value=String(st.roseTeamIdx);
-    }
-    var ti=(st.roseTeamIdx==null?st.youIdx:st.roseTeamIdx),role=st.roseRole||"",ord={P:0,D:1,C:2,A:3},items=[];
-    teams.forEach(function(t,i){ if(ti!==-1&&i!==ti)return;
-      t.bought.forEach(function(p){ if(!role||p.r===role) items.push({tName:t.name,n:p.n,r:p.r,price:p.price||0}); }); });
-    items.sort(function(a,b){return (ord[a.r]-ord[b.r])||(b.price-a.price)||a.n.localeCompare(b.n);});
-    $("g-rose-list").innerHTML=items.map(function(p){
-      return "<div class='g-rose-item'><span class='role-pill role-"+p.r+"'>"+p.r+"</span><span class='gri-n'>"+p.n+"</span>"+
-        (ti===-1?"<span class='gri-t'>"+p.tName+"</span>":"")+"<span class='gri-p'>"+p.price+"</span></div>";
-    }).join("")||"<div class='g-rose-empty'>— nessun giocatore —</div>";
+  function clubList(){var s={};LISTONE.forEach(function(p){s[p.sq]=1;});return Object.keys(s).sort();}
+  function renderMyRoster(){
+    $("g-myroster").innerHTML=rosterGroupsHTML(teams[st.youIdx]);
+  }
+  function renderGiocListone(){
+    var out=$("g-list-out");if(!out)return;
+    var sel=$("g-list-club");
+    if(!sel.dataset.done){sel.innerHTML="<option value=''>Tutte le squadre</option>"+clubList().map(function(c){return "<option value='"+c+"'>"+c+"</option>";}).join("");sel.dataset.done="1";}
+    var club=st.gClub||"",role=st.gListRole||"",q=($("g-list-search").value||"").toLowerCase(),sort=st.gSort||"quot";
+    var list=LISTONE.filter(function(p){return (!role||p.r===role)&&(!club||p.sq===club)&&p.n.toLowerCase().indexOf(q)>=0;});
+    var ord={P:0,D:1,C:2,A:3};
+    list.sort(sort==="quot"?function(a,b){return (ord[a.r]-ord[b.r])||(b.q-a.q)||a.n.localeCompare(b.n);}:function(a,b){return (ord[a.r]-ord[b.r])||a.n.localeCompare(b.n);});
+    out.innerHTML=list.map(function(p){
+      return "<div class='prow"+(p.taken?" taken":"")+"'><span class='role-pill role-"+p.r+"'>"+p.r+"</span><span class='pn'>"+p.n+"</span>"+
+        (p.taken?"<span class='takenbadge'>preso</span>":"")+"<span class='ps'>"+p.sq+" · "+p.q+"</span></div>";
+    }).join("")||"<div class='prow faint' style='cursor:default'>Nessun giocatore</div>";
   }
   function renderGiocatore(){
     var you=teams[st.youIdx];
@@ -1799,6 +1809,7 @@
       return "<span class='grole"+(cur?" cur":"")+(done?" done":"")+"'><span class='gr-l'>"+r+"</span><span class='gr-v'>"+you.f[r]+"/"+tt+"</span></span>";}).join("");
     renderGiocCall();
     var L=st.lot;
+    $("g-lotcard").classList.toggle("g-idle",!L);
     if(L){
       $("g-role").style.display="";$("g-role").textContent=L.player.r;$("g-role").className="role-pill role-"+L.player.r;
       $("g-lotname").textContent=L.player.n;$("g-lotmeta").textContent=ROLE_NAME[L.player.r]+" · "+L.player.sq;
@@ -1813,7 +1824,8 @@
       $("g-bid").textContent="—";$("g-leader").textContent="nessuno";$("g-leaderwrap").classList.remove("me");
       setBidEnabled(false);
     }
-    renderRoseBrowser();
+    renderMyRoster();
+    if($("g-sec-list")&&$("g-sec-list").open)renderGiocListone();
     renderRank("g-rank",st.youIdx,st.lot?st.lot.leaderIdx:(st.lastSale?st.lastSale.tIdx:-1));
   }
   function gBidBy(inc){
@@ -1821,9 +1833,10 @@
     var you=teams[st.youIdx],R=st.lot.player.r;
     if(st.lot.leaderIdx===st.youIdx){toast("Sei già in testa");return;}
     if(you.f[R]>=SLOTS[R]){toast("Hai già completato i "+ROLE_PLUR[R]);return;}
-    if(st.lot.bid+inc>maxBid(you)){toast("Oltre il tuo massimo ("+maxBid(you)+")");return;}
-    if(amPlayer()){sendAction("raise_by",{teamIdx:st.youIdx,amount:inc});toast("Rilancio +"+inc+" inviato");}
-    else{st.lot.bid+=inc;st.lot.leaderIdx=st.youIdx;stopBattuta();renderAll();toast("Rilancio: "+st.lot.bid);}
+    var target=st.lot.bid+inc;
+    if(target>maxBid(you)){toast("Oltre il tuo massimo ("+maxBid(you)+")");return;}
+    if(amPlayer()){sendAction("raise_to",{teamIdx:st.youIdx,amount:target});toast("Rilancio +"+inc+" inviato");}
+    else{st.lot.bid=target;st.lot.leaderIdx=st.youIdx;stopBattuta();renderAll();toast("Rilancio: "+st.lot.bid);}
   }
   function gBidTo(v){
     if(!st.lot){toast("Nessun giocatore all'asta");return;}
@@ -2065,8 +2078,12 @@
   $("g-bidbtns").addEventListener("click",function(e){var b=e.target.closest(".bidb");if(!b||b.disabled)return;gBidBy(parseInt(b.dataset.inc,10));});
   $("g-custgo").addEventListener("click",function(){var v=parseInt($("g-cust").value,10);gBidTo(v);if(!isNaN(v))$("g-cust").value="";});
   $("g-cust").addEventListener("keydown",function(e){if(e.key==="Enter"){var v=parseInt(this.value,10);gBidTo(v);if(!isNaN(v))this.value="";}});
-  $("g-rose-team").addEventListener("change",function(){st.roseTeamIdx=parseInt(this.value,10);renderRoseBrowser();});
-  $("g-rose-role").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.roseRole=b.dataset.r;document.querySelectorAll("#g-rose-role button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});renderRoseBrowser();});
+  // listone giocatore: filtri squadra + ruolo + ordinamento + ricerca
+  $("g-sec-list").addEventListener("toggle",function(){if(this.open)renderGiocListone();});
+  $("g-list-club").addEventListener("change",function(){st.gClub=this.value;renderGiocListone();});
+  $("g-list-search").addEventListener("input",renderGiocListone);
+  $("g-list-role").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.gListRole=b.dataset.r;document.querySelectorAll("#g-list-role button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});renderGiocListone();});
+  $("g-list-sort").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.gSort=b.dataset.sort;document.querySelectorAll("#g-list-sort button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});renderGiocListone();});
 
   // tabellone: click su una squadra → ingrandisci (rosa completa)
   $("t-grid").addEventListener("click",function(e){var c=e.target.closest(".tcard");if(!c)return;st.modalIdx=parseInt(c.dataset.i,10);renderTeamModal(st.modalIdx);});
