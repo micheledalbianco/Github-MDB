@@ -336,7 +336,9 @@
   .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:24px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow);opacity:0;transition:opacity .2s,transform .2s;pointer-events:none}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
   @media(prefers-reduced-motion:reduce){*{transition:none!important}}
-  .cols2{display:grid;grid-template-columns:1.35fr .95fr;gap:16px;align-items:start}
+  .cols2{display:grid;grid-template-columns:1.35fr .95fr;gap:16px;align-items:stretch}
+  #b-chiamata{display:flex;flex-direction:column}
+  #b-chiamata #b-plist{flex:1 1 0;min-height:160px;max-height:none}
   @media(max-width:900px){.cols2{grid-template-columns:1fr}}
 
   /* lampeggio ultimo secondo */
@@ -353,6 +355,14 @@
 
   .rgc.done{color:var(--good)}
 
+  /* riquadro chiamata (banditore) */
+  .b-callbox{padding:14px 16px;margin-bottom:14px}
+  .cb-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .cb-corsobox{display:flex;flex-direction:column;gap:3px;justify-content:center;background:var(--accent-soft);border:1.5px solid var(--accent-ink);border-radius:12px;padding:8px 18px;
+    box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 45%,transparent),0 0 22px color-mix(in srgb,var(--accent) 34%,transparent)}
+  .cb-corsobox .cb-lab{color:var(--accent-ink)}
+  .cb-caller{font-family:var(--ff-disp);font-weight:700;font-size:28px;line-height:1;color:#fff}
+  .cb-tools{display:flex;align-items:center;gap:10px;margin-left:auto}
   /* turno di chiamata */
   .callbanner{display:flex;align-items:stretch;gap:12px;padding:13px 15px;flex-wrap:wrap}
   .cb-side{display:flex;flex-direction:column;gap:3px;justify-content:center}
@@ -372,13 +382,10 @@
   .cb-prossima .cb-team{font-size:21px}
   .cb-you{margin-left:6px;font-size:11px;font-weight:700;color:#fff;background:var(--accent);border-radius:20px;padding:2px 9px;letter-spacing:.5px;font-family:var(--ff-body)}
   .cb-you.alt{background:var(--gold)}
-  .cb-rail{display:flex;gap:6px;overflow-x:auto;width:100%;padding-top:9px;margin-top:3px;border-top:1px dashed var(--border)}
-  .railchip{display:flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;color:var(--muted);flex:none}
-  .railchip .dot{width:8px;height:8px}
-  .railchip .qn{font-variant-numeric:tabular-nums;color:var(--faint);font-size:11px}
-  .railchip.corso{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink);font-weight:700}
-  .railchip.next{border-color:color-mix(in srgb,var(--accent) 45%,transparent);color:var(--accent-ink);font-weight:700}
-  .railchip.onyou{box-shadow:inset 0 0 0 2px var(--gold)}
+  .cb-rail{display:flex;gap:6px;width:100%;padding-top:11px;margin-top:12px;border-top:1px dashed var(--border)}
+  .railchip{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;padding:9px 8px;border:1px solid var(--border);border-radius:11px;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);text-align:center}
+  .railchip.corso{border-color:var(--evid);background:var(--evid-soft);color:var(--evid-ink);font-weight:800;font-size:16.5px}
+  .railchip.out{opacity:.4}
   .poi-badge{margin-left:6px;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);border:1px solid var(--border-strong);border-radius:20px;padding:1px 7px;font-weight:600}
 
   /* setup */
@@ -488,9 +495,8 @@
   .cb-corso{border:1.5px solid var(--accent-ink);
     box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent),0 0 22px color-mix(in srgb,var(--accent) 40%,transparent)}
   .cb-corso .cb-team{color:#fff}
-  .railchip.corso{border-color:var(--accent-ink);background:color-mix(in srgb,var(--accent) 34%,var(--surface));color:#fff;
-    box-shadow:0 0 14px color-mix(in srgb,var(--accent) 40%,transparent)}
-  .railchip.onyou{box-shadow:inset 0 0 0 2.5px var(--gold),0 0 14px color-mix(in srgb,var(--gold) 55%,transparent)}
+  .railchip.corso{border-color:var(--evid);background:color-mix(in srgb,var(--evid) 30%,var(--surface));color:#fff;
+    box-shadow:0 0 14px color-mix(in srgb,var(--evid) 40%,transparent)}
   .btn.primary{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 78%,#fff),var(--accent));
     border:1px solid color-mix(in srgb,var(--accent-ink) 75%,#fff);color:#05122e;
     box-shadow:0 4px 0 color-mix(in srgb,var(--accent) 50%,#000),0 10px 24px color-mix(in srgb,var(--accent) 48%,transparent)}
@@ -757,20 +763,22 @@
 
   <!-- ================= BANDITORE ================= -->
   <section id="v-banditore">
-    <div class="section-title">
-      <h2>Postazione banditore</h2>
-      <span class="hint">Ruolo in chiamata: <b id="b-phase">Portieri</b></span>
-    </div>
-
-    <div class="turn-tools">
-      <span class="phaserow-lab">Ruolo in corso</span>
-      <div class="roletabs big" id="b-phasesel" role="group" aria-label="Ruolo in corso">
-        <button data-r="P">P</button><button data-r="D">D</button><button data-r="C">C</button><button data-r="A" aria-pressed="true">A</button>
+    <div class="card b-callbox">
+      <div class="cb-head">
+        <div class="cb-corsobox">
+          <span class="cb-lab">Chiamata in corso</span>
+          <span class="cb-caller" id="b-caller">—</span>
+        </div>
+        <div class="cb-tools">
+          <span class="phaserow-lab">Ruolo</span>
+          <div class="roletabs big" id="b-phasesel" role="group" aria-label="Ruolo in corso">
+            <button data-r="P">P</button><button data-r="D">D</button><button data-r="C">C</button><button data-r="A" aria-pressed="true">A</button>
+          </div>
+          <button class="btn ghost" id="b-sorteggio">🎲 Sorteggia</button>
+        </div>
       </div>
-      <button class="btn ghost" id="b-sorteggio">🎲 Sorteggia chi inizia</button>
-      <span class="tt-hint">…o tocca una squadra nella coda per forzare il turno.</span>
+      <div class="cb-rail" id="b-callorder"></div>
     </div>
-    <div class="card" id="b-callorder" style="margin-bottom:14px"></div>
 
     <div class="cols2">
       <div class="grid">
@@ -818,7 +826,6 @@
             <div class="exact"><label for="r-exact">a…</label><input type="number" id="r-exact" placeholder="importo" min="1"></div>
           </div>
           <div class="regia-grid" id="r-grid"></div>
-          <div class="regia-hint" id="r-hint">Durante l'asta: tocca una squadra per rilanciare. A riposo: tocca per aprire la rosa e correggere un'assegnazione.</div>
         </div>
       </div>
 
@@ -1755,7 +1762,6 @@
 
   function renderBanditore(){
     var ic=inCorsoIdx(),nx=prossimaIdx();
-    $("b-phase").textContent=ROLE_PLUR[st.listRole];
     var L=st.lot;
     if(L){
       $("b-name").textContent=L.player.n;$("b-meta").textContent=ROLE_NAME[L.player.r]+" · "+L.player.sq;
@@ -1763,6 +1769,7 @@
       $("b-bid").textContent=L.bid;$("b-leader").textContent=teams[L.leaderIdx].name;
       $("b-assign").disabled=false;$("b-assignwho").textContent=teams[L.leaderIdx].name;
     } else {
+      $("b-role").textContent=st.listRole;$("b-role").className="role-pill role-"+st.listRole;   // segue il ruolo in corso
       $("b-name").textContent="—";$("b-meta").textContent="In attesa di chiamata";$("b-bid").textContent="—";
       $("b-leader").textContent="nessuno";
       $("b-assign").disabled=true;$("b-assignwho").textContent="—";
@@ -2004,23 +2011,13 @@
   }
   function closeModal(){st.modalIdx=null;st.modalOp=false;$("t-modal").hidden=true;$("t-modal").innerHTML="";}
 
-  function callBannerHTML(opts){
-    opts=opts||{};var ic=inCorsoIdx();
-    function you(i){return opts.you&&i===st.youIdx;}
-    var nextHTML=upcoming(2).map(function(i){var t=teams[i];
-      return "<span class='cb-arrow'>▸</span><span class='nx-team"+(you(i)?" you":"")+"'>"+t.name+(you(i)?" (tu)":"")+"</span>";}).join("");
-    var railHTML="";
-    if(opts.rail){for(var k=0;k<N;k++){var i=(ic+k)%N,t=teams[i];
-      railHTML+="<div class='railchip"+(k===0?" corso":"")+(you(i)?" onyou":"")+(isDim(i)?" out":"")+"' data-i='"+i+"'>"+t.name+"</div>";}}
-    var youIc=you(ic)?"<span class='cb-you'>SEI TU</span>":"";
-    return "<div class='callbanner'>"+
-      "<div class='cb-side cb-corso'><span class='cb-lab'>Chiamata in corso</span><span class='cb-team'>"+teams[ic].name+youIc+"</span></div>"+
-      nextHTML+
-      (opts.rail?("<div class='cb-rail'>"+railHTML+"</div>"):"")+
-    "</div>";
-  }
   function renderCallOrder(){
-    $("b-callorder").innerHTML=callBannerHTML({rail:true});
+    var ic=inCorsoIdx();
+    var cal=$("b-caller");if(cal)cal.textContent=st.drawn?teams[ic].name:"Sorteggio da fare";
+    var railHTML="";
+    for(var k=0;k<N;k++){var i=(ic+k)%N,t=teams[i];
+      railHTML+="<div class='railchip"+(k===0?" corso":"")+(isDim(i)?" out":"")+"' data-i='"+i+"'>"+t.name+"</div>";}
+    $("b-callorder").innerHTML=railHTML;
   }
   function renderAll(){renderBanditore();renderGiocatore();renderTabellone();renderCallOrder();renderRings();
     if(Sync&&Sync.ready&&Sync.role==="operator"&&!Sync.applying)syncPush();}
