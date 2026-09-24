@@ -2406,10 +2406,9 @@
   });
   $("b-reset").addEventListener("click",function(){
     if(!confirm("Sei sicuro? Verranno azzerati crediti, rose e listone: l'asta riparte da zero. Operazione non reversibile."))return;
-    teams.forEach(function(t){t.cred=BUDGET;t.f={P:0,D:0,C:0,A:0};t.bought=[];});
-    LISTONE.forEach(function(p){p.taken=false;});
-    st.lot=null;st.turnIdx=0;st.count=0;st.counting=false;st.pending=false;st.selPlayer=null;st.modalIdx=null;
-    stopBattuta();renderAll();renderExportPreview();toast("Asta ripristinata da zero");
+    stopBattuta();freshStart();                 // azzera anche storico vendite (ultimo chiamato), sorteggio, ruolo
+    st.selPlayer=null;st.modalIdx=null;
+    renderAll();renderExportPreview();toast("Asta ripristinata da zero");
   });
   $("r-step").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.step=parseInt(b.dataset.step,10);document.querySelectorAll("#r-step button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});});
 
