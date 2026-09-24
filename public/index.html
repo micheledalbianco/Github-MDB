@@ -774,7 +774,7 @@
             <div class="bid-block">
               <div class="eyebrow">Offerta più alta</div>
               <div class="bid-amount tnum"><span id="b-bid">—</span></div>
-              <div class="bid-leader"><span class="lead-dot" id="b-leaddot"></span><b id="b-leader">nessuno</b></div>
+              <div class="bid-leader"><b id="b-leader">nessuno</b></div>
             </div>
             <div class="ring idle" id="b-ring">
               <svg width="132" height="132" viewBox="0 0 132 132">
@@ -1746,18 +1746,18 @@
     if(L){
       $("b-name").textContent=L.player.n;$("b-meta").textContent=ROLE_NAME[L.player.r]+" · "+L.player.sq;
       $("b-role").textContent=L.player.r;$("b-role").className="role-pill role-"+L.player.r;
-      $("b-bid").textContent=L.bid;$("b-leader").textContent=teams[L.leaderIdx].name;$("b-leaddot").style.background=teams[L.leaderIdx].color;
+      $("b-bid").textContent=L.bid;$("b-leader").textContent=teams[L.leaderIdx].name;
       $("b-assign").disabled=false;$("b-assignwho").textContent=teams[L.leaderIdx].name;
     } else {
       $("b-name").textContent="—";$("b-meta").textContent="In attesa di chiamata";$("b-bid").textContent="—";
-      $("b-leader").textContent="nessuno";$("b-leaddot").style.background="var(--faint)";
+      $("b-leader").textContent="nessuno";
       $("b-assign").disabled=true;$("b-assignwho").textContent="—";
     }
     var rows="";
     teams.forEach(function(t,i){
       var cls=[];if(i===ic)cls.push("turn");if(L&&i===L.leaderIdx)cls.push("leadrow");if(isDim(i))cls.push("out");
       var tag=i===ic?" <span class=\"turn-badge\">chiama</span>":(isDim(i)?" <span class=\"fuori-badge\">fuori</span>":"");
-      rows+="<tr class='"+cls.join(" ")+"' data-i='"+i+"'><td><div class='team'><span class='dot' style='background:"+t.color+"'></span>"+t.name+tag+"</div></td>"+
+      rows+="<tr class='"+cls.join(" ")+"' data-i='"+i+"'><td><div class='team'>"+t.name+tag+"</div></td>"+
         "<td class='num'><span class='credits'>"+t.cred+"</span></td>"+
         "<td class='num'>"+slotCell(t,"P")+"</td><td class='num'>"+slotCell(t,"D")+"</td><td class='num'>"+slotCell(t,"C")+"</td><td class='num'>"+slotCell(t,"A")+"</td></tr>";
     });
@@ -1768,7 +1768,7 @@
     var L=st.lot,html="";
     teams.forEach(function(t,i){
       var lead=L&&i===L.leaderIdx;
-      html+="<button class='tchip"+(lead?" lead":"")+(isDim(i)?" out":"")+"' data-i='"+i+"'><span class='dot' style='background:"+t.color+"'></span><span class='nm'>"+t.name+"</span><span class='cr'>"+t.cred+"</span></button>";
+      html+="<button class='tchip"+(lead?" lead":"")+(isDim(i)?" out":"")+"' data-i='"+i+"'><span class='nm'>"+t.name+"</span><span class='cr'>"+t.cred+"</span></button>";
     });
     $("r-grid").innerHTML=html;
   }
@@ -2000,13 +2000,13 @@
     opts=opts||{};var ic=inCorsoIdx();
     function you(i){return opts.you&&i===st.youIdx;}
     var nextHTML=upcoming(2).map(function(i){var t=teams[i];
-      return "<span class='cb-arrow'>▸</span><span class='nx-team"+(you(i)?" you":"")+"'><span class='dot' style='background:"+t.color+"'></span>"+t.name+(you(i)?" (tu)":"")+"</span>";}).join("");
+      return "<span class='cb-arrow'>▸</span><span class='nx-team"+(you(i)?" you":"")+"'>"+t.name+(you(i)?" (tu)":"")+"</span>";}).join("");
     var railHTML="";
     if(opts.rail){for(var k=0;k<N;k++){var i=(ic+k)%N,t=teams[i];
-      railHTML+="<div class='railchip"+(k===0?" corso":"")+(you(i)?" onyou":"")+(isDim(i)?" out":"")+"' data-i='"+i+"'><span class='dot' style='background:"+t.color+"'></span>"+t.name+"</div>";}}
+      railHTML+="<div class='railchip"+(k===0?" corso":"")+(you(i)?" onyou":"")+(isDim(i)?" out":"")+"' data-i='"+i+"'>"+t.name+"</div>";}}
     var youIc=you(ic)?"<span class='cb-you'>SEI TU</span>":"";
     return "<div class='callbanner'>"+
-      "<div class='cb-side cb-corso'><span class='cb-lab'>Chiamata in corso</span><span class='cb-team'><span class='dot' style='background:"+teams[ic].color+"'></span>"+teams[ic].name+youIc+"</span></div>"+
+      "<div class='cb-side cb-corso'><span class='cb-lab'>Chiamata in corso</span><span class='cb-team'>"+teams[ic].name+youIc+"</span></div>"+
       nextHTML+
       (opts.rail?("<div class='cb-rail'>"+railHTML+"</div>"):"")+
     "</div>";
