@@ -1601,8 +1601,11 @@
   });
 
   var st={view:"banditore",phase:"A",turnIdx:0,lot:null,count:0,counting:false,pending:false,timer:null,
-          speed:"veloce",selPlayer:null,youIdx:0,step:1,modalIdx:null,modalOp:false,lastSale:null,drawn:false,
+          speed:"veloce",selPlayer:null,youIdx:0,step:1,modalIdx:null,modalOp:false,saleLog:[],drawn:false,
           sort:"alfa",listRole:"P",gSort:"quot",gListRole:"",gClub:"",rosterTeamIdx:null};
+
+  // ultima assegnazione = cima dello storico vendite (stack cronologico)
+  function lastSaleRec(){return (st.saleLog&&st.saleLog.length)?st.saleLog[st.saleLog.length-1]:null;}
 
   var $=function(id){return document.getElementById(id);};
   var N=teams.length;
@@ -1650,7 +1653,9 @@
     for(i=0;i<LISTONE.length;i++){if(pid!==""&&pid!=null&&String(LISTONE[i].id)===String(pid)){entry=LISTONE[i];break;}}
     if(!entry)entry=findP(b.n);
     if(entry)entry.taken=false;
-    if(st.lastSale&&st.lastSale.tIdx===teamIdx&&st.lastSale.n===b.n)st.lastSale=null;
+    // toglie la vendita dallo storico: se era l'ultima, la precedente torna "ultimo assegnato"
+    for(i=st.saleLog.length-1;i>=0;i--){var s=st.saleLog[i];
+      if(s.tIdx===teamIdx&&((b.id!=null&&s.id!=null&&String(s.id)===String(b.id))||s.n===b.n)){st.saleLog.splice(i,1);break;}}
     return true;
   }
   function stateText(){
@@ -1671,7 +1676,7 @@
     var fg=$(prefix+"ringfg"),ring=$(prefix+"ring"),numEl=$(prefix+"count");
     numEl.style.color="";numEl.style.fontFamily="";numEl.style.fontSize="";
     if(!st.lot){ring.classList.add("idle");ring.classList.remove("blink");fg.setAttribute("stroke-dashoffset",circ);
-      if(prefix==="t-"&&st.lastSale){ring.classList.add("waiting","done");numEl.textContent="venduto";}
+      if(prefix==="t-"&&lastSaleRec()){ring.classList.add("waiting","done");numEl.textContent="venduto";}
       else{ring.classList.remove("waiting","done");numEl.textContent=(prefix==="t-"?"—":"attesa");}
       renderPips(prefix);return;}
     ring.classList.remove("done");
@@ -1711,10 +1716,11 @@
   function assign(){
     if(!st.lot)return;var t=teams[st.lot.leaderIdx],p=st.lot.player;
     var price=st.lot.bid,li=st.lot.leaderIdx;
-    t.cred-=price;t.f[p.r]+=1;t.bought.push({n:p.n,r:p.r,price:price,id:p.id||String(_idseq++)});
+    var bid=p.id||String(_idseq++);
+    t.cred-=price;t.f[p.r]+=1;t.bought.push({n:p.n,r:p.r,price:price,id:bid});
     var entry=findP(p.n);if(entry)entry.taken=true;
     stopBattuta();showAssegnato(p.n,t.name,price);
-    st.lastSale={n:p.n,r:p.r,sq:p.sq,price:price,tIdx:li,tName:t.name,tColor:t.color};
+    st.saleLog.push({n:p.n,r:p.r,sq:p.sq,price:price,tIdx:li,tName:t.name,tColor:t.color,id:bid});
     st.lot=null;st.turnIdx=(li+1)%teams.length;st.selPlayer=null;renderAll(); // turno a chi segue chi ha preso
   }
   function callPlayer(){
@@ -1955,7 +1961,7 @@
       $("t-zones").innerHTML=callBlock()+DIV+playerBlock("",L.player)+DIV+
         bidBlock("",L.bid,teams[L.leaderIdx].name,teams[L.leaderIdx].color);
     }else{
-      $("t-zones").innerHTML=callBlock()+DIV+waitingBlock()+DIV+lastBlock(st.lastSale);
+      $("t-zones").innerHTML=callBlock()+DIV+waitingBlock()+DIV+lastBlock(lastSaleRec());
     }
     var html="";
     teams.forEach(function(t,i){
@@ -2102,14 +2108,17 @@
   $("b-speed").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.speed=b.dataset.speed;document.querySelectorAll("#b-speed button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});if(st.counting)batti();else renderAll();});
   $("b-assign").addEventListener("click",assign);
   $("b-undo").addEventListener("click",function(){
-    var s=st.lastSale;
+    var s=lastSaleRec();
     if(!s){toast("Nessuna assegnazione da annullare");return;}
-    if(!confirm("Annullare l'ultima assegnazione? "+s.n+" → "+s.tName+" ("+s.price+" cr) tornerà disponibile."))return;
-    if(unassign(s.tIdx,null,s.n)){renderAll();toast("Annullata: "+s.n+" torna disponibile");}
+    var rest=st.saleLog.length-1;
+    var msg="Annullare l'ultima assegnazione? "+s.n+" → "+s.tName+" ("+s.price+" cr) tornerà disponibile.";
+    if(rest>0){var prev=st.saleLog[rest-1];msg+="\n\nDopo l'annullamento l'ultimo assegnato tornerà a essere "+prev.n+" → "+prev.tName+".";}
+    if(!confirm(msg))return;
+    if(unassign(s.tIdx,s.id,s.n)){renderAll();toast("Annullata: "+s.n+" torna disponibile"+(rest>0?" · ora premi ancora Annulla per la precedente":""));}
   });
   $("b-search").addEventListener("input",renderPlist);
   $("b-plist").addEventListener("click",function(e){var row=e.target.closest(".prow");if(!row||!row.dataset.p)return;var p=findP(row.dataset.p);if(!p)return;if(p.taken){toast("Già assegnato");return;}st.selPlayer=p;renderPlist();});
-  $("b-phasesel").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.listRole=b.dataset.r;st.selPlayer=null;st.lastSale=null;document.querySelectorAll("#b-phasesel button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});renderAll();});
+  $("b-phasesel").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.listRole=b.dataset.r;st.selPlayer=null;document.querySelectorAll("#b-phasesel button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});renderAll();});
   $("b-sort").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.sort=b.dataset.sort;document.querySelectorAll("#b-sort button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});renderPlist();});
   $("b-call").addEventListener("click",callPlayer);
   $("r-grid").addEventListener("click",function(e){var c=e.target.closest(".tchip");if(!c||c.classList.contains("out"))return;regiaPick(parseInt(c.dataset.i,10));});
@@ -2208,14 +2217,14 @@
       t.bought.forEach(function(p,i){p.price=prices[i];});
       t.cred=BUDGET-target;t.f=f;
     });
-    st.listRole=phaseRole;st.turnIdx=0;st.lot=null;st.lastSale=null;st.drawn=true;st.count=0;st.counting=false;st.pending=false;
+    st.listRole=phaseRole;st.turnIdx=0;st.lot=null;st.saleLog=[];st.drawn=true;st.count=0;st.counting=false;st.pending=false;
     document.querySelectorAll("#b-phasesel button").forEach(function(x){x.setAttribute("aria-pressed",x.dataset.r===phaseRole?"true":"false");});
   }
 
   function freshStart(){
     teams.forEach(function(t){t.cred=BUDGET;t.f={P:0,D:0,C:0,A:0};t.bought=[];});
     LISTONE.forEach(function(p){p.taken=false;});
-    st.listRole="P";st.turnIdx=0;st.lot=null;st.lastSale=null;st.drawn=false;st.count=0;st.counting=false;st.pending=false;
+    st.listRole="P";st.turnIdx=0;st.lot=null;st.saleLog=[];st.drawn=false;st.count=0;st.counting=false;st.pending=false;
     document.querySelectorAll("#b-phasesel button").forEach(function(x){x.setAttribute("aria-pressed",x.dataset.r==="P"?"true":"false");});
   }
   function demoParam(){try{return (new URLSearchParams(location.search).get("demo")||"").toUpperCase();}catch(e){return "";}}
@@ -2226,7 +2235,7 @@
       teams:teams.map(function(t){return {name:t.name,fanta:t.fanta,cred:t.cred,f:t.f,bought:t.bought};}),
       taken:LISTONE.filter(function(p){return p.taken;}).map(function(p){return p.id;}),
       listRole:st.listRole,turnIdx:st.turnIdx,speed:st.speed,
-      counting:st.counting,pending:st.pending,count:st.count,lastSale:st.lastSale,drawn:st.drawn,
+      counting:st.counting,pending:st.pending,count:st.count,saleLog:st.saleLog,drawn:st.drawn,
       lot:st.lot?{n:st.lot.player.n,r:st.lot.player.r,sq:st.lot.player.sq,id:st.lot.player.id,q:st.lot.player.q,bid:st.lot.bid,base:st.lot.base,leaderIdx:st.lot.leaderIdx}:null};
   }
   function applyState(d){
@@ -2237,7 +2246,7 @@
     st.listRole=d.listRole||"P";st.turnIdx=d.turnIdx||0;st.speed=d.speed||"veloce";
     st.counting=!!d.counting;st.pending=!!d.pending;st.count=d.count||0;
     st.lot=d.lot?{player:{n:d.lot.n,r:d.lot.r,sq:d.lot.sq,id:d.lot.id,q:d.lot.q},bid:d.lot.bid,base:d.lot.base,leaderIdx:d.lot.leaderIdx}:null;
-    st.lastSale=d.lastSale||null;st.drawn=!!d.drawn;
+    st.saleLog=d.saleLog||(d.lastSale?[d.lastSale]:[]);st.drawn=!!d.drawn;
     document.querySelectorAll("#b-phasesel button").forEach(function(x){x.setAttribute("aria-pressed",x.dataset.r===st.listRole?"true":"false");});
   }
   function syncPush(){
