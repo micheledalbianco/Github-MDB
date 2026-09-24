@@ -357,12 +357,8 @@
 
   /* riquadro chiamata (banditore) */
   .b-callbox{padding:14px 16px;margin-bottom:14px}
-  .cb-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-  .cb-corsobox{display:flex;flex-direction:column;gap:3px;justify-content:center;background:var(--accent-soft);border:1.5px solid var(--accent-ink);border-radius:12px;padding:8px 18px;
-    box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 45%,transparent),0 0 22px color-mix(in srgb,var(--accent) 34%,transparent)}
-  .cb-corsobox .cb-lab{color:var(--accent-ink)}
-  .cb-caller{font-family:var(--ff-disp);font-weight:700;font-size:28px;line-height:1;color:#fff}
-  .cb-tools{display:flex;align-items:center;gap:10px;margin-left:auto}
+  .cb-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .cb-head #b-sorteggio{margin-left:auto}
   /* turno di chiamata */
   .callbanner{display:flex;align-items:stretch;gap:12px;padding:13px 15px;flex-wrap:wrap}
   .cb-side{display:flex;flex-direction:column;gap:3px;justify-content:center}
@@ -765,17 +761,11 @@
   <section id="v-banditore">
     <div class="card b-callbox">
       <div class="cb-head">
-        <div class="cb-corsobox">
-          <span class="cb-lab">Chiamata in corso</span>
-          <span class="cb-caller" id="b-caller">—</span>
+        <span class="phaserow-lab">Ruolo</span>
+        <div class="roletabs big" id="b-phasesel" role="group" aria-label="Ruolo in corso">
+          <button data-r="P">P</button><button data-r="D">D</button><button data-r="C">C</button><button data-r="A" aria-pressed="true">A</button>
         </div>
-        <div class="cb-tools">
-          <span class="phaserow-lab">Ruolo</span>
-          <div class="roletabs big" id="b-phasesel" role="group" aria-label="Ruolo in corso">
-            <button data-r="P">P</button><button data-r="D">D</button><button data-r="C">C</button><button data-r="A" aria-pressed="true">A</button>
-          </div>
-          <button class="btn ghost" id="b-sorteggio">🎲 Sorteggia</button>
-        </div>
+        <button class="btn ghost" id="b-sorteggio">🎲 Sorteggia</button>
       </div>
       <div class="cb-rail" id="b-callorder"></div>
     </div>
@@ -2013,10 +2003,9 @@
 
   function renderCallOrder(){
     var ic=inCorsoIdx();
-    var cal=$("b-caller");if(cal)cal.textContent=st.drawn?teams[ic].name:"Sorteggio da fare";
     var railHTML="";
     for(var k=0;k<N;k++){var i=(ic+k)%N,t=teams[i];
-      railHTML+="<div class='railchip"+(k===0?" corso":"")+(isDim(i)?" out":"")+"' data-i='"+i+"'>"+t.name+"</div>";}
+      railHTML+="<div class='railchip"+(k===0&&st.drawn?" corso":"")+(isDim(i)?" out":"")+"' data-i='"+i+"'>"+t.name+"</div>";}
     $("b-callorder").innerHTML=railHTML;
   }
   function renderAll(){renderBanditore();renderGiocatore();renderTabellone();renderCallOrder();renderRings();
