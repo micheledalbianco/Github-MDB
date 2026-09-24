@@ -139,6 +139,8 @@
   .roletabs button[aria-pressed="true"][data-r="D"]{background:#2f77c9;border-color:#2f77c9}
   .roletabs button[aria-pressed="true"][data-r="C"]{background:#2f9e6b;border-color:#2f9e6b}
   .roletabs button[aria-pressed="true"][data-r="A"]{background:#c4472f;border-color:#c4472f}
+  .roletabs button[data-r=""]{width:auto;padding:0 12px}
+  .roletabs button[aria-pressed="true"][data-r=""]{background:var(--accent);border-color:var(--accent);color:#fff}
   .sortpick{margin-left:auto;display:inline-flex;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;padding:3px;gap:2px}
   .sortpick button{border:0;background:transparent;color:var(--muted);padding:6px 11px;border-radius:6px;font-weight:600;font-size:12.5px;cursor:pointer}
   .sortpick button[aria-pressed="true"]{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
@@ -243,6 +245,7 @@
   .g-list-filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
   .g-list-filters select{flex:1 1 150px;min-width:0;height:40px;border-radius:11px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text);font-size:14.5px;font-weight:600;padding:0 12px}
   .g-list-out{max-height:52vh;overflow:auto}
+  .g-roster-sel{width:100%;height:42px;border-radius:11px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text);font-size:15px;font-weight:600;padding:0 12px;margin-bottom:12px}
   #g-rank.crank{padding:0}
   /* PC: hero più orizzontale */
   @media(min-width:721px){
@@ -860,13 +863,15 @@
           <input type="number" id="g-cust" inputmode="numeric" placeholder="Rilancio a…" min="1">
           <button class="btn" id="g-custgo">Invia</button>
         </div>
-        <div class="max-note">Puoi arrivare a <b id="g-maxbid2">—</b> cr · il resto è bloccato per completare la rosa</div>
       </div>
 
-      <!-- COLLASSABILE: la mia rosa -->
+      <!-- COLLASSABILE: rose (mia + altre squadre) -->
       <details class="card g-sec">
-        <summary>La mia rosa <span class="g-sec-x" id="g-rosa-x"></span></summary>
-        <div class="g-sec-body" id="g-myroster"></div>
+        <summary>Rose</summary>
+        <div class="g-sec-body">
+          <select id="g-roster-team" class="g-roster-sel" aria-label="Squadra"></select>
+          <div id="g-myroster"></div>
+        </div>
       </details>
 
       <!-- COLLASSABILE: listone giocatori -->
@@ -1581,7 +1586,7 @@
 
   var st={view:"banditore",phase:"A",turnIdx:0,lot:null,count:0,counting:false,pending:false,timer:null,
           speed:"veloce",selPlayer:null,youIdx:0,step:1,modalIdx:null,lastSale:null,drawn:false,
-          sort:"alfa",listRole:"P",gSort:"quot",gListRole:"",gClub:""};
+          sort:"alfa",listRole:"P",gSort:"quot",gListRole:"",gClub:"",rosterTeamIdx:null};
 
   var $=function(id){return document.getElementById(id);};
   var N=teams.length;
@@ -1786,7 +1791,15 @@
   }
   function clubList(){var s={};LISTONE.forEach(function(p){s[p.sq]=1;});return Object.keys(s).sort();}
   function renderMyRoster(){
-    $("g-myroster").innerHTML=rosterGroupsHTML(teams[st.youIdx]);
+    var sel=$("g-roster-team");
+    if(sel.dataset.n!==String(teams.length)){
+      sel.innerHTML=teams.map(function(t,i){return "<option value='"+i+"'>"+t.name+(i===st.youIdx?" (tu)":"")+"</option>";}).join("");
+      sel.dataset.n=String(teams.length);
+      if(st.rosterTeamIdx==null)st.rosterTeamIdx=st.youIdx;
+      sel.value=String(st.rosterTeamIdx);
+    }
+    var ti=(st.rosterTeamIdx==null?st.youIdx:st.rosterTeamIdx);
+    $("g-myroster").innerHTML=rosterGroupsHTML(teams[ti]);
   }
   function renderGiocListone(){
     var out=$("g-list-out");if(!out)return;
@@ -1804,7 +1817,7 @@
   function renderGiocatore(){
     var you=teams[st.youIdx];
     $("g-name2").textContent=you.name;$("g-owner").textContent=you.fanta;
-    $("g-cred").textContent=you.cred;$("g-maxbid").textContent=maxBid(you);$("g-maxbid2").textContent=maxBid(you);
+    $("g-cred").textContent=you.cred;$("g-maxbid").textContent=maxBid(you);
     $("g-roles").innerHTML=ROLE_SLOTS.map(function(x){var r=x[0],tt=x[1],cur=(r===st.listRole),done=you.f[r]>=tt;
       return "<span class='grole"+(cur?" cur":"")+(done?" done":"")+"'><span class='gr-l'>"+r+"</span><span class='gr-v'>"+you.f[r]+"/"+tt+"</span></span>";}).join("");
     renderGiocCall();
@@ -1817,7 +1830,7 @@
       var meLead=(L.leaderIdx===st.youIdx),R=L.player.r,roleFull=you.f[R]>=SLOTS[R];
       $("g-leader").textContent=meLead?"Sei in testa":teams[L.leaderIdx].name;
       $("g-leaderwrap").classList.toggle("me",meLead);
-      setBidEnabled(!meLead&&!roleFull);
+      setBidEnabled(!roleFull);
     } else {
       $("g-role").style.display="none";
       $("g-lotname").textContent="—";$("g-lotmeta").textContent="In attesa di chiamata";
@@ -1826,15 +1839,16 @@
     }
     renderMyRoster();
     if($("g-sec-list")&&$("g-sec-list").open)renderGiocListone();
-    renderRank("g-rank",st.youIdx,st.lot?st.lot.leaderIdx:(st.lastSale?st.lastSale.tIdx:-1));
+    renderRank("g-rank",st.youIdx,-1);
   }
+  function selfRaiseOk(){return confirm("Ti stai autorilanciando: sei già in testa e rilanci contro te stesso. Sei sicuro?");}
   function gBidBy(inc){
     if(!st.lot){toast("Nessun giocatore all'asta");return;}
     var you=teams[st.youIdx],R=st.lot.player.r;
-    if(st.lot.leaderIdx===st.youIdx){toast("Sei già in testa");return;}
     if(you.f[R]>=SLOTS[R]){toast("Hai già completato i "+ROLE_PLUR[R]);return;}
     var target=st.lot.bid+inc;
     if(target>maxBid(you)){toast("Oltre il tuo massimo ("+maxBid(you)+")");return;}
+    if(st.lot.leaderIdx===st.youIdx&&!selfRaiseOk())return;
     if(amPlayer()){sendAction("raise_to",{teamIdx:st.youIdx,amount:target});toast("Rilancio +"+inc+" inviato");}
     else{st.lot.bid=target;st.lot.leaderIdx=st.youIdx;stopBattuta();renderAll();toast("Rilancio: "+st.lot.bid);}
   }
@@ -1844,6 +1858,7 @@
     if(you.f[R]>=SLOTS[R]){toast("Hai già completato i "+ROLE_PLUR[R]);return;}
     if(isNaN(v)||v<=st.lot.bid){toast("Deve superare "+st.lot.bid);return;}
     if(v>maxBid(you)){toast("Oltre il tuo massimo ("+maxBid(you)+")");return;}
+    if(st.lot.leaderIdx===st.youIdx&&!selfRaiseOk())return;
     if(amPlayer()){sendAction("raise_to",{teamIdx:st.youIdx,amount:v});toast("Rilancio a "+v+" inviato");}
     else{st.lot.bid=v;st.lot.leaderIdx=st.youIdx;stopBattuta();renderAll();toast("Rilancio a "+v);}
   }
@@ -2078,6 +2093,7 @@
   $("g-bidbtns").addEventListener("click",function(e){var b=e.target.closest(".bidb");if(!b||b.disabled)return;gBidBy(parseInt(b.dataset.inc,10));});
   $("g-custgo").addEventListener("click",function(){var v=parseInt($("g-cust").value,10);gBidTo(v);if(!isNaN(v))$("g-cust").value="";});
   $("g-cust").addEventListener("keydown",function(e){if(e.key==="Enter"){var v=parseInt(this.value,10);gBidTo(v);if(!isNaN(v))this.value="";}});
+  $("g-roster-team").addEventListener("change",function(){st.rosterTeamIdx=parseInt(this.value,10);renderMyRoster();});
   // listone giocatore: filtri squadra + ruolo + ordinamento + ricerca
   $("g-sec-list").addEventListener("toggle",function(){if(this.open)renderGiocListone();});
   $("g-list-club").addEventListener("change",function(){st.gClub=this.value;renderGiocListone();});
