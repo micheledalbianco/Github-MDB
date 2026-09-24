@@ -204,6 +204,7 @@
   .g-callline .gc-lab{font-size:9.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--faint);font-weight:700}
   .g-callline .gc-team{font-family:var(--ff-disp);font-weight:700;font-size:18px;color:var(--text);line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .g-callline .gc-next{font-size:14px;color:var(--muted);font-weight:600;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .g-callline .gc-next.mine{color:var(--evid-ink);font-weight:700;font-size:17px}
   .g-callline.mine .gc-team{color:var(--evid-ink)}
   .g-lot-top{display:flex;align-items:center;gap:14px}
   .g-lot-top .role-pill{width:48px;height:48px;font-size:23px;border-radius:13px;flex:0 0 auto}
@@ -1790,8 +1791,9 @@
     if(!st.drawn){el.className="g-callline";el.innerHTML="<div class='gc-now'><span class='gc-lab'>Chiamata in corso</span><span class='gc-team'>—</span></div><div class='gc-nx'><span class='gc-lab'>Sorteggio da fare</span></div>";return;}
     var ic=inCorsoIdx(),upc=upcoming(1),nx=upc.length?upc[0]:null,mine=(ic===st.youIdx);
     el.className="g-callline"+(mine?" mine":"");
+    var nxMine=(nx===st.youIdx);
     el.innerHTML="<div class='gc-now'><span class='gc-lab'>Chiamata in corso</span><span class='gc-team'>"+(mine?"Tocca a te":teams[ic].name)+"</span></div>"+
-      (nx!=null?"<div class='gc-nx'><span class='gc-lab'>Prossimo</span><span class='gc-next'>"+teams[nx].name+"</span></div>":"");
+      (nx!=null?"<div class='gc-nx'><span class='gc-lab'>Prossimo</span><span class='gc-next"+(nxMine?" mine":"")+"'>"+(nxMine?"Tocca a te":teams[nx].name)+"</span></div>":"");
   }
   function setBidEnabled(baseOk){
     var you=teams[st.youIdx];
@@ -1851,7 +1853,7 @@
     }
     var rf=$("g-rolefull"),youRoleFull=you.f[st.listRole]>=SLOTS[st.listRole];
     rf.hidden=!youRoleFull;
-    if(youRoleFull)rf.textContent="Hai completato i "+ROLE_PLUR[st.listRole]+": in questo ruolo verrai saltato.";
+    if(youRoleFull)rf.textContent="Hai completato i "+ROLE_PLUR[st.listRole];
     renderMyRoster();
     if($("g-sec-list")&&$("g-sec-list").open)renderGiocListone();
     renderRank("g-rank",st.youIdx,-1);
