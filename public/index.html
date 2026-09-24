@@ -178,6 +178,91 @@
   .max-note{margin-top:12px;font-size:13px;color:var(--muted);text-align:center}
   .max-note b{color:var(--text)}
 
+  /* ===== Vista Giocatore (mobile-first) ===== */
+  .g-wrap{display:flex;flex-direction:column;gap:12px;max-width:720px;margin:0 auto}
+  /* chiamata in corso */
+  .g-callstrip{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-radius:14px;
+    background:var(--surface);border:1px solid var(--border)}
+  .g-callstrip .gc-lab{font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--faint);font-weight:700}
+  .g-callstrip .gc-team{font-family:var(--ff-disp);font-weight:700;font-size:18px;color:var(--text)}
+  .g-callstrip .gc-sub{margin-left:auto;font-size:13px;color:var(--muted);font-weight:600}
+  .g-callstrip.mine{background:color-mix(in srgb,var(--evid) 16%,var(--surface));border-color:color-mix(in srgb,var(--evid) 45%,transparent)}
+  .g-callstrip.mine .gc-team{color:var(--evid-ink)}
+  /* asta in corso */
+  .g-lot{padding:16px}
+  .g-lot-top{display:flex;align-items:center;gap:14px}
+  .g-lot-top .role-pill{width:48px;height:48px;font-size:23px;border-radius:13px;flex:0 0 auto}
+  .g-lot-id{flex:1 1 auto;min-width:0}
+  .g-lot-id .lot-name{font-family:var(--ff-disp);font-weight:700;font-size:30px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .g-lot-id .lot-meta{font-size:14px;color:var(--muted);margin-top:5px}
+  .g-ring{position:relative;width:78px;height:78px;flex:0 0 auto}
+  .g-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .g-ring svg circle{transition:stroke-dashoffset .35s linear,stroke .3s}
+  .g-ring .num{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--ff-disp);font-weight:700;font-size:30px;font-variant-numeric:tabular-nums;line-height:1}
+  .g-ring.idle .num,.g-ring.waiting .num{font-size:12px!important;color:var(--muted);font-family:var(--ff-body);font-weight:700;text-transform:uppercase;letter-spacing:.4px;text-align:center}
+  .g-ring.waiting circle:first-of-type{stroke:color-mix(in srgb,var(--accent) 40%,var(--border))}
+  .g-ring.done circle:first-of-type{stroke:color-mix(in srgb,var(--good) 60%,var(--border))}
+  .g-ring.done .num{color:var(--good)!important;font-size:12px!important}
+  .g-bidinfo{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:14px}
+  .g-bidinfo .eyebrow{flex-basis:100%}
+  .g-bidinfo .bid-amount{font-size:52px;color:var(--gold);line-height:.9}
+  .g-lot.g-idle .bid-amount{color:var(--faint)}
+  .g-bidinfo .bid-leader{margin:0}
+  .g-bidinfo .bid-leader.me b{color:var(--evid-ink)}
+  .g-bidbtns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:16px}
+  .bidb{border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);background:color-mix(in srgb,var(--accent) 18%,var(--surface));
+    color:#fff;font-family:var(--ff-disp);font-weight:700;font-size:24px;border-radius:14px;min-height:60px;cursor:pointer;
+    box-shadow:0 4px 0 rgba(0,0,0,.32);transition:transform .06s}
+  .bidb:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.32)}
+  .bidb:disabled{opacity:.4;box-shadow:none;cursor:not-allowed}
+  .g-bidcustom{display:flex;gap:10px;margin-top:10px}
+  .g-bidcustom input{flex:1 1 auto;min-width:0;height:52px;border-radius:12px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text);font-size:17px;padding:0 14px;font-family:var(--ff-disp);font-weight:700}
+  .g-bidcustom .btn{flex:0 0 auto;min-height:52px;padding:0 20px}
+  .g-bidcustom input:disabled{opacity:.4}
+  /* la mia squadra */
+  .g-me{padding:16px}
+  .g-me-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .g-me-head b{font-family:var(--ff-disp);font-size:22px;font-weight:700}
+  .g-me-head span{font-size:13px;color:var(--muted)}
+  .g-me-stats{display:flex;gap:24px;margin-top:12px}
+  .g-roles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+  .grole{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:11px;background:var(--surface-2);border:1px solid transparent}
+  .grole .gr-l{font-family:var(--ff-disp);font-weight:700;font-size:15px;color:var(--muted)}
+  .grole .gr-v{font-family:var(--ff-disp);font-weight:700;font-size:17px;font-variant-numeric:tabular-nums}
+  .grole.cur{background:color-mix(in srgb,var(--evid) 16%,transparent);border-color:color-mix(in srgb,var(--evid) 46%,transparent)}
+  .grole.cur .gr-l{color:var(--evid-ink)}
+  .grole.done .gr-v{color:var(--good)}
+  /* rose */
+  .g-rose{padding:16px}
+  .g-rose-filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+  .g-rose-filters select{flex:1 1 180px;min-width:0;height:42px;border-radius:11px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text);font-size:15px;font-weight:600;padding:0 12px}
+  .g-rose-filters .roletabs{flex:0 0 auto}
+  .g-rose-list{display:flex;flex-direction:column}
+  .g-rose-item{display:flex;align-items:center;gap:10px;padding:8px 8px;border-radius:9px;font-size:15px}
+  .g-rose-item:nth-child(odd){background:color-mix(in srgb,var(--surface-2) 55%,transparent)}
+  .g-rose-item .role-pill{width:22px;height:22px;font-size:12px;border-radius:6px;flex:0 0 auto}
+  .g-rose-item .gri-n{flex:1 1 auto;font-weight:600}
+  .g-rose-item .gri-t{color:var(--muted);font-size:12.5px}
+  .g-rose-item .gri-p{flex:0 0 auto;font-family:var(--ff-disp);font-weight:700;font-variant-numeric:tabular-nums;min-width:30px;text-align:right}
+  .g-rose-empty{padding:8px;color:var(--faint);font-size:13px}
+  #g-rank.crank{padding:14px 16px}
+  /* PC: hero più orizzontale */
+  @media(min-width:721px){
+    .g-lot-id .lot-name{font-size:36px}
+    .g-bidinfo .bid-amount{font-size:60px}
+    .g-ring{width:92px;height:92px}
+    .g-ring .num{font-size:34px}
+  }
+  /* Mobile: nav compatta (non deve creare scroll orizzontale) */
+  @media(max-width:520px){
+    .top-inner{padding:8px 48px 8px 12px}
+    .seg{gap:1px;padding:2px}
+    .seg button{padding:6px 9px;font-size:12.5px}
+    .g-lot-top .role-pill{width:44px;height:44px;font-size:21px}
+    .g-ring{width:70px;height:70px}
+    .g-lot-id .lot-name{font-size:27px}
+  }
+
   .board-hero{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;padding:24px}
   @media(max-width:640px){.board-hero{grid-template-columns:1fr;text-align:center;justify-items:center}}
   .board-hero .lot-name{font-size:42px}
@@ -735,64 +820,70 @@
 
   <!-- ================= GIOCATORE ================= -->
   <section id="v-giocatore" hidden>
-    <div class="section-title"><h2>La tua postazione</h2><span class="hint">Tu sei: <b id="g-teamname">—</b></span></div>
-    <div class="card" id="g-callorder" style="margin-bottom:14px"></div>
-    <div class="grid">
-      <div class="card you">
-        <div class="stat"><span class="name" id="g-name2">—</span><span class="l" id="g-owner">—</span></div>
-        <div class="divider-v"></div>
-        <div class="stat gold"><span class="v tnum" id="g-cred">—</span><span class="l">crediti residui</span></div>
-        <div class="divider-v"></div>
-        <div class="stat"><span class="v tnum" id="g-slots">—</span><span class="l">slot da riempire</span></div>
-        <div class="divider-v"></div>
-        <div class="stat"><span class="v tnum" id="g-maxbid">—</span><span class="l">rilancio massimo</span></div>
-      </div>
-      <div class="card lot">
-        <div class="lot-head">
-          <div class="lot-player">
-            <span class="role-pill role-A" id="g-role">A</span>
-            <div><div class="lot-name" id="g-lotname">—</div><div class="lot-meta" id="g-lotmeta">In attesa di chiamata</div></div>
+    <div class="g-wrap">
+      <!-- chiamata in corso -->
+      <div class="g-callstrip" id="g-callstrip"></div>
+
+      <!-- ASTA IN CORSO -->
+      <div class="card g-lot" id="g-lotcard">
+        <div class="g-lot-top">
+          <span class="role-pill role-A" id="g-role">A</span>
+          <div class="g-lot-id">
+            <div class="lot-name" id="g-lotname">—</div>
+            <div class="lot-meta" id="g-lotmeta">In attesa di chiamata</div>
           </div>
-        </div>
-        <div class="lot-body">
-          <div class="bid-block">
-            <div class="eyebrow">Offerta più alta</div>
-            <div class="bid-amount tnum"><span id="g-bid">—</span></div>
-            <div class="bid-leader"><span class="lead-dot" id="g-leaddot"></span><b id="g-leader">nessuno</b></div>
-          </div>
-          <div class="ring idle" id="g-ring">
-            <svg width="132" height="132" viewBox="0 0 132 132">
+          <div class="ring idle g-ring" id="g-ring">
+            <svg viewBox="0 0 132 132">
               <circle cx="66" cy="66" r="58" fill="none" stroke="var(--border)" stroke-width="12"/>
               <circle id="g-ringfg" cx="66" cy="66" r="58" fill="none" stroke="var(--crit)" stroke-width="12" stroke-linecap="round" stroke-dasharray="364.4" stroke-dashoffset="364.4"/>
             </svg>
             <div class="num" id="g-count">attesa</div>
           </div>
         </div>
-        <div class="pips" id="g-pips"></div>
-        <div class="rlz">
-          <button class="btn primary big" id="g-plus">Rilancio <span class="k">+1</span></button>
-          <button class="btn big" id="g-custom">Rilancio a…</button>
+        <div class="g-bidinfo">
+          <span class="eyebrow">Offerta più alta</span>
+          <span class="bid-amount tnum" id="g-bid">—</span>
+          <span class="bid-leader" id="g-leaderwrap"><b id="g-leader">nessuno</b></span>
         </div>
-        <div class="max-note">Puoi arrivare al massimo a <b id="g-maxbid2">—</b> crediti: il resto è bloccato per completare la rosa.</div>
+        <div class="g-bidbtns" id="g-bidbtns">
+          <button class="bidb" data-inc="1">+1</button>
+          <button class="bidb" data-inc="5">+5</button>
+          <button class="bidb" data-inc="10">+10</button>
+        </div>
+        <div class="g-bidcustom">
+          <input type="number" id="g-cust" inputmode="numeric" placeholder="Rilancio a…" min="1">
+          <button class="btn" id="g-custgo">Invia</button>
+        </div>
+        <div class="max-note">Puoi arrivare a <b id="g-maxbid2">—</b> cr · il resto è bloccato per completare la rosa</div>
       </div>
-      <div class="card detail" id="g-roster"></div>
 
+      <!-- LA MIA SQUADRA -->
+      <div class="card g-me">
+        <div class="g-me-head"><b id="g-name2">—</b><span id="g-owner">—</span></div>
+        <div class="g-me-stats">
+          <div class="stat gold"><span class="v tnum" id="g-cred">—</span><span class="l">crediti residui</span></div>
+          <div class="stat"><span class="v tnum" id="g-maxbid">—</span><span class="l">rilancio massimo</span></div>
+        </div>
+        <div class="g-roles" id="g-roles"></div>
+      </div>
+
+      <!-- ROSE (tutte le squadre) -->
+      <div class="card g-rose">
+        <div class="eyebrow" style="margin-bottom:9px">Rose</div>
+        <div class="g-rose-filters">
+          <select id="g-rose-team" aria-label="Squadra"></select>
+          <div class="roletabs" id="g-rose-role" role="group" aria-label="Ruolo">
+            <button data-r="" aria-pressed="true">Tutti</button>
+            <button data-r="P">P</button><button data-r="D">D</button><button data-r="C">C</button><button data-r="A">A</button>
+          </div>
+        </div>
+        <div class="g-rose-list" id="g-rose-list"></div>
+      </div>
+
+      <!-- CREDITI -->
       <div class="card crank" id="g-rank"></div>
 
-      <div class="card" style="padding:16px">
-        <div class="eyebrow" style="margin-bottom:2px">Listone giocatori</div>
-        <div class="list-controls">
-          <div class="roletabs" id="g-roletabs" role="group" aria-label="Ruolo">
-            <button data-r="P" aria-pressed="true">P</button><button data-r="D">D</button><button data-r="C">C</button><button data-r="A">A</button>
-          </div>
-          <div class="sortpick" id="g-sort" role="group" aria-label="Ordinamento">
-            <button data-sort="alfa" aria-pressed="true">A‑Z</button>
-            <button data-sort="quot">Quotazione</button>
-          </div>
-        </div>
-        <input type="text" id="g-search2" placeholder="Cerca nel listone…" autocomplete="off">
-        <div class="plist" id="g-plist2" style="margin-top:8px"></div>
-      </div>
+      <div class="g-hint" id="g-teamname" hidden></div>
     </div>
   </section>
 
@@ -1480,7 +1571,7 @@
 
   var st={view:"banditore",phase:"A",turnIdx:0,lot:null,count:0,counting:false,pending:false,timer:null,
           speed:"veloce",selPlayer:null,youIdx:0,step:1,modalIdx:null,lastSale:null,drawn:false,
-          sort:"alfa",listRole:"P",gSort:"alfa",gListRole:"P"};
+          sort:"alfa",listRole:"P",gSort:"alfa",gListRole:"P",roseTeamIdx:null,roseRole:""};
 
   var $=function(id){return document.getElementById(id);};
   var N=teams.length;
@@ -1541,6 +1632,7 @@
       numEl.textContent="venduto";numEl.style.color="var(--good)";numEl.style.fontFamily="var(--ff-body)";numEl.style.fontSize=(prefix==="t-"?"16px":"12px");renderPips(prefix);return;}
     if(!active()){ring.classList.remove("idle","blink");fg.setAttribute("stroke-dashoffset",circ);
       if(prefix==="t-"){ring.classList.add("waiting");numEl.innerHTML="asta<br>in corso";}
+      else if(prefix==="g-"){ring.classList.add("waiting");numEl.textContent="in asta";numEl.style.fontSize="15px";}
       else{ring.classList.remove("waiting");numEl.textContent="batti";numEl.style.fontSize="15px";}
       numEl.style.color="var(--muted)";numEl.style.fontFamily="var(--ff-body)";renderPips(prefix);return;}
     ring.classList.remove("idle","waiting");
@@ -1665,30 +1757,82 @@
     el.innerHTML="<div class='crank-title'>Crediti</div>"+rows;
   }
 
+  function renderGiocCall(){
+    var el=$("g-callstrip");if(!el)return;
+    if(!st.drawn){el.className="g-callstrip";el.innerHTML="<span class='gc-lab'>Chiamata in corso</span><span class='gc-team'>—</span><span class='gc-sub'>Sorteggio da fare</span>";return;}
+    var ic=inCorsoIdx(),upc=upcoming(1),nx=upc.length?upc[0]:null,mine=(ic===st.youIdx);
+    el.className="g-callstrip"+(mine?" mine":"");
+    el.innerHTML="<span class='gc-lab'>Chiamata in corso</span>"+
+      "<span class='gc-team'>"+(mine?"Tocca a te":teams[ic].name)+"</span>"+
+      (nx!=null?"<span class='gc-sub'>Prossimo "+teams[nx].name+"</span>":"");
+  }
+  function setBidEnabled(baseOk){
+    var you=teams[st.youIdx];
+    document.querySelectorAll("#g-bidbtns .bidb").forEach(function(b){
+      var inc=parseInt(b.dataset.inc,10);
+      b.disabled=!(baseOk&&st.lot&&st.lot.bid+inc<=maxBid(you));
+    });
+    $("g-cust").disabled=!baseOk;$("g-custgo").disabled=!baseOk;
+  }
+  function renderRoseBrowser(){
+    var sel=$("g-rose-team");
+    if(sel.dataset.n!==String(teams.length)){
+      sel.innerHTML="<option value='-1'>Tutte le squadre</option>"+teams.map(function(t,i){return "<option value='"+i+"'>"+t.name+"</option>";}).join("");
+      sel.dataset.n=String(teams.length);
+      if(st.roseTeamIdx==null)st.roseTeamIdx=st.youIdx;
+      sel.value=String(st.roseTeamIdx);
+    }
+    var ti=(st.roseTeamIdx==null?st.youIdx:st.roseTeamIdx),role=st.roseRole||"",ord={P:0,D:1,C:2,A:3},items=[];
+    teams.forEach(function(t,i){ if(ti!==-1&&i!==ti)return;
+      t.bought.forEach(function(p){ if(!role||p.r===role) items.push({tName:t.name,n:p.n,r:p.r,price:p.price||0}); }); });
+    items.sort(function(a,b){return (ord[a.r]-ord[b.r])||(b.price-a.price)||a.n.localeCompare(b.n);});
+    $("g-rose-list").innerHTML=items.map(function(p){
+      return "<div class='g-rose-item'><span class='role-pill role-"+p.r+"'>"+p.r+"</span><span class='gri-n'>"+p.n+"</span>"+
+        (ti===-1?"<span class='gri-t'>"+p.tName+"</span>":"")+"<span class='gri-p'>"+p.price+"</span></div>";
+    }).join("")||"<div class='g-rose-empty'>— nessun giocatore —</div>";
+  }
   function renderGiocatore(){
     var you=teams[st.youIdx];
-    $("g-teamname").textContent=you.name;$("g-name2").textContent=you.name;$("g-owner").textContent=you.fanta;
-    $("g-cred").textContent=you.cred;$("g-slots").textContent=mandatoryLeft(you);
-    $("g-maxbid").textContent=maxBid(you);$("g-maxbid2").textContent=maxBid(you);
+    $("g-name2").textContent=you.name;$("g-owner").textContent=you.fanta;
+    $("g-cred").textContent=you.cred;$("g-maxbid").textContent=maxBid(you);$("g-maxbid2").textContent=maxBid(you);
+    $("g-roles").innerHTML=ROLE_SLOTS.map(function(x){var r=x[0],tt=x[1],cur=(r===st.listRole),done=you.f[r]>=tt;
+      return "<span class='grole"+(cur?" cur":"")+(done?" done":"")+"'><span class='gr-l'>"+r+"</span><span class='gr-v'>"+you.f[r]+"/"+tt+"</span></span>";}).join("");
+    renderGiocCall();
     var L=st.lot;
     if(L){
+      $("g-role").style.display="";$("g-role").textContent=L.player.r;$("g-role").className="role-pill role-"+L.player.r;
       $("g-lotname").textContent=L.player.n;$("g-lotmeta").textContent=ROLE_NAME[L.player.r]+" · "+L.player.sq;
-      $("g-role").textContent=L.player.r;$("g-role").className="role-pill role-"+L.player.r;
-      $("g-bid").textContent=L.bid;$("g-leader").textContent=(L.leaderIdx===st.youIdx?"TU":teams[L.leaderIdx].name);$("g-leaddot").style.background=teams[L.leaderIdx].color;
-      var canBid=canBidLot(st.youIdx)||L.leaderIdx===st.youIdx;
-      $("g-plus").disabled=!canBid;$("g-custom").disabled=!canBid;
+      $("g-bid").textContent=L.bid;
+      var meLead=(L.leaderIdx===st.youIdx),R=L.player.r,roleFull=you.f[R]>=SLOTS[R];
+      $("g-leader").textContent=meLead?"Sei in testa":teams[L.leaderIdx].name;
+      $("g-leaderwrap").classList.toggle("me",meLead);
+      setBidEnabled(!meLead&&!roleFull);
     } else {
-      $("g-lotname").textContent="—";$("g-lotmeta").textContent="In attesa di chiamata";$("g-bid").textContent="—";
-      $("g-leader").textContent="nessuno";$("g-leaddot").style.background="var(--faint)";$("g-plus").disabled=true;$("g-custom").disabled=true;
+      $("g-role").style.display="none";
+      $("g-lotname").textContent="—";$("g-lotmeta").textContent="In attesa di chiamata";
+      $("g-bid").textContent="—";$("g-leader").textContent="nessuno";$("g-leaderwrap").classList.remove("me");
+      setBidEnabled(false);
     }
-    renderMyTeam();renderGiocatoreListone();renderRank("g-rank",st.youIdx,st.lot?st.lot.leaderIdx:(st.lastSale?st.lastSale.tIdx:-1));
+    renderRoseBrowser();
+    renderRank("g-rank",st.youIdx,st.lot?st.lot.leaderIdx:(st.lastSale?st.lastSale.tIdx:-1));
   }
-  function playerRaise(){
+  function gBidBy(inc){
+    if(!st.lot){toast("Nessun giocatore all'asta");return;}
+    var you=teams[st.youIdx],R=st.lot.player.r;
+    if(st.lot.leaderIdx===st.youIdx){toast("Sei già in testa");return;}
+    if(you.f[R]>=SLOTS[R]){toast("Hai già completato i "+ROLE_PLUR[R]);return;}
+    if(st.lot.bid+inc>maxBid(you)){toast("Oltre il tuo massimo ("+maxBid(you)+")");return;}
+    if(amPlayer()){sendAction("raise_by",{teamIdx:st.youIdx,amount:inc});toast("Rilancio +"+inc+" inviato");}
+    else{st.lot.bid+=inc;st.lot.leaderIdx=st.youIdx;stopBattuta();renderAll();toast("Rilancio: "+st.lot.bid);}
+  }
+  function gBidTo(v){
     if(!st.lot){toast("Nessun giocatore all'asta");return;}
     var you=teams[st.youIdx],R=st.lot.player.r;
     if(you.f[R]>=SLOTS[R]){toast("Hai già completato i "+ROLE_PLUR[R]);return;}
-    if(st.lot.bid+1>maxBid(you)){toast("Hai raggiunto il tuo rilancio massimo ("+maxBid(you)+")");return;}
-    st.lot.bid+=1;st.lot.leaderIdx=st.youIdx;stopBattuta();renderAll();toast("Hai rilanciato: "+st.lot.bid);
+    if(isNaN(v)||v<=st.lot.bid){toast("Deve superare "+st.lot.bid);return;}
+    if(v>maxBid(you)){toast("Oltre il tuo massimo ("+maxBid(you)+")");return;}
+    if(amPlayer()){sendAction("raise_to",{teamIdx:st.youIdx,amount:v});toast("Rilancio a "+v+" inviato");}
+    else{st.lot.bid=v;st.lot.leaderIdx=st.youIdx;stopBattuta();renderAll();toast("Rilancio a "+v);}
   }
 
   function teamStatsHTML(t){
@@ -1804,7 +1948,6 @@
   }
   function renderCallOrder(){
     $("b-callorder").innerHTML=callBannerHTML({rail:true});
-    $("g-callorder").innerHTML=callBannerHTML({you:true,rail:true});
   }
   function renderAll(){renderBanditore();renderGiocatore();renderTabellone();renderCallOrder();renderRings();
     if(Sync&&Sync.ready&&Sync.role==="operator"&&!Sync.applying)syncPush();}
@@ -1917,30 +2060,13 @@
   });
   $("r-step").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.step=parseInt(b.dataset.step,10);document.querySelectorAll("#r-step button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});});
 
-  // giocatore — listone di consultazione
-  $("g-search2").addEventListener("input",renderGiocatoreListone);
-  $("g-roletabs").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.gListRole=b.dataset.r;document.querySelectorAll("#g-roletabs button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});renderGiocatoreListone();});
-  $("g-sort").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.gSort=b.dataset.sort;document.querySelectorAll("#g-sort button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});renderGiocatoreListone();});
-
   // giocatore
   function amPlayer(){return MP&&Sync&&Sync.role==="player";}
-  $("g-plus").addEventListener("click",function(){
-    if(!amPlayer()){playerRaise();return;}
-    if(!st.lot){toast("Nessun giocatore all'asta");return;}
-    var you=teams[st.youIdx],R=st.lot.player.r;
-    if(you.f[R]>=SLOTS[R]){toast("Hai già completato i "+ROLE_PLUR[R]);return;}
-    if(st.lot.bid+1>maxBid(you)){toast("Oltre il tuo massimo ("+maxBid(you)+")");return;}
-    sendAction("raise",{teamIdx:st.youIdx});toast("Rilancio inviato…");
-  });
-  $("g-custom").addEventListener("click",function(){
-    if(!st.lot){toast("Nessun giocatore all'asta");return;}
-    var you=teams[st.youIdx];var v=prompt("A quanto vuoi rilanciare? (max "+maxBid(you)+")",st.lot.bid+1);
-    if(v==null)return;v=parseInt(v,10);
-    if(isNaN(v)||v<=st.lot.bid){toast("Deve superare "+st.lot.bid);return;}
-    if(v>maxBid(you)){toast("Oltre il tuo massimo ("+maxBid(you)+")");return;}
-    if(amPlayer()){sendAction("raise_to",{teamIdx:st.youIdx,amount:v});toast("Rilancio a "+v+" inviato…");}
-    else {st.lot.bid=v;st.lot.leaderIdx=st.youIdx;stopBattuta();renderAll();toast("Rilancio a "+v);}
-  });
+  $("g-bidbtns").addEventListener("click",function(e){var b=e.target.closest(".bidb");if(!b||b.disabled)return;gBidBy(parseInt(b.dataset.inc,10));});
+  $("g-custgo").addEventListener("click",function(){var v=parseInt($("g-cust").value,10);gBidTo(v);if(!isNaN(v))$("g-cust").value="";});
+  $("g-cust").addEventListener("keydown",function(e){if(e.key==="Enter"){var v=parseInt(this.value,10);gBidTo(v);if(!isNaN(v))this.value="";}});
+  $("g-rose-team").addEventListener("change",function(){st.roseTeamIdx=parseInt(this.value,10);renderRoseBrowser();});
+  $("g-rose-role").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.roseRole=b.dataset.r;document.querySelectorAll("#g-rose-role button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});renderRoseBrowser();});
 
   // tabellone: click su una squadra → ingrandisci (rosa completa)
   $("t-grid").addEventListener("click",function(e){var c=e.target.closest(".tcard");if(!c)return;st.modalIdx=parseInt(c.dataset.i,10);renderTeamModal(st.modalIdx);});
@@ -2042,6 +2168,7 @@
     var idx=p.teamIdx;if(idx==null||!teams[idx])return;
     var R=st.lot.player.r,t=teams[idx];if(t.f[R]>=SLOTS[R])return;
     if(p.kind==="raise"){if(st.lot.bid+1>maxBid(t))return;st.lot.bid+=1;st.lot.leaderIdx=idx;stopBattuta();renderAll();}
+    else if(p.kind==="raise_by"){var inc=parseInt(p.amount,10)||1;if(inc<1||st.lot.bid+inc>maxBid(t))return;st.lot.bid+=inc;st.lot.leaderIdx=idx;stopBattuta();renderAll();}
     else if(p.kind==="raise_to"){var v=parseInt(p.amount,10);if(isNaN(v)||v<=st.lot.bid||v>maxBid(t))return;st.lot.bid=v;st.lot.leaderIdx=idx;stopBattuta();renderAll();}
   }
   function gateRoom(){return (($("gate-room").value||CFG.ROOM||"ASTA").trim().toUpperCase())||"ASTA";}
