@@ -217,14 +217,16 @@
   .grole.done .gr-v{color:var(--good)}
   /* asta in corso */
   .g-lot{padding:16px}
-  .g-callline{display:flex;align-items:center;gap:12px;margin-bottom:12px;padding-bottom:11px;border-bottom:1px solid var(--border)}
-  .g-callline .gc-now{display:flex;flex-direction:column;gap:3px;min-width:0}
-  .g-callline .gc-nx{margin-left:auto;display:flex;flex-direction:column;gap:3px;align-items:flex-end;text-align:right;min-width:0}
-  .g-callline .gc-lab{font-size:9.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--faint);font-weight:700}
-  .g-callline .gc-team{font-family:var(--ff-disp);font-weight:700;font-size:18px;color:var(--text);line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .g-callline .gc-next{font-size:14px;color:var(--muted);font-weight:600;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .g-callline .gc-next.mine{color:var(--evid-ink);font-weight:700;font-size:17px}
-  .g-callline.mine .gc-team{color:var(--evid-ink)}
+  /* coda chiamate nel giocatore: tutte le squadre, chi chiama evidenziato (come banditone) */
+  .g-rail{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+  .g-railchip{flex:0 0 auto;padding:7px 12px;border:1px solid var(--border);border-radius:20px;font-size:13.5px;font-weight:600;color:var(--muted);white-space:nowrap;line-height:1}
+  .g-railchip.corso{border-color:var(--evid);background:var(--evid-soft);color:var(--evid-ink);font-weight:800}
+  .g-railchip.you{box-shadow:inset 0 0 0 2px var(--gold)}
+  .g-railchip .rc-tag{font-size:10px;color:var(--gold);font-weight:700;margin-left:4px;text-transform:uppercase}
+  .g-railchip.lab{color:var(--faint);border-style:dashed}
+  /* mobile: una sola riga scorrevole, chi chiama in testa */
+  .g-rail-mob{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .g-rail-mob::-webkit-scrollbar{display:none}
   .g-lot-top{display:flex;align-items:center;gap:14px}
   .g-lot-top .role-pill{width:48px;height:48px;font-size:23px;border-radius:13px;flex:0 0 auto}
   .g-lot-id{flex:1 1 auto;min-width:0}
@@ -1905,12 +1907,16 @@
 
   function renderGiocCall(){
     var el=$("g-callstrip");if(!el)return;
-    if(!st.drawn){el.className="g-callline";el.innerHTML="<div class='gc-now'><span class='gc-lab'>Chiamata in corso</span><span class='gc-team'>—</span></div><div class='gc-nx'><span class='gc-lab'>Sorteggio da fare</span></div>";return;}
-    var ic=inCorsoIdx(),upc=upcoming(1),nx=upc.length?upc[0]:null,mine=(ic===st.youIdx);
-    el.className="g-callline"+(mine?" mine":"");
-    var nxMine=(nx===st.youIdx);
-    el.innerHTML="<div class='gc-now'><span class='gc-lab'>Chiamata in corso</span><span class='gc-team'>"+(mine?"Tocca a te":teams[ic].name)+"</span></div>"+
-      (nx!=null?"<div class='gc-nx'><span class='gc-lab'>Prossimo</span><span class='gc-next"+(nxMine?" mine":"")+"'>"+(nxMine?"Tocca a te":teams[nx].name)+"</span></div>":"");
+    if(!st.drawn){el.className="g-rail undrawn";el.innerHTML="<div class='g-railchip lab'>Sorteggio da fare</div>";return;}
+    var ic=inCorsoIdx();
+    // desktop: tutte le card in ordine fisso (come il banditone). mobile: solo chi chiama + i successivi (ordine di chiamata), scorrono avanti
+    var mobile=!!(window.matchMedia&&window.matchMedia("(max-width:600px)").matches),order=[],i,k;
+    if(mobile){for(k=0;k<N;k++)order.push((ic+k)%N);}else{for(i=0;i<N;i++)order.push(i);}
+    el.className="g-rail"+(mobile?" g-rail-mob":"");
+    el.innerHTML=order.map(function(i){var t=teams[i],me=(i===st.youIdx),cur=(i===ic);
+      var txt=(cur&&me)?"Tocca a te":(t.name+(me?" <span class='rc-tag'>tu</span>":""));
+      return "<div class='g-railchip"+(cur?" corso":"")+(me?" you":"")+"'>"+txt+"</div>";
+    }).join("");
   }
   function setBidEnabled(baseOk){
     var you=teams[st.youIdx];
@@ -2251,6 +2257,8 @@
   $("g-custgo").addEventListener("click",function(){var v=parseInt($("g-cust").value,10);gBidTo(v);if(!isNaN(v))$("g-cust").value="";});
   $("g-cust").addEventListener("keydown",function(e){if(e.key==="Enter"){var v=parseInt(this.value,10);gBidTo(v);if(!isNaN(v))this.value="";}});
   $("g-roster-team").addEventListener("change",function(){st.rosterTeamIdx=parseInt(this.value,10);renderMyRoster();});
+  // ricalcola la coda del giocatore quando si passa desktop<->mobile
+  (function(){var t;window.addEventListener("resize",function(){clearTimeout(t);t=setTimeout(renderGiocCall,150);});})();
   // listone giocatore: filtri squadra + ruolo + ordinamento + ricerca
   $("g-sec-list").addEventListener("toggle",function(){if(this.open)renderGiocListone();});
   $("g-list-club").addEventListener("change",function(){st.gClub=this.value;renderGiocListone();});
@@ -2427,7 +2435,7 @@
       $("gate-team").hidden=false;$("gate-status").textContent="Scegli chi sei, poi Entra.";
     });
   }
-  function finalizePlayer(idx){st.youIdx=idx;setNav(["giocatore"]);$("gate").hidden=true;setView("giocatore");renderAll();saveJoin({role:"player",teamIdx:idx,room:gateRoom()});}
+  function finalizePlayer(idx){st.youIdx=idx;setNav(["giocatore","tabellone"]);$("gate").hidden=true;setView("giocatore");renderAll();saveJoin({role:"player",teamIdx:idx,room:gateRoom()});}
 
   function wireGate(){
     $("gate-roles").addEventListener("click",function(e){var b=e.target.closest("button[data-role]");if(!b)return;
