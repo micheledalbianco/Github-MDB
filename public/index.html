@@ -92,11 +92,11 @@
   #b-lotcard .ring,#b-lotcard .ring svg{width:176px;height:176px}
   #b-lotcard .ring .num{font-size:66px}
   #b-lotcard .ring.idle .num{font-size:16px}
-  /* offerta più alta: numero e nome ben leggibili, centrati e in colonna */
-  #b-lotcard .lot-body{display:flex;align-items:center;justify-content:center;gap:clamp(40px,9%,110px);margin-top:22px}
-  #b-lotcard .bid-block{text-align:center}
+  /* offerta più alta: numero+nome a sinistra (allineati al nome giocatore), countdown a destra */
+  #b-lotcard .lot-body{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-top:22px}
+  #b-lotcard .bid-block{text-align:left}
   #b-lotcard .bid-block .eyebrow{font-size:13px;letter-spacing:1.4px;margin-bottom:16px}
-  #b-lotcard .bid-line{flex-direction:column;align-items:center;gap:14px}
+  #b-lotcard .bid-line{flex-direction:column;align-items:flex-start;gap:14px}
   #b-lotcard .bid-amount{font-size:84px;line-height:.9}
   #b-lotcard .bid-leader{margin-top:0;padding:10px 20px}
   #b-lotcard .bid-leader b{font-size:26px}
@@ -132,13 +132,14 @@
   .exact{display:flex;align-items:center;gap:6px;margin-left:auto}
   .exact label{font-size:12px;color:var(--muted);font-weight:600}
   .exact input{width:132px}
-  .regia-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:8px}
+  .regia-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+  @media(max-width:1100px) and (min-width:901px){.regia-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
   .regia-hint{margin-top:10px;font-size:11.5px;color:var(--faint);line-height:1.4}
   .tchip{display:flex;align-items:center;gap:8px;padding:10px 11px;border:1px solid var(--border-strong);border-radius:11px;background:var(--surface);cursor:pointer;text-align:left;font-size:13.5px;font-weight:600;color:var(--text);transition:transform .05s}
   .tchip:hover{border-color:var(--faint)}
   .tchip:active{transform:scale(.96)}
   .tchip .dot{width:11px;height:11px;border-radius:50%;flex:none}
-  .tchip .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tchip .nm{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .tchip.lead{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
   .tchip.turn{border-color:var(--evid);box-shadow:inset 0 0 0 1px var(--evid)}
   .tchip .slot{margin-left:auto;font-variant-numeric:tabular-nums;font-size:11.5px;color:var(--faint);letter-spacing:.3px;flex:none}
@@ -275,14 +276,18 @@
   #g-rank.crank{padding:0}
   /* PC: hero più grande, cerchio "in asta" più prominente */
   @media(min-width:721px){
-    .g-lot{padding:22px 24px}
-    .g-lot-top{gap:20px}
-    .g-lot-top .role-pill{width:58px;height:58px;font-size:28px}
-    .g-lot-id .lot-name{font-size:40px}
+    .g-wrap{max-width:1040px}                 /* più largo: la coda squadre sta in una riga sola */
+    .g-rail{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+    .g-rail::-webkit-scrollbar{display:none}
+    .g-lot{padding:22px 26px}
+    .g-lot-top{gap:22px}
+    .g-lot-top .role-pill{width:60px;height:60px;font-size:29px}
+    .g-lot-id .lot-name{font-size:42px}
     .g-lot-id .lot-meta{font-size:15px}
-    .g-bidinfo .bid-amount{font-size:64px}
-    .g-ring{width:124px;height:124px}
-    .g-ring .num{font-size:44px}
+    .g-bidinfo{margin-top:18px}
+    .g-bidinfo .bid-amount{font-size:66px}
+    .g-ring{width:150px;height:150px}
+    .g-ring .num{font-size:52px}
     .g-ring.idle .num,.g-ring.waiting .num{font-size:15px!important}
     .g-ring.done .num{font-size:15px!important}
   }
@@ -783,21 +788,42 @@
     #t-rank{display:block}
     #t-rank .crank-row{flex:0 0 auto;min-height:0;padding:7px 6px}
 
+    /* tabellone mobile: squadra allineata all'inizio del nome giocatore */
+    .board-hero .bh-player{justify-content:flex-start;text-align:left}
+    .board-hero .bh-ptext{text-align:left}
+
     /* --- BANDITORE: coda e regia leggibili --- */
     #v-banditore{padding-inline:14px}
-    .cb-head{gap:8px}
+    .cb-head{gap:8px 10px}
+    .cb-head #b-sorteggio{flex:1 0 100%;margin-left:0;justify-content:center}   /* Sorteggia a tutta riga, non spezzato */
     .cb-rail{flex-wrap:wrap}
     .railchip{flex:0 0 auto;padding:8px 13px;font-size:14px;border-radius:20px;text-align:left}
     .railchip.corso{font-size:14.5px}
-    .regia-grid{grid-template-columns:1fr}
-    .tchip{font-size:15px}
-    /* lot card: impila offerta e anello, dimensioni adatte al telefono */
-    #b-lotcard .lot-body{flex-direction:column;gap:18px;margin-top:18px}
+    /* regia: incremento + importo su righe pulite, card in griglia 2 colonne */
+    .regia-top{flex-direction:column;align-items:stretch;gap:10px}
+    .regia-top .step-toggle{align-self:flex-start}
+    .exact{margin-left:0;width:100%}
+    .exact input{width:100%}
+    .regia-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+    .tchip{font-size:13.5px;padding:9px 10px;gap:4px}
+    .tchip .slot{display:none}                 /* su mobile priorità a nome + crediti (i nomi restano interi) */
+    .tchip .cr{font-size:13px;margin-left:5px}
+    .tchip .cr::before{width:13px;height:13px;margin-right:3px}
+    /* lot card: impila offerta e anello centrati, dimensioni da telefono */
+    #b-lotcard .lot-body{flex-direction:column;align-items:center;gap:18px;margin-top:18px}
+    #b-lotcard .bid-block{text-align:center}
+    #b-lotcard .bid-line{align-items:center}
     #b-lotcard .bid-amount{font-size:66px}
     #b-lotcard .ring,#b-lotcard .ring svg{width:150px;height:150px}
     #b-lotcard .ring .num{font-size:56px}
     #b-lotcard .btn-row{flex-wrap:wrap}
     #b-lotcard .btn-row .btn{flex:1 1 auto}
+
+    /* --- GIOCATORE: anello countdown grande e centrato sotto il nome --- */
+    .g-lot-top{flex-wrap:wrap}
+    #g-ring{flex:1 0 100%;width:150px;height:150px;margin:8px auto 0}
+    #g-ring .num{font-size:52px}
+    #g-ring.idle .num,#g-ring.waiting .num,#g-ring.done .num{font-size:15px!important}
   }
 
   [hidden]{display:none!important}
@@ -1784,7 +1810,7 @@
       numEl.textContent="venduto";numEl.style.color="var(--good)";numEl.style.fontFamily="var(--ff-body)";numEl.style.fontSize=(prefix==="t-"?"16px":"12px");renderPips(prefix);return;}
     if(!active()){ring.classList.remove("idle","blink");fg.setAttribute("stroke-dashoffset",circ);
       if(prefix==="t-"){ring.classList.add("waiting");numEl.innerHTML="asta<br>in corso";}
-      else if(prefix==="g-"){ring.classList.add("waiting");numEl.textContent="in asta";numEl.style.fontSize="15px";}
+      else if(prefix==="g-"){ring.classList.add("waiting");numEl.textContent="countdown";numEl.style.fontSize="15px";}
       else{ring.classList.remove("waiting");numEl.textContent="countdown";numEl.style.fontSize="15px";}
       numEl.style.color="var(--muted)";numEl.style.fontFamily="var(--ff-body)";renderPips(prefix);return;}
     ring.classList.remove("idle","waiting");
@@ -1849,7 +1875,7 @@
     var ic=inCorsoIdx(),nx=prossimaIdx();
     var L=st.lot;
     if(L){
-      $("b-name").textContent=L.player.n;$("b-meta").textContent=ROLE_NAME[L.player.r]+" · "+L.player.sq;
+      $("b-name").textContent=L.player.n;$("b-meta").textContent=L.player.sq;
       $("b-role").textContent=L.player.r;$("b-role").className="role-pill role-"+L.player.r;
       $("b-bid").textContent=L.bid;$("b-leader").textContent=teams[L.leaderIdx].name;
       $("b-assign").disabled=false;$("b-assignwho").textContent=teams[L.leaderIdx].name;
