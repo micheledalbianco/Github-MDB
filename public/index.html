@@ -311,6 +311,9 @@
   .rgi .rgnm{flex:1 1 auto;font-weight:600}
   .rgi .rgp{flex:0 0 auto;color:var(--text);font-variant-numeric:tabular-nums;font-weight:700;font-family:var(--ff-disp);font-size:15px}
   .rgempty{font-size:12.5px;color:var(--faint);padding:5px 10px}
+  .rg-del{flex:0 0 auto;width:26px;height:26px;margin-left:6px;border-radius:7px;border:1px solid color-mix(in srgb,var(--crit) 45%,transparent);background:color-mix(in srgb,var(--crit) 15%,transparent);color:var(--crit);font-weight:700;font-size:12px;cursor:pointer;line-height:1}
+  .rg-del:hover{background:color-mix(in srgb,var(--crit) 28%,transparent)}
+  .op-hint{font-size:12px;color:var(--muted);margin:6px 0 10px;line-height:1.35}
 
   .board-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
   .tcard{padding:11px 12px;border-radius:12px;cursor:pointer}
@@ -939,7 +942,6 @@
       <div class="board-grid big" id="t-grid"></div>
     </div>
     <div class="recap" id="t-recap" hidden></div>
-    <div class="tmodal" id="t-modal" hidden></div>
   </section>
 
   <!-- ================= SETUP ================= -->
@@ -984,6 +986,7 @@
     </div>
   </section>
 </main>
+<div class="tmodal" id="t-modal" hidden></div>
 <div class="toast" id="toast"></div>
 <div class="assegnato" id="assegnato" aria-live="polite"></div>
 
@@ -1598,7 +1601,7 @@
   });
 
   var st={view:"banditore",phase:"A",turnIdx:0,lot:null,count:0,counting:false,pending:false,timer:null,
-          speed:"veloce",selPlayer:null,youIdx:0,step:1,modalIdx:null,lastSale:null,drawn:false,
+          speed:"veloce",selPlayer:null,youIdx:0,step:1,modalIdx:null,modalOp:false,lastSale:null,drawn:false,
           sort:"alfa",listRole:"P",gSort:"quot",gListRole:"",gClub:"",rosterTeamIdx:null};
 
   var $=function(id){return document.getElementById(id);};
@@ -1619,7 +1622,8 @@
   function toast(m){var el=$("toast");el.textContent=m;el.classList.add("show");clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove("show");},1600);}
   function showAssegnato(pn,tn,price){if(st.view==="tabellone")return;var el=$("assegnato");el.innerHTML="<div class='ass-name'>"+pn+"</div><div class='ass-sub'>→ "+tn+" · "+price+" cr.</div>";el.classList.add("show");clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove("show");},2600);}
   function active(){return st.counting||st.pending;}
-  function rosterGroupsHTML(t){
+  function rosterGroupsHTML(t,opTeamIdx){
+    var op=(opTeamIdx!=null);
     var byrole={P:[],D:[],C:[],A:[]};t.bought.forEach(function(p){byrole[p.r].push(p);});
     var roles=[["P",3],["D",8],["C",8],["A",6]],body="";
     roles.forEach(function(rr){
@@ -1627,12 +1631,27 @@
       var spent=0;arr.forEach(function(p){spent+=(p.price||0);});
       body+="<div class='rgroup'><div class='rgh'><span class='role-pill role-"+r+"'>"+r+"</span><b>"+ROLE_PLUR[r]+"</b>"+
         "<span class='rgc'>"+arr.length+"/"+tt+"</span></div>";
-      if(arr.length){body+="<div class='rglist'>";arr.forEach(function(p){body+="<div class='rgi'><span class='rgnm'>"+p.n+"</span><span class='rgp'>"+p.price+"</span></div>";});
+      if(arr.length){body+="<div class='rglist"+(op?" op":"")+"'>";arr.forEach(function(p){body+="<div class='rgi'><span class='rgnm'>"+p.n+"</span><span class='rgp'>"+p.price+"</span>"+
+          (op?"<button class='rg-del' data-tid='"+opTeamIdx+"' data-pid='"+(p.id!=null?p.id:"")+"' data-pn='"+p.n+"' title='Annulla assegnazione'>✕</button>":"")+"</div>";});
         body+="<div class='rgtot'><span class='rgtl'>Totale ruolo</span><span class='rgtv'>"+spent+"</span></div></div>";}
       else body+="<div class='rgempty'>— nessuno —</div>";
       body+="</div>";
     });
     return body;
+  }
+  function unassign(teamIdx,pid,pn){
+    var t=teams[teamIdx];if(!t)return false;
+    var idx=-1,i;
+    for(i=0;i<t.bought.length;i++){if((pid!==""&&pid!=null&&String(t.bought[i].id)===String(pid))||(t.bought[i].n===pn)){idx=i;break;}}
+    if(idx<0)return false;
+    var b=t.bought[idx];
+    t.cred+=(b.price||0);t.f[b.r]=Math.max(0,(t.f[b.r]||0)-1);t.bought.splice(idx,1);
+    var entry=null;
+    for(i=0;i<LISTONE.length;i++){if(pid!==""&&pid!=null&&String(LISTONE[i].id)===String(pid)){entry=LISTONE[i];break;}}
+    if(!entry)entry=findP(b.n);
+    if(entry)entry.taken=false;
+    if(st.lastSale&&st.lastSale.tIdx===teamIdx&&st.lastSale.n===b.n)st.lastSale=null;
+    return true;
   }
   function stateText(){
     if(!st.lot)return "In attesa";
@@ -1738,7 +1757,7 @@
     teams.forEach(function(t,i){
       var cls=[];if(i===ic)cls.push("turn");if(L&&i===L.leaderIdx)cls.push("leadrow");if(isDim(i))cls.push("out");
       var tag=i===ic?" <span class=\"turn-badge\">chiama</span>":(isDim(i)?" <span class=\"fuori-badge\">fuori</span>":"");
-      rows+="<tr class='"+cls.join(" ")+"'><td><div class='team'><span class='dot' style='background:"+t.color+"'></span>"+t.name+tag+"</div></td>"+
+      rows+="<tr class='"+cls.join(" ")+"' data-i='"+i+"'><td><div class='team'><span class='dot' style='background:"+t.color+"'></span>"+t.name+tag+"</div></td>"+
         "<td class='num'><span class='credits'>"+t.cred+"</span></td>"+
         "<td class='num'>"+slotCell(t,"P")+"</td><td class='num'>"+slotCell(t,"D")+"</td><td class='num'>"+slotCell(t,"C")+"</td><td class='num'>"+slotCell(t,"A")+"</td></tr>";
     });
@@ -1967,14 +1986,15 @@
       "<div class='recap-list'>"+rows+"</div>";
   }
   function renderTeamModal(idx){
-    var t=teams[idx];
-    $("t-modal").innerHTML="<div class='tmodal-card card'><button class='tmodal-x' id='t-modalx' aria-label='Chiudi'>✕</button>"+
+    var t=teams[idx],op=!!st.modalOp;
+    $("t-modal").innerHTML="<div class='tmodal-card card"+(op?" op":"")+"'><button class='tmodal-x' id='t-modalx' aria-label='Chiudi'>✕</button>"+
       "<div class='detail-head'><b>"+t.name+" · "+t.fanta+"</b></div>"+
-      teamStatsHTML(t)+rosterGroupsHTML(t)+"</div>";
+      (op?"<div class='op-hint'>Tocca ✕ per annullare un'assegnazione: il giocatore torna disponibile, lo slot si libera e i crediti tornano alla squadra.</div>":"")+
+      teamStatsHTML(t)+rosterGroupsHTML(t,op?idx:null)+"</div>";
     $("t-modal").hidden=false;
     var x=$("t-modalx");if(x)x.addEventListener("click",closeModal);
   }
-  function closeModal(){st.modalIdx=null;$("t-modal").hidden=true;$("t-modal").innerHTML="";}
+  function closeModal(){st.modalIdx=null;st.modalOp=false;$("t-modal").hidden=true;$("t-modal").innerHTML="";}
 
   function callBannerHTML(opts){
     opts=opts||{};var ic=inCorsoIdx();
@@ -2081,7 +2101,12 @@
   $("b-batti").addEventListener("click",batti);
   $("b-speed").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.speed=b.dataset.speed;document.querySelectorAll("#b-speed button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});if(st.counting)batti();else renderAll();});
   $("b-assign").addEventListener("click",assign);
-  $("b-undo").addEventListener("click",function(){toast("Annulla (demo): nella versione reale ripristina l'ultima azione");});
+  $("b-undo").addEventListener("click",function(){
+    var s=st.lastSale;
+    if(!s){toast("Nessuna assegnazione da annullare");return;}
+    if(!confirm("Annullare l'ultima assegnazione? "+s.n+" → "+s.tName+" ("+s.price+" cr) tornerà disponibile."))return;
+    if(unassign(s.tIdx,null,s.n)){renderAll();toast("Annullata: "+s.n+" torna disponibile");}
+  });
   $("b-search").addEventListener("input",renderPlist);
   $("b-plist").addEventListener("click",function(e){var row=e.target.closest(".prow");if(!row||!row.dataset.p)return;var p=findP(row.dataset.p);if(!p)return;if(p.taken){toast("Già assegnato");return;}st.selPlayer=p;renderPlist();});
   $("b-phasesel").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.listRole=b.dataset.r;st.selPlayer=null;st.lastSale=null;document.querySelectorAll("#b-phasesel button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});renderAll();});
@@ -2119,8 +2144,17 @@
   $("g-list-sort").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.gSort=b.dataset.sort;document.querySelectorAll("#g-list-sort button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});renderGiocListone();});
 
   // tabellone: click su una squadra → ingrandisci (rosa completa)
-  $("t-grid").addEventListener("click",function(e){var c=e.target.closest(".tcard");if(!c)return;st.modalIdx=parseInt(c.dataset.i,10);renderTeamModal(st.modalIdx);});
-  $("t-modal").addEventListener("click",function(e){if(e.target===$("t-modal"))closeModal();});
+  $("t-grid").addEventListener("click",function(e){var c=e.target.closest(".tcard");if(!c)return;st.modalIdx=parseInt(c.dataset.i,10);st.modalOp=false;renderTeamModal(st.modalIdx);});
+  $("t-modal").addEventListener("click",function(e){
+    var del=e.target.closest(".rg-del");
+    if(del){var tid=parseInt(del.dataset.tid,10),pid=del.dataset.pid,pn=del.dataset.pn;
+      if(confirm("Annullare l'assegnazione di "+pn+"? Tornerà disponibile e i crediti torneranno alla squadra."))
+        {if(unassign(tid,pid,pn)){renderAll();renderTeamModal(st.modalIdx);toast("Assegnazione annullata: "+pn);}}
+      return;}
+    if(e.target===$("t-modal"))closeModal();
+  });
+  // banditore: clic su una squadra nella tabella rose -> annulla assegnazioni
+  $("b-stand").addEventListener("click",function(e){var tr=e.target.closest("tr[data-i]");if(!tr)return;st.modalIdx=parseInt(tr.dataset.i,10);st.modalOp=true;renderTeamModal(st.modalIdx);});
 
   // setup
   $("setup-teams").addEventListener("input",function(e){var el=e.target;if(el.tagName!=="INPUT")return;var i=+el.dataset.i;teams[i][el.dataset.k]=el.value;renderAll();renderExportPreview();});
