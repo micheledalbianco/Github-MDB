@@ -1698,10 +1698,16 @@
     if(!entry)entry=findP(b.n);
     if(entry)entry.taken=false;
     // toglie la vendita dallo storico: se era l'ultima, la precedente torna "ultimo assegnato"
+    var removed=null;
     for(i=st.saleLog.length-1;i>=0;i--){var s=st.saleLog[i];
-      if(s.tIdx===teamIdx&&((b.id!=null&&s.id!=null&&String(s.id)===String(b.id))||s.n===b.n)){st.saleLog.splice(i,1);break;}}
-    // il turno torna indietro: la squadra a cui e' stato tolto il giocatore chiama di nuovo
-    st.turnIdx=teamIdx;
+      if(s.tIdx===teamIdx&&((b.id!=null&&s.id!=null&&String(s.id)===String(b.id))||s.n===b.n)){removed=s;st.saleLog.splice(i,1);break;}}
+    // il turno torna indietro di uno: richiama chi aveva chiamato quel lotto
+    var back=teamIdx;
+    if(removed){
+      if(removed.callerId!=null){for(i=0;i<teams.length;i++){if(teams[i].id===removed.callerId){back=i;break;}}}
+      else if(removed.caller!=null)back=removed.caller;
+    }
+    st.turnIdx=back;
     return true;
   }
   function stateText(){
@@ -1762,18 +1768,19 @@
   function assign(){
     if(!st.lot)return;var t=teams[st.lot.leaderIdx],p=st.lot.player;
     var price=st.lot.bid,li=st.lot.leaderIdx;
+    var caller=(st.lot.caller!=null?st.lot.caller:st.turnIdx);   // chi ha chiamato (non chi ha vinto)
     var bid=p.id||String(_idseq++);
     t.cred-=price;t.f[p.r]+=1;t.bought.push({n:p.n,r:p.r,price:price,id:bid});
     var entry=findP(p.n);if(entry)entry.taken=true;
     stopBattuta();showAssegnato(p.n,t.name,price);
-    st.saleLog.push({n:p.n,r:p.r,sq:p.sq,price:price,tIdx:li,tId:t.id,tName:t.name,tColor:t.color,id:bid});
-    st.lot=null;st.turnIdx=(li+1)%teams.length;st.selPlayer=null;renderAll(); // turno a chi segue chi ha preso
+    st.saleLog.push({n:p.n,r:p.r,sq:p.sq,price:price,tIdx:li,tId:t.id,tName:t.name,tColor:t.color,id:bid,caller:caller,callerId:(teams[caller]||{}).id});
+    st.lot=null;st.turnIdx=(caller+1)%teams.length;st.selPlayer=null;renderAll(); // il turno segue l'ordine del setup: chiama chi viene dopo chi ha chiamato
   }
   function callPlayer(){
     if(!st.selPlayer||st.selPlayer.taken)return;var base=1;
     st.drawn=true;
     var caller=inCorsoIdx();st.turnIdx=caller;   // salta chi ha completato il ruolo
-    st.lot={player:st.selPlayer,bid:base,base:base,leaderIdx:caller};
+    st.lot={player:st.selPlayer,bid:base,base:base,leaderIdx:caller,caller:caller};
     stopBattuta();st.selPlayer=null;$("b-search").value="";renderAll();
     toast("Chiamato "+st.lot.player.n+" — base "+base+" · premi Batti");
   }
@@ -2044,8 +2051,9 @@
   function renderCallOrder(){
     var ic=inCorsoIdx();
     var railHTML="";
-    for(var k=0;k<N;k++){var i=(ic+k)%N,t=teams[i];
-      railHTML+="<div class='railchip"+(k===0&&st.drawn?" corso":"")+(isDim(i)?" out":"")+"' data-i='"+i+"'>"+t.name+"</div>";}
+    // ordine FISSO come nel setup: si muove solo il cursore arancione su chi chiama
+    for(var i=0;i<N;i++){var t=teams[i];
+      railHTML+="<div class='railchip"+(i===ic&&st.drawn?" corso":"")+(isDim(i)?" out":"")+"' data-i='"+i+"'>"+t.name+"</div>";}
     $("b-callorder").innerHTML=railHTML;
   }
   function renderAll(){renderBanditore();renderGiocatore();renderTabellone();renderCallOrder();renderRings();
@@ -2059,13 +2067,15 @@
   function moveTeam(from,to){
     if(from===to||from<0||to<0||from>=teams.length||to>=teams.length)return;
     var youId=(teams[st.youIdx]||{}).id,turnId=(teams[st.turnIdx]||{}).id,
-        leadId=st.lot?(teams[st.lot.leaderIdx]||{}).id:null;
+        leadId=st.lot?(teams[st.lot.leaderIdx]||{}).id:null,
+        callId=(st.lot&&st.lot.caller!=null)?(teams[st.lot.caller]||{}).id:null;
     var item=teams.splice(from,1)[0];teams.splice(to,0,item);
     function idxOf(id){for(var i=0;i<teams.length;i++)if(teams[i].id===id)return i;return 0;}
     if(youId!=null)st.youIdx=idxOf(youId);
     if(turnId!=null)st.turnIdx=idxOf(turnId);
     if(leadId!=null&&st.lot)st.lot.leaderIdx=idxOf(leadId);
-    if(st.saleLog)st.saleLog.forEach(function(s){if(s.tId!=null)s.tIdx=idxOf(s.tId);});
+    if(callId!=null&&st.lot)st.lot.caller=idxOf(callId);
+    if(st.saleLog)st.saleLog.forEach(function(s){if(s.tId!=null)s.tIdx=idxOf(s.tId);if(s.callerId!=null)s.caller=idxOf(s.callerId);});
     renderSetupTeams();renderAll();renderExportPreview();
   }
   function renderSetupTeams(){
@@ -2293,7 +2303,7 @@
       taken:LISTONE.filter(function(p){return p.taken;}).map(function(p){return p.id;}),
       listRole:st.listRole,turnIdx:st.turnIdx,speed:st.speed,
       counting:st.counting,pending:st.pending,count:st.count,saleLog:st.saleLog,drawn:st.drawn,
-      lot:st.lot?{n:st.lot.player.n,r:st.lot.player.r,sq:st.lot.player.sq,id:st.lot.player.id,q:st.lot.player.q,bid:st.lot.bid,base:st.lot.base,leaderIdx:st.lot.leaderIdx}:null};
+      lot:st.lot?{n:st.lot.player.n,r:st.lot.player.r,sq:st.lot.player.sq,id:st.lot.player.id,q:st.lot.player.q,bid:st.lot.bid,base:st.lot.base,leaderIdx:st.lot.leaderIdx,caller:st.lot.caller}:null};
   }
   function applyState(d){
     if(!d||!d.teams)return;
@@ -2313,7 +2323,7 @@
     LISTONE.forEach(function(p){p.taken=!!tk[p.id];});
     st.listRole=d.listRole||"P";st.turnIdx=d.turnIdx||0;st.speed=d.speed||"veloce";
     st.counting=!!d.counting;st.pending=!!d.pending;st.count=d.count||0;
-    st.lot=d.lot?{player:{n:d.lot.n,r:d.lot.r,sq:d.lot.sq,id:d.lot.id,q:d.lot.q},bid:d.lot.bid,base:d.lot.base,leaderIdx:d.lot.leaderIdx}:null;
+    st.lot=d.lot?{player:{n:d.lot.n,r:d.lot.r,sq:d.lot.sq,id:d.lot.id,q:d.lot.q},bid:d.lot.bid,base:d.lot.base,leaderIdx:d.lot.leaderIdx,caller:(d.lot.caller!=null?d.lot.caller:d.lot.leaderIdx)}:null;
     st.saleLog=d.saleLog||(d.lastSale?[d.lastSale]:[]);st.drawn=!!d.drawn;
     document.querySelectorAll("#b-phasesel button").forEach(function(x){x.setAttribute("aria-pressed",x.dataset.r===st.listRole?"true":"false");});
   }
