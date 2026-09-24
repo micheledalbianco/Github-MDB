@@ -74,7 +74,9 @@
   .phase-tag{margin-left:auto;font-size:12px;color:var(--muted);background:var(--surface-2);border:1px solid var(--border);border-radius:20px;padding:4px 11px;font-weight:600}
   .lot-body{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;margin-top:16px}
   @media(max-width:560px){.lot-body{grid-template-columns:1fr;text-align:center}}
-  .bid-block .eyebrow{margin-bottom:2px}
+  .bid-block .eyebrow{margin-bottom:6px}
+  .bid-line{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .bid-line .bid-leader{margin-top:0}
   .bid-amount{font-family:var(--ff-disp);font-weight:700;font-size:58px;line-height:.95;color:var(--text);font-variant-numeric:tabular-nums}
   .bid-leader{margin-top:6px;font-size:15px}
   .bid-leader b{color:var(--accent-ink)}
@@ -86,6 +88,10 @@
   .ring svg circle{transition:stroke-dashoffset .35s linear,stroke .3s}
   .ring .num{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--ff-disp);font-weight:700;font-size:52px;font-variant-numeric:tabular-nums;line-height:1}
   .ring.idle .num{font-size:15px;color:var(--muted);font-family:var(--ff-body);font-weight:600;text-align:center;padding:0 12px;line-height:1.2}
+  /* anello del banditore più grande: sfrutta lo spazio vuoto */
+  #b-lotcard .ring,#b-lotcard .ring svg{width:176px;height:176px}
+  #b-lotcard .ring .num{font-size:66px}
+  #b-lotcard .ring.idle .num{font-size:16px}
   @keyframes pop{0%{transform:scale(.62);opacity:.35}55%{transform:scale(1.16);opacity:1}100%{transform:scale(1)}}
   .num.pop{animation:pop .5s cubic-bezier(.2,.9,.25,1)}
   @media(prefers-reduced-motion:reduce){.num.pop{animation:none}}
@@ -117,7 +123,7 @@
   .step-toggle button[aria-pressed="true"]{background:var(--accent);color:#fff}
   .exact{display:flex;align-items:center;gap:6px;margin-left:auto}
   .exact label{font-size:12px;color:var(--muted);font-weight:600}
-  .exact input{width:78px}
+  .exact input{width:132px}
   .regia-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:8px}
   .regia-hint{margin-top:10px;font-size:11.5px;color:var(--faint);line-height:1.4}
   .tchip{display:flex;align-items:center;gap:8px;padding:10px 11px;border:1px solid var(--border-strong);border-radius:11px;background:var(--surface);cursor:pointer;text-align:left;font-size:13.5px;font-weight:600;color:var(--text);transition:transform .05s}
@@ -449,6 +455,10 @@
     box-shadow:0 4px 0 color-mix(in srgb,var(--cta2) 60%,#000),0 10px 22px color-mix(in srgb,var(--cta1) 30%,transparent)}
   .btn.cta:disabled{background:var(--surface-2);color:var(--muted);box-shadow:0 4px 0 rgba(0,0,0,.35)}
   .btn.ghost{background:transparent;box-shadow:none;border-color:var(--border)}
+  /* Countdown: piatto (niente blu luminoso) */
+  .btn.countdown{background:var(--surface-2);border:1px solid var(--evid);color:var(--evid-ink);
+    box-shadow:0 3px 0 color-mix(in srgb,var(--evid) 32%,#000)}
+  .btn.countdown:hover{background:var(--evid-soft);border-color:var(--evid);color:#fff}
 
   /* input scuri */
   input[type=text],input[type=number]{background:var(--bg);border-color:var(--border-strong);color:var(--text)}
@@ -824,24 +834,22 @@
           <div class="lot-body">
             <div class="bid-block">
               <div class="eyebrow">Offerta più alta</div>
-              <div class="bid-amount tnum"><span id="b-bid">—</span></div>
-              <div class="bid-leader"><b id="b-leader">nessuno</b></div>
+              <div class="bid-line">
+                <div class="bid-amount tnum"><span id="b-bid">—</span></div>
+                <div class="bid-leader"><b id="b-leader">nessuno</b></div>
+              </div>
             </div>
             <div class="ring idle" id="b-ring">
-              <svg width="132" height="132" viewBox="0 0 132 132">
-                <circle cx="66" cy="66" r="58" fill="none" stroke="var(--border)" stroke-width="12"/>
-                <circle id="b-ringfg" cx="66" cy="66" r="58" fill="none" stroke="var(--crit)" stroke-width="12" stroke-linecap="round" stroke-dasharray="364.4" stroke-dashoffset="364.4"/>
+              <svg width="176" height="176" viewBox="0 0 176 176">
+                <circle cx="88" cy="88" r="78" fill="none" stroke="var(--border)" stroke-width="14"/>
+                <circle id="b-ringfg" cx="88" cy="88" r="78" fill="none" stroke="var(--crit)" stroke-width="14" stroke-linecap="round" stroke-dasharray="490.1" stroke-dashoffset="490.1"/>
               </svg>
               <div class="num" id="b-count">pronto</div>
             </div>
           </div>
           <div class="pips" id="b-pips"></div>
           <div class="btn-row">
-            <button class="btn primary" id="b-batti">Batti ▸</button>
-            <div class="step-toggle" id="b-speed" role="group" aria-label="Velocità battuta">
-              <button data-speed="veloce" aria-pressed="true">Veloce&nbsp;3</button>
-              <button data-speed="lenta">Lenta&nbsp;5</button>
-            </div>
+            <button class="btn countdown" id="b-batti">Countdown ▸</button>
             <button class="btn cta" id="b-assign" disabled>Assegna a <span id="b-assignwho">—</span></button>
             <button class="btn ghost" id="b-undo">Annulla</button>
           </div>
@@ -855,7 +863,7 @@
               <button data-step="5">+5</button>
               <button data-step="10">+10</button>
             </div>
-            <div class="exact"><label for="r-exact">a…</label><input type="number" id="r-exact" placeholder="importo" min="1"></div>
+            <div class="exact"><input type="number" id="r-exact" placeholder="Rilancio a…" min="1"></div>
           </div>
           <div class="regia-grid" id="r-grid"></div>
         </div>
@@ -1009,7 +1017,16 @@
       </div>
 
       <div class="card" style="padding:16px">
-        <div class="eyebrow">3 · Esporta le rose per fantacalcio.it</div>
+        <div class="eyebrow">3 · Velocità della battuta</div>
+        <p class="setup-p">Quanti secondi di countdown alla battuta del banditore prima di assegnare: <b>Veloce (3)</b> per andare spediti, <b>Lenta (5)</b> per dare più tempo ai rilanci.</p>
+        <div class="step-toggle" id="b-speed" role="group" aria-label="Velocità battuta">
+          <button data-speed="veloce" aria-pressed="true">Veloce&nbsp;3</button>
+          <button data-speed="lenta">Lenta&nbsp;5</button>
+        </div>
+      </div>
+
+      <div class="card" style="padding:16px">
+        <div class="eyebrow">4 · Esporta le rose per fantacalcio.it</div>
         <p class="setup-p">Genero un file CSV per ogni squadra (formato <b>Squadra,Id,Prezzo</b>), tutti in un'unica cartella dentro uno ZIP, pronto da caricare su fantacalcio.it.</p>
         <div class="export-preview" id="exp-preview"></div>
         <div class="btn-row" style="margin-top:0">
@@ -1021,7 +1038,7 @@
       </div>
 
       <div class="card" style="padding:16px">
-        <div class="eyebrow">4 · Ripristina asta</div>
+        <div class="eyebrow">5 · Ripristina asta</div>
         <p class="setup-p">Azzera <b>tutto</b>: crediti a 500, rose vuote, listone di nuovo disponibile, turno al primo. Da usare per far ripartire l'asta da capo.</p>
         <div class="danger-zone">
           <button class="btn danger" id="b-reset">Ripristina asta da zero</button>
@@ -1739,7 +1756,7 @@
     if(!active()){ring.classList.remove("idle","blink");fg.setAttribute("stroke-dashoffset",circ);
       if(prefix==="t-"){ring.classList.add("waiting");numEl.innerHTML="asta<br>in corso";}
       else if(prefix==="g-"){ring.classList.add("waiting");numEl.textContent="in asta";numEl.style.fontSize="15px";}
-      else{ring.classList.remove("waiting");numEl.textContent="batti";numEl.style.fontSize="15px";}
+      else{ring.classList.remove("waiting");numEl.textContent="countdown";numEl.style.fontSize="15px";}
       numEl.style.color="var(--muted)";numEl.style.fontFamily="var(--ff-body)";renderPips(prefix);return;}
     ring.classList.remove("idle","waiting");
     ring.classList.toggle("blink",st.counting&&st.count<=1);
@@ -1753,7 +1770,7 @@
     numEl.classList.remove("pop");void numEl.offsetWidth;numEl.classList.add("pop");
     renderPips(prefix);
   }
-  function renderRings(){setRing("b-",364.4);setRing("g-",364.4);setRing("t-",502.6);}
+  function renderRings(){setRing("b-",490.1);setRing("g-",364.4);setRing("t-",502.6);}
 
   function tick(){
     st.count--;
