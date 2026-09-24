@@ -135,6 +135,25 @@
   .regia-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
   @media(max-width:1100px) and (min-width:901px){.regia-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
   .regia-hint{margin-top:10px;font-size:11.5px;color:var(--faint);line-height:1.4}
+  /* barra rilanci a voce */
+  .voice-bar{padding:12px 14px;margin-bottom:14px}
+  .vb-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .voice-toggle{flex:0 0 auto;border:1px solid var(--border-strong);background:var(--surface-2);color:var(--muted);border-radius:11px;padding:10px 16px;font-weight:700;font-size:14px;cursor:pointer}
+  .voice-toggle.on{border-color:var(--good);color:#fff;background:color-mix(in srgb,var(--good) 22%,var(--surface));box-shadow:0 0 0 1px color-mix(in srgb,var(--good) 45%,transparent),0 0 16px color-mix(in srgb,var(--good) 30%,transparent)}
+  .voice-toggle.on::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--good);margin-right:8px;animation:vbpulse 1.1s ease-in-out infinite;vertical-align:middle}
+  @keyframes vbpulse{0%,100%{opacity:1}50%{opacity:.25}}
+  @media(prefers-reduced-motion:reduce){.voice-toggle.on::before{animation:none}}
+  .vb-heard{flex:1 1 200px;min-width:0;font-size:13.5px;color:var(--muted)}
+  .vb-heard b{color:var(--text)}
+  .vb-heard .vh-ok{color:var(--good);font-weight:700}
+  .vb-heard .vh-no{color:var(--crit);font-weight:700}
+  .vb-undo{margin-top:10px;display:flex;align-items:center;gap:12px;background:color-mix(in srgb,var(--evid) 14%,var(--surface));border:1px solid color-mix(in srgb,var(--evid) 45%,transparent);border-radius:11px;padding:9px 14px;font-weight:600}
+  .vb-undo b{color:var(--evid-ink)}
+  .vb-undo .btn{margin-left:auto;padding:6px 14px;min-height:0}
+  .vb-confirm{margin-top:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:color-mix(in srgb,var(--accent) 14%,var(--surface));border:1.5px solid var(--accent-ink);border-radius:12px;padding:12px 15px}
+  .vb-confirm .vc-txt{font-family:var(--ff-disp);font-weight:700;font-size:19px}
+  .vb-confirm .vc-warn{color:var(--crit);font-weight:700;font-size:13px}
+  .vb-confirm .vc-actions{margin-left:auto;display:flex;gap:8px}
   .tchip{display:flex;align-items:center;gap:8px;padding:10px 11px;border:1px solid var(--border-strong);border-radius:11px;background:var(--surface);cursor:pointer;text-align:left;font-size:13.5px;font-weight:600;color:var(--text);transition:transform .05s}
   .tchip:hover{border-color:var(--faint)}
   .tchip:active{transform:scale(.96)}
@@ -877,6 +896,15 @@
       <div class="cb-rail" id="b-callorder"></div>
     </div>
 
+    <div class="card voice-bar" id="voice-bar" hidden>
+      <div class="vb-row">
+        <button class="btn voice-toggle" id="voice-toggle" aria-pressed="false">🎤 Ascolto: off</button>
+        <div class="vb-heard" id="voice-heard">Attiva l'ascolto e detta i rilanci: «Ale 30», «Michele 31»…</div>
+      </div>
+      <div class="vb-undo" id="voice-undo" hidden></div>
+      <div class="vb-confirm" id="voice-confirm" hidden></div>
+    </div>
+
     <div class="cols2">
       <div class="grid">
         <div class="card lot" id="b-lotcard">
@@ -1081,7 +1109,19 @@
       </div>
 
       <div class="card" style="padding:16px">
-        <div class="eyebrow">4 · Esporta le rose per fantacalcio.it</div>
+        <div class="eyebrow">4 · Rilanci a voce (banditore)</div>
+        <p class="setup-p">Il banditore può dettare i rilanci a voce dal suo PC: dici <b>«nome squadra + cifra»</b> (es. «Ale 30», «Michele 31») e l'offerta si aggiorna. Riconosce anche la battuta: <b>«batto»</b> avvia il countdown, <b>«assegnato a …»</b> chiede conferma e assegna. Richiede <b>Chrome/Edge</b>, microfono e connessione.</p>
+        <div class="step-toggle" id="voice-mode" role="group" aria-label="Rilanci a voce">
+          <button data-vmode="off" aria-pressed="true">Off (manuale)</button>
+          <button data-vmode="auto">Auto</button>
+          <button data-vmode="annullo">Auto + annullo</button>
+        </div>
+        <p class="setup-p" style="color:var(--faint);margin-top:10px"><b>Auto</b>: applica subito. <b>Auto + annullo</b>: applica ma lascia qualche secondo per annullare. La battuta («assegnato a…») chiede <b>sempre</b> conferma. La griglia manuale resta sempre disponibile.</p>
+        <div class="setup-status" id="voice-setup-status"></div>
+      </div>
+
+      <div class="card" style="padding:16px">
+        <div class="eyebrow">5 · Esporta le rose per fantacalcio.it</div>
         <p class="setup-p">Genero un file CSV per ogni squadra (formato <b>Squadra,Id,Prezzo</b>), tutti in un'unica cartella dentro uno ZIP, pronto da caricare su fantacalcio.it.</p>
         <div class="export-preview" id="exp-preview"></div>
         <div class="btn-row" style="margin-top:0">
@@ -1093,7 +1133,7 @@
       </div>
 
       <div class="card" style="padding:16px">
-        <div class="eyebrow">5 · Ripristina asta</div>
+        <div class="eyebrow">6 · Ripristina asta</div>
         <p class="setup-p">Azzera <b>tutto</b>: crediti a 500, rose vuote, listone di nuovo disponibile, turno al primo. Da usare per far ripartire l'asta da capo.</p>
         <div class="danger-zone">
           <button class="btn danger" id="b-reset">Ripristina asta da zero</button>
@@ -1720,7 +1760,7 @@
 
   var st={view:"banditore",phase:"A",turnIdx:0,lot:null,count:0,counting:false,pending:false,timer:null,
           speed:"veloce",selPlayer:null,youIdx:0,step:1,modalIdx:null,modalOp:false,saleLog:[],drawn:false,
-          sort:"quot",bClub:"",listRole:"P",gSort:"quot",gListRole:"",gClub:"",rosterTeamIdx:null};
+          sort:"quot",bClub:"",listRole:"P",gSort:"quot",gListRole:"",gClub:"",rosterTeamIdx:null,voiceMode:"off"};
 
   // ultima assegnazione = cima dello storico vendite (stack cronologico)
   function lastSaleRec(){return (st.saleLog&&st.saleLog.length)?st.saleLog[st.saleLog.length-1]:null;}
@@ -1869,6 +1909,98 @@
     st.lot.leaderIdx=idx;stopBattuta();renderAll();
     toast(t.name+" · "+st.lot.bid);
   }
+
+  // ===================== RILANCI A VOCE (banditore) =====================
+  var Voice={rec:null,on:false,undoTimer:null};
+  try{if(/[?&]vtest/.test(location.search))window.__vhandle=function(t){return handleVoiceResult(t);};}catch(e){}
+  function voiceSupported(){return !!(window.SpeechRecognition||window.webkitSpeechRecognition);}
+  // applica un rilancio (come regiaPick) restituendo esito + snapshot per l'annullo
+  function voiceRaise(idx,amount){
+    if(!st.lot)return {ok:false,msg:"nessun giocatore all'asta"};
+    if(idx==null||idx<0||!teams[idx])return {ok:false,msg:"squadra non capita"};
+    var t=teams[idx],R=st.lot.player.r;
+    if(t.f[R]>=SLOTS[R])return {ok:false,msg:t.name+": ruolo pieno"};
+    if(amount<=st.lot.bid)return {ok:false,msg:amount+" non supera "+st.lot.bid};
+    if(amount>maxBid(t))return {ok:false,msg:t.name+": oltre il max ("+maxBid(t)+")"};
+    var prev={bid:st.lot.bid,leaderIdx:st.lot.leaderIdx};
+    st.lot.bid=amount;st.lot.leaderIdx=idx;stopBattuta();renderAll();
+    return {ok:true,prev:prev,name:t.name};
+  }
+  // ---- parser numeri italiani (cifre o parole, 1..999) ----
+  var VU=["","uno","due","tre","quattro","cinque","sei","sette","otto","nove"];
+  var VTENS=["","dieci","venti","trenta","quaranta","cinquanta","sessanta","settanta","ottanta","novanta"];
+  var VTEENS={10:"dieci",11:"undici",12:"dodici",13:"tredici",14:"quattordici",15:"quindici",16:"sedici",17:"diciassette",18:"diciotto",19:"diciannove"};
+  function itWord(n){if(n<10)return VU[n];if(n<20)return VTEENS[n];var t=Math.floor(n/10),u=n%10,tw=VTENS[t];if(u===1||u===8)tw=tw.slice(0,-1);return tw+(u?VU[u]:"");}
+  var NUMW={};(function(){for(var n=1;n<100;n++)NUMW[itWord(n)]=n;for(var h=1;h<=9;h++){var hw=(h===1?"cento":VU[h]+"cento");NUMW[hw]=h*100;for(var r=1;r<100;r++)NUMW[hw+itWord(r)]=h*100+r;}})();
+  function toNum(tok){if(tok==null)return null;tok=String(tok).replace(/[^a-z0-9]/g,"");if(tok==="")return null;if(/^\d+$/.test(tok))return parseInt(tok,10);return NUMW[tok]!=null?NUMW[tok]:null;}
+  // ---- match nome squadra (fuzzy) ----
+  function normTxt(s){return String(s).toLowerCase().replace(/[àáâ]/g,"a").replace(/[èé]/g,"e").replace(/[ìí]/g,"i").replace(/[òó]/g,"o").replace(/[ùú]/g,"u").replace(/[^a-z0-9]/g,"");}
+  function lev(a,b){var m=a.length,n=b.length,d=[],i,j;for(i=0;i<=m;i++)d[i]=[i];for(j=0;j<=n;j++)d[0][j]=j;for(i=1;i<=m;i++)for(j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[m][n];}
+  function matchTeam(tok){tok=normTxt(tok);if(!tok)return -1;var best=-1,bs=1e9;teams.forEach(function(t,i){var n=normTxt(t.name),d;if(n===tok)d=0;else if(n.indexOf(tok)===0||tok.indexOf(n)===0)d=0.5;else d=lev(tok,n);if(d<bs){bs=d;best=i;}});if(best<0)return -1;var nm=normTxt(teams[best].name);return bs<=Math.max(1,Math.floor(nm.length*0.4))?best:-1;}
+  // ---- interpreta la frase ----
+  function parseControl(txt){var t=normTxt(txt.replace(/\s+/g," "));
+    if(/\bbatt/.test(txt.toLowerCase())||/batt/.test(t))return {action:"batti"};
+    var low=txt.toLowerCase();
+    if(/(assegnat|aggiudicat|vendut|venduto)/.test(low)){var m=low.match(/(?:assegnat[oa]|aggiudicat[oa]|vendut[oa])\s+a\s+([a-zàèéìòù]+)/);return {action:"assign",teamIdx:m?matchTeam(m[1]):-1};}
+    return null;}
+  function parseBid(txt){var toks=txt.toLowerCase().trim().split(/\s+/);var amount=null,ni=-1,i;
+    for(i=toks.length-1;i>=0;i--){var v=toNum(toks[i]);if(v!=null){amount=v;ni=i;break;}}
+    if(amount==null)return null;
+    var rest=toks.slice(0,ni).concat(toks.slice(ni+1)).filter(function(x){return x&&x!=="a"&&x!=="e"&&x!=="ad";});
+    var idx=-1;for(i=0;i<rest.length;i++){idx=matchTeam(rest[i]);if(idx>=0)break;}
+    if(idx<0&&rest.length)idx=matchTeam(rest.join(""));
+    if(idx<0)return null;return {teamIdx:idx,amount:amount};}
+  // ---- azioni ----
+  function voiceHeard(txt,cls){var el=$("voice-heard");if(!el)return;el.innerHTML="Sentito: <b>"+escAttr(txt)+"</b>"+(cls?" <span class='"+cls+"'>"+(cls==="vh-ok"?"✓":"—")+"</span>":"");}
+  function handleVoiceResult(txt){
+    var ctl=parseControl(txt);
+    if(ctl){if(ctl.action==="batti"){voiceHeard(txt+"  → countdown","vh-ok");batti();return;}
+      if(ctl.action==="assign"){askVoiceAssign(ctl.teamIdx,txt);return;}}
+    var bid=parseBid(txt);
+    if(bid){var r=voiceRaise(bid.teamIdx,bid.amount);
+      if(r.ok){voiceHeard(txt,"vh-ok");if(st.voiceMode==="annullo")showVoiceUndo(r);}
+      else voiceHeard(txt+"  ("+r.msg+")","vh-no");
+      return;}
+    voiceHeard(txt+"  (non capito)","vh-no");
+  }
+  function showVoiceUndo(r){var el=$("voice-undo");if(!el)return;clearTimeout(Voice.undoTimer);
+    el.innerHTML="Applicato: <b>"+escAttr(r.name)+" · "+st.lot.bid+"</b><button class='btn ghost' id='voice-undo-btn'>Annulla</button>";el.hidden=false;
+    var snap=r.prev;$("voice-undo-btn").addEventListener("click",function(){if(st.lot){st.lot.bid=snap.bid;st.lot.leaderIdx=snap.leaderIdx;renderAll();}el.hidden=true;});
+    Voice.undoTimer=setTimeout(function(){el.hidden=true;el.innerHTML="";},4500);}
+  function askVoiceAssign(spokenIdx,txt){var el=$("voice-confirm");if(!el||!st.lot)return;
+    var li=st.lot.leaderIdx,lead=teams[li],price=st.lot.bid;
+    var warn=(spokenIdx>=0&&spokenIdx!==li)?"<div class='vc-warn'>Hai detto «"+escAttr(teams[spokenIdx].name)+"», ma in testa c'è "+escAttr(lead.name)+"</div>":"";
+    voiceHeard(txt,"vh-ok");
+    el.innerHTML="<div><div class='vc-txt'>Assegnare "+escAttr(st.lot.player.n)+" a "+escAttr(lead.name)+" per "+price+"?</div>"+warn+"</div>"+
+      "<div class='vc-actions'><button class='btn cta' id='vc-yes'>Conferma</button><button class='btn ghost' id='vc-no'>Annulla</button></div>";
+    el.hidden=false;
+    $("vc-yes").addEventListener("click",function(){el.hidden=true;el.innerHTML="";if(st.lot)assign();});
+    $("vc-no").addEventListener("click",function(){el.hidden=true;el.innerHTML="";});}
+  // ---- motore riconoscimento ----
+  function voiceStart(){
+    if(!voiceSupported()){toast("Riconoscimento vocale non supportato: usa Chrome/Edge");return;}
+    var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    var r=new SR();r.lang="it-IT";r.continuous=true;r.interimResults=true;
+    r.onresult=function(e){var res=e.results[e.results.length-1];var txt=res[0].transcript.trim();
+      if(!res.isFinal){var el=$("voice-heard");if(el)el.innerHTML="… <i>"+escAttr(txt)+"</i>";return;}
+      handleVoiceResult(txt);};
+    r.onerror=function(e){if(e.error==="not-allowed"||e.error==="service-not-allowed"){toast("Microfono negato");voiceStop();}};
+    r.onend=function(){if(Voice.on){try{r.start();}catch(x){}}};   // riavvio automatico
+    Voice.rec=r;Voice.on=true;try{r.start();}catch(x){}
+    renderVoiceBar();
+  }
+  function voiceStop(){Voice.on=false;if(Voice.rec){try{Voice.rec.stop();}catch(x){}Voice.rec=null;}renderVoiceBar();}
+  function voiceToggle(){if(Voice.on)voiceStop();else voiceStart();}
+  function renderVoiceBar(){
+    var bar=$("voice-bar");if(!bar)return;
+    bar.hidden=(st.voiceMode==="off");
+    var btn=$("voice-toggle");if(btn){btn.classList.toggle("on",Voice.on);btn.setAttribute("aria-pressed",Voice.on?"true":"false");btn.textContent=Voice.on?"🎤 Ascolto: attivo":"🎤 Ascolto: off";}
+    if(st.voiceMode==="off"){voiceStop&&(Voice.on&&voiceStop());}
+  }
+  function setVoiceMode(m){st.voiceMode=m;try{localStorage.setItem("astaVoiceMode",m);}catch(e){}
+    document.querySelectorAll("#voice-mode button").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.vmode===m?"true":"false");});
+    if(m==="off")voiceStop();renderVoiceBar();
+    var s=$("voice-setup-status");if(s)s.textContent=(m==="off"?"Rilanci a voce disattivati.":(voiceSupported()?"Attivo: nel Banditore trovi il pulsante 🎤 Ascolto.":"⚠️ Questo browser non supporta il riconoscimento vocale (usa Chrome/Edge)."));}
 
 
   function renderBanditore(){
@@ -2134,7 +2266,7 @@
       railHTML+="<div class='railchip"+(i===ic&&st.drawn?" corso":"")+(isDim(i)?" out":"")+"' data-i='"+i+"'>"+t.name+"</div>";}
     $("b-callorder").innerHTML=railHTML;
   }
-  function renderAll(){renderBanditore();renderGiocatore();renderTabellone();renderCallOrder();renderRings();
+  function renderAll(){renderBanditore();renderGiocatore();renderTabellone();renderCallOrder();renderRings();renderVoiceBar();
     if(Sync&&Sync.ready&&Sync.role==="operator"&&!Sync.applying)syncPush();}
 
   // ---------- SETUP: import listone / mappa squadre / export rose ----------
@@ -2239,6 +2371,10 @@
   try{if(document.body.classList.contains("chrome-hidden"))$("chrome-toggle").textContent="⤡";}catch(e){}
   // banditore
   $("b-batti").addEventListener("click",batti);
+  // rilanci a voce
+  $("voice-toggle").addEventListener("click",voiceToggle);
+  $("voice-mode").addEventListener("click",function(e){var b=e.target.closest("button[data-vmode]");if(!b)return;setVoiceMode(b.dataset.vmode);});
+  try{var vm=localStorage.getItem("astaVoiceMode");if(vm)setVoiceMode(vm);}catch(e){}
   $("b-speed").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.speed=b.dataset.speed;document.querySelectorAll("#b-speed button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});if(st.counting)batti();else renderAll();});
   $("b-assign").addEventListener("click",assign);
   $("b-undo").addEventListener("click",function(){
