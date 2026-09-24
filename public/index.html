@@ -92,6 +92,14 @@
   #b-lotcard .ring,#b-lotcard .ring svg{width:176px;height:176px}
   #b-lotcard .ring .num{font-size:66px}
   #b-lotcard .ring.idle .num{font-size:16px}
+  /* offerta più alta: numero e nome ben leggibili, centrati e in colonna */
+  #b-lotcard .lot-body{display:flex;align-items:center;justify-content:center;gap:clamp(40px,9%,110px);margin-top:22px}
+  #b-lotcard .bid-block{text-align:center}
+  #b-lotcard .bid-block .eyebrow{font-size:13px;letter-spacing:1.4px;margin-bottom:16px}
+  #b-lotcard .bid-line{flex-direction:column;align-items:center;gap:14px}
+  #b-lotcard .bid-amount{font-size:84px;line-height:.9}
+  #b-lotcard .bid-leader{margin-top:0;padding:10px 20px}
+  #b-lotcard .bid-leader b{font-size:26px}
   @keyframes pop{0%{transform:scale(.62);opacity:.35}55%{transform:scale(1.16);opacity:1}100%{transform:scale(1)}}
   .num.pop{animation:pop .5s cubic-bezier(.2,.9,.25,1)}
   @media(prefers-reduced-motion:reduce){.num.pop{animation:none}}
@@ -549,6 +557,9 @@
 
   /* tabellone: a tutta larghezza (esce dal contenitore da 1120px) per usare il maxischermo */
   #v-tabellone{width:100vw;margin-left:calc(50% - 50vw);padding-inline:24px;overflow-x:hidden}
+  /* banditore: si espande come il tabellone (esce dal contenitore da 1120px) */
+  #v-banditore{width:100vw;margin-left:calc(50% - 50vw);padding-inline:24px;overflow-x:hidden}
+  #v-banditore .b-callbox,#v-banditore .cols2{max-width:1680px;margin-left:auto;margin-right:auto}
   /* tabellone: compattazione per stare in UNA schermata (target 1080p) */
   #v-tabellone .section-title{display:none}
   #v-tabellone #t-callorder{margin-bottom:10px}
@@ -733,8 +744,16 @@
 
   /* ================= MOBILE (solo ≤600px — il desktop resta invariato) ================= */
   @media(max-width:600px){
+    /* su mobile niente full-bleed 100vw (evita scroll orizzontale da scrollbar) */
+    #v-tabellone,#v-banditore{width:100%;margin-left:0;padding-inline:14px}
     /* --- TABELLONE: da vetrina orizzontale a colonna leggibile --- */
-    #v-tabellone{padding-inline:14px;height:auto}
+    #v-tabellone{height:auto}
+    /* --- SETUP: tabella squadre compatta (niente scroll orizzontale) --- */
+    .setup-table th:first-child,.setup-table td.drag{display:none}
+    .setup-table th,.setup-table td{padding:4px 5px}
+    .setup-table input{padding:6px 8px;width:100%;min-width:0}
+    .setup-table td.ord{width:60px}
+    .ordbtn{width:24px;height:24px}
     .board-hero{flex-direction:column;align-items:stretch;gap:14px;padding:16px}
     .board-hero .bh-zones{flex-direction:column;width:100%;gap:15px;align-items:stretch}
     .board-hero .bh-zones>.bh-call,.board-hero .bh-zones>.bh-player,.board-hero .bh-zones>.bh-bid,.board-hero .bh-zones>.bh-last,.board-hero .bh-zones>.bh-wait{flex:0 0 auto;width:100%}
@@ -763,12 +782,20 @@
     #t-rank .crank-row{flex:0 0 auto;min-height:0;padding:7px 6px}
 
     /* --- BANDITORE: coda e regia leggibili --- */
+    #v-banditore{padding-inline:14px}
     .cb-head{gap:8px}
     .cb-rail{flex-wrap:wrap}
     .railchip{flex:0 0 auto;padding:8px 13px;font-size:14px;border-radius:20px;text-align:left}
     .railchip.corso{font-size:14.5px}
     .regia-grid{grid-template-columns:1fr}
     .tchip{font-size:15px}
+    /* lot card: impila offerta e anello, dimensioni adatte al telefono */
+    #b-lotcard .lot-body{flex-direction:column;gap:18px;margin-top:18px}
+    #b-lotcard .bid-amount{font-size:66px}
+    #b-lotcard .ring,#b-lotcard .ring svg{width:150px;height:150px}
+    #b-lotcard .ring .num{font-size:56px}
+    #b-lotcard .btn-row{flex-wrap:wrap}
+    #b-lotcard .btn-row .btn{flex:1 1 auto}
   }
 
   [hidden]{display:none!important}
