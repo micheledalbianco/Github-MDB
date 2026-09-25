@@ -776,6 +776,7 @@
     #v-tabellone{height:auto}
     /* --- SETUP: tabella squadre compatta (niente scroll orizzontale) --- */
     .setup-table th:first-child,.setup-table td.drag{display:none}
+    .setup-table th:nth-child(5),.setup-table td:nth-child(5){display:none}   /* alias voce: solo desktop */
     .setup-table th,.setup-table td{padding:4px 5px}
     .setup-table input{padding:6px 8px;width:100%;min-width:0}
     .setup-table td.ord{width:60px}
@@ -1096,7 +1097,8 @@
         <div class="eyebrow">2 · Partecipanti e squadre</div>
         <p class="setup-p">Nell'asta identifichi ognuno con il <b>nome della persona</b>; l'export usa il <b>nome della squadra</b> registrata su fantacalcio.it (es. Michele → Partizan Degrado).</p>
         <p class="setup-p" style="color:var(--faint)">Trascina le righe (o usa ▲▼) per metterle nell'<b>ordine in cui siedono</b>: questo ordine vale ovunque — banditore, tabellone, rose — e detta la sequenza dei turni dopo il sorteggio.</p>
-        <table class="setup-table"><thead><tr><th></th><th>#</th><th>Persona (nell'asta)</th><th>Squadra fantacalcio.it (per l'export)</th><th>Ordine</th></tr></thead><tbody id="setup-teams"></tbody></table>
+        <table class="setup-table"><thead><tr><th></th><th>#</th><th>Persona (nell'asta)</th><th>Squadra fantacalcio.it (per l'export)</th><th>Varianti voce</th><th>Ordine</th></tr></thead><tbody id="setup-teams"></tbody></table>
+        <p class="setup-p" style="color:var(--faint);margin-top:8px"><b>Varianti voce</b> (facoltativo): come l'app potrebbe sentire il nome, separate da virgola — es. Jon → «gion, john», Sugar → «sciugar». Serve solo se i rilanci a voce sbagliano quel nome.</p>
       </div>
 
       <div class="card" style="padding:16px">
@@ -1117,6 +1119,8 @@
           <button data-vmode="annullo">Auto + annullo</button>
         </div>
         <p class="setup-p" style="color:var(--faint);margin-top:10px"><b>Auto</b>: applica subito. <b>Auto + annullo</b>: applica ma lascia qualche secondo per annullare. La battuta («assegnato a…») chiede <b>sempre</b> conferma. La griglia manuale resta sempre disponibile.</p>
+        <button class="btn ghost" id="voice-ptt" aria-pressed="false" style="margin-top:4px">Push-to-talk: OFF (ascolto continuo)</button>
+        <p class="setup-p" style="color:var(--faint);margin-top:8px"><b>Off</b> (consigliato per far dettare tutti «Ale 30»): il microfono ascolta di continuo. <b>ON</b>: il microfono ascolta solo mentre tieni premuta la <b>barra spaziatrice</b> — utile se la stanza è rumorosa.</p>
         <div class="setup-status" id="voice-setup-status"></div>
       </div>
 
@@ -1760,7 +1764,7 @@
 
   var st={view:"banditore",phase:"A",turnIdx:0,lot:null,count:0,counting:false,pending:false,timer:null,
           speed:"veloce",selPlayer:null,youIdx:0,step:1,modalIdx:null,modalOp:false,saleLog:[],drawn:false,
-          sort:"quot",bClub:"",listRole:"P",gSort:"quot",gListRole:"",gClub:"",rosterTeamIdx:null,voiceMode:"off"};
+          sort:"quot",bClub:"",listRole:"P",gSort:"quot",gListRole:"",gClub:"",rosterTeamIdx:null,voiceMode:"off",voicePTT:false};
 
   // ultima assegnazione = cima dello storico vendite (stack cronologico)
   function lastSaleRec(){return (st.saleLog&&st.saleLog.length)?st.saleLog[st.saleLog.length-1]:null;}
@@ -1911,20 +1915,25 @@
   }
 
   // ===================== RILANCI A VOCE (banditore) =====================
-  var Voice={rec:null,on:false,undoTimer:null};
+  var Voice={rec:null,on:false,undoTimer:null,talking:false};
   try{if(/[?&]vtest/.test(location.search))window.__vhandle=function(t){return handleVoiceResult(t);};}catch(e){}
   function voiceSupported(){return !!(window.SpeechRecognition||window.webkitSpeechRecognition);}
-  // applica un rilancio (come regiaPick) restituendo esito + snapshot per l'annullo
-  function voiceRaise(idx,amount){
+  // verifica (senza applicare) se un rilancio è valido
+  function bidCheck(idx,amount){
     if(!st.lot)return {ok:false,msg:"nessun giocatore all'asta"};
     if(idx==null||idx<0||!teams[idx])return {ok:false,msg:"squadra non capita"};
     var t=teams[idx],R=st.lot.player.r;
     if(t.f[R]>=SLOTS[R])return {ok:false,msg:t.name+": ruolo pieno"};
     if(amount<=st.lot.bid)return {ok:false,msg:amount+" non supera "+st.lot.bid};
     if(amount>maxBid(t))return {ok:false,msg:t.name+": oltre il max ("+maxBid(t)+")"};
+    return {ok:true,name:t.name};
+  }
+  // applica un rilancio (come regiaPick) restituendo snapshot per l'annullo
+  function voiceRaise(idx,amount){
+    var c=bidCheck(idx,amount);if(!c.ok)return c;
     var prev={bid:st.lot.bid,leaderIdx:st.lot.leaderIdx};
     st.lot.bid=amount;st.lot.leaderIdx=idx;stopBattuta();renderAll();
-    return {ok:true,prev:prev,name:t.name};
+    return {ok:true,prev:prev,name:c.name};
   }
   // ---- parser numeri italiani (cifre o parole, 1..999) ----
   var VU=["","uno","due","tre","quattro","cinque","sei","sette","otto","nove"];
@@ -1933,10 +1942,32 @@
   function itWord(n){if(n<10)return VU[n];if(n<20)return VTEENS[n];var t=Math.floor(n/10),u=n%10,tw=VTENS[t];if(u===1||u===8)tw=tw.slice(0,-1);return tw+(u?VU[u]:"");}
   var NUMW={};(function(){for(var n=1;n<100;n++)NUMW[itWord(n)]=n;for(var h=1;h<=9;h++){var hw=(h===1?"cento":VU[h]+"cento");NUMW[hw]=h*100;for(var r=1;r<100;r++)NUMW[hw+itWord(r)]=h*100+r;}})();
   function toNum(tok){if(tok==null)return null;tok=String(tok).replace(/[^a-z0-9]/g,"");if(tok==="")return null;if(/^\d+$/.test(tok))return parseInt(tok,10);return NUMW[tok]!=null?NUMW[tok]:null;}
-  // ---- match nome squadra (fuzzy) ----
+  // ---- match nome squadra (fuzzy + fonetico + alias) ----
   function normTxt(s){return String(s).toLowerCase().replace(/[àáâ]/g,"a").replace(/[èé]/g,"e").replace(/[ìí]/g,"i").replace(/[òó]/g,"o").replace(/[ùú]/g,"u").replace(/[^a-z0-9]/g,"");}
+  // normalizzazione fonetica: fa convergere le scritture che l'STT confonde
+  function phon(s){s=normTxt(s);if(!s)return "";
+    s=s.replace(/h/g,"")
+       .replace(/sch/g,"sk").replace(/sci|sce/g,"si").replace(/sc/g,"sk").replace(/sh/g,"s")
+       .replace(/ci|ce/g,"ci").replace(/ch/g,"k").replace(/c/g,"k").replace(/q/g,"k")
+       .replace(/gli/g,"li").replace(/gn/g,"n").replace(/gi|ge/g,"gi").replace(/gh/g,"g").replace(/j/g,"gi")
+       .replace(/y/g,"i").replace(/w/g,"v").replace(/x/g,"ks").replace(/z/g,"s")
+       .replace(/(.)\1+/g,"$1");
+    return s;}
   function lev(a,b){var m=a.length,n=b.length,d=[],i,j;for(i=0;i<=m;i++)d[i]=[i];for(j=0;j<=n;j++)d[0][j]=j;for(i=1;i<=m;i++)for(j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[m][n];}
-  function matchTeam(tok){tok=normTxt(tok);if(!tok)return -1;var best=-1,bs=1e9;teams.forEach(function(t,i){var n=normTxt(t.name),d;if(n===tok)d=0;else if(n.indexOf(tok)===0||tok.indexOf(n)===0)d=0.5;else d=lev(tok,n);if(d<bs){bs=d;best=i;}});if(best<0)return -1;var nm=normTxt(teams[best].name);return bs<=Math.max(1,Math.floor(nm.length*0.4))?best:-1;}
+  function aliasArr(t){return String(t.alias||"").split(/[,;\/]/).map(function(x){return x.trim();}).filter(Boolean);}
+  function matchTeam(tok){tok=normTxt(tok);if(!tok)return -1;var tokP=phon(tok),best=-1,bs=1e9,bestLen=99;
+    teams.forEach(function(t,i){
+      var cands=[t.name].concat(aliasArr(t));
+      cands.forEach(function(c){var n=normTxt(c);if(!n)return;var d;
+        if(n===tok)d=0;
+        else if(n.indexOf(tok)===0||tok.indexOf(n)===0)d=0.5;
+        else d=Math.min(lev(tok,n),lev(tokP,phon(c))+0.25);   // distanza minore tra scritto e fonetico
+        if(d<bs){bs=d;best=i;bestLen=Math.min(tok.length,n.length);}});
+    });
+    if(best<0)return -1;
+    return bs<=Math.max(1.5,Math.floor(bestLen*0.45))?best:-1;}
+  function saveAliases(){try{var m={};teams.forEach(function(t){if(t.alias)m[t.id]=t.alias;});localStorage.setItem("astaAliases",JSON.stringify(m));}catch(e){}}
+  function loadAliases(){try{var m=JSON.parse(localStorage.getItem("astaAliases")||"{}");teams.forEach(function(t){if(m[t.id])t.alias=m[t.id];});}catch(e){}}
   // ---- interpreta la frase ----
   function parseControl(txt){var t=normTxt(txt.replace(/\s+/g," "));
     if(/\bbatt/.test(txt.toLowerCase())||/batt/.test(t))return {action:"batti"};
@@ -1952,16 +1983,24 @@
     if(idx<0)return null;return {teamIdx:idx,amount:amount};}
   // ---- azioni ----
   function voiceHeard(txt,cls){var el=$("voice-heard");if(!el)return;el.innerHTML="Sentito: <b>"+escAttr(txt)+"</b>"+(cls?" <span class='"+cls+"'>"+(cls==="vh-ok"?"✓":"—")+"</span>":"");}
-  function handleVoiceResult(txt){
-    var ctl=parseControl(txt);
-    if(ctl){if(ctl.action==="batti"){voiceHeard(txt+"  → countdown","vh-ok");batti();return;}
-      if(ctl.action==="assign"){askVoiceAssign(ctl.teamIdx,txt);return;}}
-    var bid=parseBid(txt);
-    if(bid){var r=voiceRaise(bid.teamIdx,bid.amount);
-      if(r.ok){voiceHeard(txt,"vh-ok");if(st.voiceMode==="annullo")showVoiceUndo(r);}
-      else voiceHeard(txt+"  ("+r.msg+")","vh-no");
-      return;}
-    voiceHeard(txt+"  (non capito)","vh-no");
+  // riceve una o più alternative (ordinate per confidenza): sceglie quella che combacia con la grammatica
+  function handleVoiceResult(input){
+    var alts=Array.isArray(input)?input.filter(Boolean):[String(input)];
+    if(!alts.length)return;
+    var i;
+    // 1) comandi (batto / assegnato) su una qualsiasi alternativa
+    for(i=0;i<alts.length;i++){var ctl=parseControl(alts[i]);
+      if(ctl){if(ctl.action==="batti"){voiceHeard(alts[i]+"  → countdown","vh-ok");batti();return;}
+        if(ctl.action==="assign"){askVoiceAssign(ctl.teamIdx,alts[i]);return;}}}
+    // 2) rilancio: prima alternativa che si interpreta E risulta valida
+    var firstParsed=null;
+    for(i=0;i<alts.length;i++){var bid=parseBid(alts[i]);if(!bid)continue;
+      if(!firstParsed)firstParsed={alt:alts[i],bid:bid};
+      var chk=bidCheck(bid.teamIdx,bid.amount);
+      if(chk.ok){var r=voiceRaise(bid.teamIdx,bid.amount);voiceHeard(alts[i],"vh-ok");if(st.voiceMode==="annullo")showVoiceUndo(r);return;}}
+    // 3) niente di valido: messaggio più utile possibile
+    if(firstParsed){var c=bidCheck(firstParsed.bid.teamIdx,firstParsed.bid.amount);voiceHeard(firstParsed.alt+"  ("+c.msg+")","vh-no");}
+    else voiceHeard(alts[0]+"  (non capito)","vh-no");
   }
   function showVoiceUndo(r){var el=$("voice-undo");if(!el)return;clearTimeout(Voice.undoTimer);
     el.innerHTML="Applicato: <b>"+escAttr(r.name)+" · "+st.lot.bid+"</b><button class='btn ghost' id='voice-undo-btn'>Annulla</button>";el.hidden=false;
@@ -1980,10 +2019,12 @@
   function voiceStart(){
     if(!voiceSupported()){toast("Riconoscimento vocale non supportato: usa Chrome/Edge");return;}
     var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-    var r=new SR();r.lang="it-IT";r.continuous=true;r.interimResults=true;
-    r.onresult=function(e){var res=e.results[e.results.length-1];var txt=res[0].transcript.trim();
-      if(!res.isFinal){var el=$("voice-heard");if(el)el.innerHTML="… <i>"+escAttr(txt)+"</i>";return;}
-      handleVoiceResult(txt);};
+    var r=new SR();r.lang="it-IT";r.continuous=true;r.interimResults=true;r.maxAlternatives=5;
+    r.onresult=function(e){var res=e.results[e.results.length-1];
+      if(st.voicePTT&&!Voice.talking)return;                       // push-to-talk: processa solo mentre tieni premuto
+      if(!res.isFinal){var el=$("voice-heard");if(el)el.innerHTML="… <i>"+escAttr(res[0].transcript.trim())+"</i>";return;}
+      var alts=[],i;for(i=0;i<res.length;i++)alts.push(res[i].transcript.trim());   // tutte le ipotesi
+      handleVoiceResult(alts);};
     r.onerror=function(e){if(e.error==="not-allowed"||e.error==="service-not-allowed"){toast("Microfono negato");voiceStop();}};
     r.onend=function(){if(Voice.on){try{r.start();}catch(x){}}};   // riavvio automatico
     Voice.rec=r;Voice.on=true;try{r.start();}catch(x){}
@@ -1995,12 +2036,20 @@
     var bar=$("voice-bar");if(!bar)return;
     bar.hidden=(st.voiceMode==="off");
     var btn=$("voice-toggle");if(btn){btn.classList.toggle("on",Voice.on);btn.setAttribute("aria-pressed",Voice.on?"true":"false");btn.textContent=Voice.on?"🎤 Ascolto: attivo":"🎤 Ascolto: off";}
-    if(st.voiceMode==="off"){voiceStop&&(Voice.on&&voiceStop());}
+    if(st.voiceMode==="off"&&Voice.on)voiceStop();
   }
   function setVoiceMode(m){st.voiceMode=m;try{localStorage.setItem("astaVoiceMode",m);}catch(e){}
     document.querySelectorAll("#voice-mode button").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.vmode===m?"true":"false");});
     if(m==="off")voiceStop();renderVoiceBar();
     var s=$("voice-setup-status");if(s)s.textContent=(m==="off"?"Rilanci a voce disattivati.":(voiceSupported()?"Attivo: nel Banditore trovi il pulsante 🎤 Ascolto.":"⚠️ Questo browser non supporta il riconoscimento vocale (usa Chrome/Edge)."));}
+  function setVoicePTT(on){st.voicePTT=!!on;try{localStorage.setItem("astaVoicePTT",on?"1":"0");}catch(e){}
+    var b=$("voice-ptt");if(b){b.setAttribute("aria-pressed",on?"true":"false");b.textContent=on?"Push-to-talk: ON (tieni SPAZIO)":"Push-to-talk: OFF (ascolto continuo)";}
+    Voice.talking=false;}
+  // push-to-talk: processa solo mentre tieni premuta la barra spaziatrice
+  function vbTalk(on){if(!st.voicePTT||!Voice.on)return;Voice.talking=on;
+    var el=$("voice-heard");if(el&&on)el.innerHTML="🎙️ <b>Sto ascoltando…</b> (rilascia per fermare)";}
+  document.addEventListener("keydown",function(e){if(e.code==="Space"&&st.voicePTT&&Voice.on&&st.view==="banditore"){var tg=e.target.tagName;if(tg==="INPUT"||tg==="TEXTAREA"||tg==="SELECT")return;e.preventDefault();vbTalk(true);}});
+  document.addEventListener("keyup",function(e){if(e.code==="Space"&&st.voicePTT){vbTalk(false);}});
 
 
   function renderBanditore(){
@@ -2295,6 +2344,7 @@
          "<td class='idx'>"+(i+1)+"</td>"+
          "<td><input type='text' data-i='"+i+"' data-k='name' value='"+escAttr(t.name)+"'></td>"+
          "<td><input type='text' data-i='"+i+"' data-k='fanta' value='"+escAttr(t.fanta)+"'></td>"+
+         "<td><input type='text' data-i='"+i+"' data-k='alias' placeholder='es. gion, john' value='"+escAttr(t.alias||"")+"'></td>"+
          "<td class='ord'><button class='ordbtn' data-mv='up' data-i='"+i+"' aria-label='Su'"+(i===0?" disabled":"")+">▲</button>"+
          "<button class='ordbtn' data-mv='down' data-i='"+i+"' aria-label='Giù'"+(i===teams.length-1?" disabled":"")+">▼</button></td></tr>";
     });
@@ -2374,7 +2424,10 @@
   // rilanci a voce
   $("voice-toggle").addEventListener("click",voiceToggle);
   $("voice-mode").addEventListener("click",function(e){var b=e.target.closest("button[data-vmode]");if(!b)return;setVoiceMode(b.dataset.vmode);});
+  $("voice-ptt").addEventListener("click",function(){setVoicePTT(!st.voicePTT);});
   try{var vm=localStorage.getItem("astaVoiceMode");if(vm)setVoiceMode(vm);}catch(e){}
+  try{setVoicePTT(localStorage.getItem("astaVoicePTT")==="1");}catch(e){}
+  loadAliases();renderSetupTeams();
   $("b-speed").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.speed=b.dataset.speed;document.querySelectorAll("#b-speed button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});if(st.counting)batti();else renderAll();});
   $("b-assign").addEventListener("click",assign);
   $("b-undo").addEventListener("click",function(){
@@ -2439,7 +2492,7 @@
   });
 
   // setup
-  $("setup-teams").addEventListener("input",function(e){var el=e.target;if(el.tagName!=="INPUT")return;var i=+el.dataset.i;teams[i][el.dataset.k]=el.value;renderAll();renderExportPreview();});
+  $("setup-teams").addEventListener("input",function(e){var el=e.target;if(el.tagName!=="INPUT")return;var i=+el.dataset.i;teams[i][el.dataset.k]=el.value;if(el.dataset.k==="alias")saveAliases();renderAll();renderExportPreview();});
   // riordino squadre: pulsanti ▲▼
   $("setup-teams").addEventListener("click",function(e){var b=e.target.closest(".ordbtn");if(!b)return;var i=+b.dataset.i;moveTeam(i,b.dataset.mv==="up"?i-1:i+1);});
   // riordino squadre: drag & drop
