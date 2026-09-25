@@ -239,6 +239,7 @@
   .grole.done .gr-v{color:var(--good)}
   /* asta in corso */
   .g-lot{padding:16px}
+  .g-menus{display:flex;flex-direction:column;gap:12px}
   /* struttura lot: mobile-first impilata (giocatore + anello + offerta) */
   .g-lot-main{display:flex;flex-direction:column;gap:14px}
   .g-lot-main .g-lot-top{order:1}
@@ -248,8 +249,8 @@
   .g-rail{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
   .g-railchip{flex:0 0 auto;padding:7px 12px;border:1px solid var(--border);border-radius:20px;font-size:13.5px;font-weight:600;color:var(--muted);white-space:nowrap;line-height:1}
   .g-railchip.corso{border-color:var(--evid);background:var(--evid-soft);color:var(--evid-ink);font-weight:800}
-  .g-railchip.you{box-shadow:inset 0 0 0 2px var(--gold)}
-  .g-railchip .rc-tag{font-size:10px;color:var(--gold);font-weight:700;margin-left:4px;text-transform:uppercase}
+  .g-railchip.you{border-color:var(--good);color:var(--text);box-shadow:inset 0 0 0 2px var(--good)}   /* sei tu: contorno verde */
+  .g-railchip.corso.you{box-shadow:none}   /* quando è il tuo turno vince l'arancione "Tocca a te" */
   .g-railchip.lab{color:var(--faint);border-style:dashed}
   /* mobile: una sola riga scorrevole, chi chiama in testa */
   .g-rail-mob{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
@@ -302,7 +303,15 @@
   #g-rank.crank{padding:0}
   /* PC: hero più grande, cerchio "in asta" più prominente */
   @media(min-width:721px){
-    .g-wrap{max-width:1040px}                 /* più largo: la coda squadre sta in una riga sola */
+    /* giocatore desktop: a tutta larghezza come tabellone/banditore */
+    #v-giocatore{width:100vw;margin-left:calc(50% - 50vw);padding-inline:24px;overflow-x:hidden}
+    /* layout: barra in alto a tutta larghezza, asta a sinistra, i 3 menù a destra */
+    .g-wrap{max-width:1560px;display:grid;grid-template-columns:minmax(0,1.85fr) minmax(0,1fr);gap:14px;
+            grid-template-areas:"top top" "lot menus";align-items:start}
+    .g-top{grid-area:top}
+    .g-lot{grid-area:lot;align-self:start;position:sticky;top:70px}   /* l'asta resta in vista mentre scorri i menù */
+    .g-menus{grid-area:menus}
+    .g-list-out{max-height:60vh}
     /* coda: i chip occupano tutta la larghezza in una riga */
     .g-rail{flex-wrap:nowrap;gap:6px}
     .g-railchip{flex:1 1 auto;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1033,6 +1042,7 @@
         <div class="g-rolefull" id="g-rolefull" hidden></div>
       </div>
 
+      <div class="g-menus">
       <!-- COLLASSABILE: listone giocatori -->
       <details class="card g-sec" id="g-sec-list">
         <summary>Listone giocatori</summary>
@@ -1067,6 +1077,7 @@
         <summary>Crediti</summary>
         <div class="g-sec-body"><div class="crank" id="g-rank"></div></div>
       </details>
+      </div>
     </div>
   </section>
 
@@ -2141,7 +2152,7 @@
     if(mobile){for(k=0;k<N;k++)order.push((ic+k)%N);}else{for(i=0;i<N;i++)order.push(i);}
     el.className="g-rail"+(mobile?" g-rail-mob":"");
     el.innerHTML=order.map(function(i){var t=teams[i],me=(i===st.youIdx),cur=(i===ic);
-      var txt=(cur&&me)?"Tocca a te":(t.name+(me?" <span class='rc-tag'>tu</span>":""));
+      var txt=(cur&&me)?"Tocca a te":t.name;
       return "<div class='g-railchip"+(cur?" corso":"")+(me?" you":"")+"'>"+txt+"</div>";
     }).join("");
   }
@@ -2491,6 +2502,8 @@
   $("g-roster-team").addEventListener("change",function(){st.rosterTeamIdx=parseInt(this.value,10);renderMyRoster();});
   // ricalcola la coda del giocatore quando si passa desktop<->mobile
   (function(){var t;window.addEventListener("resize",function(){clearTimeout(t);t=setTimeout(renderGiocCall,150);});})();
+  // su desktop apri i 3 menù come anteprima (restano comunque richiudibili)
+  try{if(window.matchMedia&&window.matchMedia("(min-width:721px)").matches){document.querySelectorAll("#v-giocatore details.g-sec").forEach(function(d){d.open=true;});}}catch(e){}
   // listone giocatore: filtri squadra + ruolo + ordinamento + ricerca
   $("g-sec-list").addEventListener("toggle",function(){if(this.open)renderGiocListone();});
   $("g-list-club").addEventListener("change",function(){st.gClub=this.value;renderGiocListone();});
