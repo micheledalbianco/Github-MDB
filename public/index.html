@@ -2852,12 +2852,15 @@
       ch.on("broadcast",{event:"hello"},function(){syncPush();});   // ri-invia lo stato a chi entra
       sb.from("rooms").select("state").eq("id",Sync.room).maybeSingle().then(function(res){
         var dbState=(res&&res.data&&res.data.state&&res.data.state.teams)?res.data.state:null;
-        // priorità: (1) stato canonico salvato nel DB; (2) asta viva già in memoria
-        // (stavo guardando come giocatore) — divento solo l'autorità, NON azzerare;
+        var d=demoParam(),isDemo=(["P","D","C","A"].indexOf(d)>=0);
+        // priorità: (0) scenario demo esplicito nell'URL (?demo=A) — l'admin vuole caricarlo
+        // e verrà propagato a tutti; (1) stato canonico salvato nel DB; (2) asta viva già in
+        // memoria (stavo guardando come giocatore) — divento solo l'autorità, NON azzerare;
         // (3) solo se non c'è NULLA, nuova asta.
-        if(dbState){Sync.applying=true;applyState(dbState);Sync.applying=false;}
+        if(isDemo){seedMidRole(d);}
+        else if(dbState){Sync.applying=true;applyState(dbState);Sync.applying=false;}
         else if(haveLive){/* mantengo lo stato corrente e lo ripubblico appena connesso */}
-        else{var d=demoParam();if(["P","D","C","A"].indexOf(d)>=0)seedMidRole(d);else freshStart();}
+        else{freshStart();}
         ch.subscribe(function(status){if(status==="SUBSCRIBED"){Sync.ready=true;syncPush();onReady&&onReady();}});
       });
     } else {
