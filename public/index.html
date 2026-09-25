@@ -7,7 +7,7 @@
 <meta name="description" content="Gestione asta del fantacalcio dal vivo: banditore, giocatori e tabellone.">
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<title>Asta Fantacalcio</title>
+<title>FANTABRIGATA</title>
 <style>
   /* ===== Tema "Blu Cobalto" (scuro, committed) ===== */
   :root{
@@ -54,6 +54,8 @@
   .seg{display:inline-flex;margin-left:auto;background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:3px;gap:2px}
   .seg button{border:0;background:transparent;color:var(--muted);padding:7px 13px;border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer;letter-spacing:.2px}
   .seg button[aria-current="true"]{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+  .top-brand{font-family:var(--ff-disp);font-weight:700;font-size:16px;letter-spacing:.5px;color:var(--accent-ink)}
+  .mode-switch{padding:7px 12px;font-size:12.5px;white-space:nowrap}
 
   .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow)}
   .eyebrow{font-size:11px;letter-spacing:1.1px;text-transform:uppercase;color:var(--faint);font-weight:600}
@@ -232,6 +234,7 @@
   .g-top-id{display:flex;flex-direction:column;gap:2px;min-width:0}
   .g-top-id b{font-family:var(--ff-disp);font-size:22px;font-weight:700;line-height:1}
   .g-top-id span{font-size:12.5px;color:var(--muted)}
+  .g-adminteam{margin-top:6px;height:34px;border-radius:9px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text);font-size:13.5px;font-weight:600;padding:0 8px;max-width:220px}
   .g-top-right{display:flex;gap:20px;justify-self:end}
   .g-top-right .stat{align-items:flex-end}
   .g-roles{grid-column:1 / -1;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
@@ -305,6 +308,12 @@
   .g-sec-body #g-rank.crank,.g-sec-body .crank{padding:0}
   .g-list-filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
   .g-list-filters select{flex:1 1 150px;min-width:0;height:40px;border-radius:11px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text);font-size:14.5px;font-weight:600;padding:0 12px}
+  /* filtro obiettivi: stellina come toggle */
+  .starfilter{flex:none;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:11px;border:1px solid var(--border-strong);background:var(--bg);color:var(--faint);font-size:17px;cursor:pointer;line-height:1}
+  .starfilter[aria-pressed="true"]{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 60%,transparent);background:color-mix(in srgb,var(--gold) 14%,transparent)}
+  .pstar{flex:none;border:0;background:transparent;color:var(--border-strong);font-size:17px;line-height:1;cursor:pointer;padding:0 2px}
+  .pstar:hover{color:var(--gold)}
+  .pstar[aria-pressed="true"]{color:var(--gold)}
   .g-list-out{max-height:52vh;overflow:auto}
   .g-roster-sel{width:100%;height:42px;border-radius:11px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text);font-size:15px;font-weight:600;padding:0 12px;margin-bottom:12px}
   #g-rank.crank{padding:0}
@@ -312,22 +321,27 @@
   @media(min-width:721px){
     /* giocatore desktop: a tutta larghezza come tabellone/banditore */
     #v-giocatore{width:100vw;margin-left:calc(50% - 50vw);padding-inline:24px;overflow-x:hidden}
-    /* layout: barra in alto a tutta larghezza, asta a sinistra, i 3 menù a destra */
+    /* layout: barra squadra, coda nomi, poi asta a sinistra + i 3 menù a destra */
     .g-wrap{max-width:1560px;display:grid;grid-template-columns:minmax(0,1.85fr) minmax(0,1fr);gap:14px;
-            grid-template-rows:auto 1fr;grid-template-areas:"top top" "left menus";align-items:start}
+            grid-template-rows:auto auto auto;grid-template-areas:"top top" "rail rail" "left menus";align-items:start}
     .g-top{grid-area:top}
-    .g-railcard{display:none}          /* su desktop la fila nomi diventa le card sotto l'asta */
-    .g-left{grid-area:left;align-self:stretch;display:flex;flex-direction:column;gap:14px}
+    .g-railcard{grid-area:rail}
+    .g-left{grid-area:left;align-self:start;display:flex;flex-direction:column;gap:14px}   /* non si allunga se allargo i menù a destra */
     .g-gridcard{display:block;flex:1 1 auto}
     #g-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;height:100%;grid-auto-rows:minmax(44px,1fr);align-content:stretch}
     #g-grid .tchip{font-size:14px}
     .g-menus{grid-area:menus}
-    /* modalità tutto schermo: la colonna sinistra riempie giusto lo schermo */
-    body.chrome-hidden #v-giocatore .g-wrap{min-height:calc(100vh - 20px)}
+    /* modalità tutto schermo: la colonna sinistra riempie giusto lo schermo (i menù a destra scrollano) */
+    body.chrome-hidden #v-giocatore .g-wrap{height:calc(100vh - 16px);grid-template-rows:auto auto 1fr;overflow:hidden}
+    body.chrome-hidden #v-giocatore .g-left{align-self:stretch;min-height:0}
+    body.chrome-hidden #v-giocatore .g-menus{align-self:stretch;min-height:0;overflow-y:auto}
     .g-list-out{max-height:60vh}
-    /* coda: i chip occupano tutta la larghezza in una riga */
+    /* listone giocatore: filtri su una sola riga (allarga i tab, stringi il menu squadra) */
+    #g-sec-list .g-list-filters{flex-wrap:nowrap}
+    #g-sec-list .g-list-filters select{flex:1 1 80px}
+    /* coda partecipanti: chip a tutta larghezza, identici al banditore */
     .g-rail{flex-wrap:nowrap;gap:6px}
-    .g-railchip{flex:1 1 auto;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .g-railchip{flex:1 1 0;min-width:0;justify-content:center;text-align:center;padding:9px 8px;border-radius:11px;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .g-lot{padding:22px 26px}
     /* header orizzontale su griglia 1fr auto 1fr: offerta centrata nella card */
     .g-lot-main{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px}
@@ -800,8 +814,8 @@
   .gate-field{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:16px}
   .gate-field input,.gate-field select{font-family:inherit;font-size:16px;padding:12px;border-radius:10px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text)}
   .gate-roles{display:flex;flex-direction:column;gap:10px}
-  .gate-roles .btn,#gate-team .btn{justify-content:center;width:100%}
-  #gate-team{margin-top:16px;display:flex;flex-direction:column;gap:10px}
+  .gate-roles .btn,#gate-team .btn,#gate-admin .btn{justify-content:center;width:100%}
+  #gate-team,#gate-admin{margin-top:16px;display:flex;flex-direction:column;gap:10px}
   .gate-status{margin-top:14px;font-size:13px;color:var(--accent-ink);min-height:18px;font-weight:600}
 
   /* ================= MOBILE (solo ≤600px — il desktop resta invariato) ================= */
@@ -888,13 +902,17 @@
 <body>
 <div id="gate" class="gate" hidden>
   <div class="gate-card card">
-    <div class="gate-logo"><span class="logo">A</span> <b>Asta&nbsp;Live</b></div>
-    <p class="gate-sub">Entra in questa asta scegliendo il tuo ruolo.</p>
+    <div class="gate-logo"><span class="logo">F</span> <b>FANTABRIGATA</b></div>
+    <p class="gate-sub">Entra scegliendo come vuoi partecipare.</p>
     <label class="gate-field">Codice stanza<input type="text" id="gate-room" autocomplete="off"></label>
     <div class="gate-roles" id="gate-roles">
-      <button class="btn primary big" data-role="operator">🎙️ Banditore</button>
-      <button class="btn big" data-role="board">📺 Tabellone</button>
-      <button class="btn cta big" data-role="player">📱 Giocatore</button>
+      <button class="btn primary big" data-acc="admin">🛡️ Admin</button>
+      <button class="btn cta big" data-acc="giocatore">📱 Giocatore</button>
+    </div>
+    <div id="gate-admin" hidden>
+      <label class="gate-field">Password admin<input type="password" id="gate-pass" autocomplete="off"></label>
+      <button class="btn primary big" id="gate-adminok">Entra come admin</button>
+      <button class="btn ghost" id="gate-back2">Indietro</button>
     </div>
     <div id="gate-team" hidden>
       <label class="gate-field">Chi sei?<select id="gate-teamsel"></select></label>
@@ -906,12 +924,14 @@
 </div>
 <header class="top">
   <div class="top-inner">
+    <span class="top-brand">FANTABRIGATA</span>
     <div class="seg" role="tablist" aria-label="Vista">
       <button data-view="banditore" aria-current="true">Banditore</button>
       <button data-view="giocatore">Giocatore</button>
       <button data-view="tabellone">Tabellone</button>
       <button data-view="setup">Setup</button>
     </div>
+    <button class="btn ghost mode-switch" id="mode-switch" title="Cambia modalità di accesso">⇄ Modalità</button>
   </div>
 </header>
 <button id="chrome-toggle" aria-label="Nascondi o mostra la barra" title="Nascondi/mostra barra">⤢</button>
@@ -1012,7 +1032,9 @@
     <div class="g-wrap">
       <!-- TOP: squadra + composizione -->
       <div class="card g-top">
-        <div class="g-top-id"><b id="g-name2">—</b><span id="g-owner">—</span></div>
+        <div class="g-top-id"><b id="g-name2">—</b><span id="g-owner">—</span>
+          <select id="g-adminteam" class="g-adminteam" aria-label="Vedi come squadra" hidden></select>
+        </div>
         <div class="g-top-right">
           <div class="stat gold"><span class="v tnum" id="g-cred">—</span><span class="l">crediti</span></div>
           <div class="stat"><span class="v tnum" id="g-maxbid">—</span><span class="l">max rilancio</span></div>
@@ -1077,6 +1099,7 @@
               <button data-r="" aria-pressed="true">Tutti</button>
               <button data-r="P">P</button><button data-r="D">D</button><button data-r="C">C</button><button data-r="A">A</button>
             </div>
+            <button class="starfilter" id="g-list-star" aria-pressed="false" title="Mostra solo i miei obiettivi">★</button>
             <div class="sortpick" id="g-list-sort" role="group" aria-label="Ordinamento">
               <button data-sort="quot" aria-pressed="true">Quot.</button>
               <button data-sort="alfa">A‑Z</button>
@@ -1813,10 +1836,16 @@
 
   var st={view:"banditore",phase:"A",turnIdx:0,lot:null,count:0,counting:false,pending:false,timer:null,
           speed:"veloce",selPlayer:null,youIdx:0,step:1,modalIdx:null,modalOp:false,saleLog:[],drawn:false,
-          sort:"quot",bClub:"",listRole:"P",gSort:"quot",gListRole:"",gClub:"",rosterTeamIdx:null,voiceMode:"off",voicePTT:false};
+          sort:"quot",bClub:"",listRole:"P",gSort:"quot",gListRole:"",gClub:"",gStarOnly:false,rosterTeamIdx:null,voiceMode:"off",voicePTT:false,access:"admin"};
 
   // ultima assegnazione = cima dello storico vendite (stack cronologico)
   function lastSaleRec(){return (st.saleLog&&st.saleLog.length)?st.saleLog[st.saleLog.length-1]:null;}
+
+  // obiettivi personali (stellina) — salvati localmente sul dispositivo, non condivisi
+  var myObj={};
+  try{myObj=JSON.parse(localStorage.getItem("fb-obiettivi")||"{}")||{};}catch(e){myObj={};}
+  function isObj(id){return !!myObj[id];}
+  function toggleObj(id){if(myObj[id])delete myObj[id];else myObj[id]=1;try{localStorage.setItem("fb-obiettivi",JSON.stringify(myObj));}catch(e){}}
 
   var $=function(id){return document.getElementById(id);};
   var N=teams.length;
@@ -2204,18 +2233,25 @@
     var out=$("g-list-out");if(!out)return;
     var sel=$("g-list-club");
     if(!sel.dataset.done){sel.innerHTML="<option value=''>Tutte le squadre</option>"+clubList().map(function(c){return "<option value='"+c+"'>"+c+"</option>";}).join("");sel.dataset.done="1";}
-    var club=st.gClub||"",role=st.gListRole||"",q=($("g-list-search").value||"").toLowerCase(),sort=st.gSort||"quot";
-    var list=LISTONE.filter(function(p){return (!role||p.r===role)&&(!club||p.sq===club)&&p.n.toLowerCase().indexOf(q)>=0;});
+    var club=st.gClub||"",role=st.gListRole||"",q=($("g-list-search").value||"").toLowerCase(),sort=st.gSort||"quot",starOnly=!!st.gStarOnly;
+    var list=LISTONE.filter(function(p){return (!role||p.r===role)&&(!club||p.sq===club)&&(!starOnly||isObj(p.id))&&p.n.toLowerCase().indexOf(q)>=0;});
     var ord={P:0,D:1,C:2,A:3};
     list.sort(sort==="quot"?function(a,b){return (ord[a.r]-ord[b.r])||(b.q-a.q)||a.n.localeCompare(b.n);}:function(a,b){return (ord[a.r]-ord[b.r])||a.n.localeCompare(b.n);});
     out.innerHTML=list.map(function(p){
+      var on=isObj(p.id);
       return "<div class='prow"+(p.taken?" taken":"")+"'><span class='role-pill role-"+p.r+"'>"+p.r+"</span><span class='pn'>"+p.n+"</span>"+
+        "<button class='pstar' data-pid='"+p.id+"' aria-pressed='"+(on?"true":"false")+"' title='Segna obiettivo'>"+(on?"★":"☆")+"</button>"+
         (p.taken?"<span class='takenbadge'>preso</span>":"")+"<span class='ps'>"+p.sq+" · "+p.q+"</span></div>";
     }).join("")||"<div class='prow faint' style='cursor:default'>Nessun giocatore</div>";
   }
   function renderGiocatore(){
     var you=teams[st.youIdx];
     $("g-name2").textContent=you.name;$("g-owner").textContent=you.fanta;
+    // admin: può cambiare in ogni momento quale squadra vede/gestisce nella sezione giocatore
+    var ats=$("g-adminteam"),isAdmin=(st.access==="admin");
+    if(ats){ats.hidden=!isAdmin;
+      if(isAdmin){var want=teams.map(function(t,i){return "<option value='"+i+"'"+(i===st.youIdx?" selected":"")+">"+t.name+" — "+t.fanta+"</option>";}).join("");
+        if(ats._sig!==want){ats.innerHTML=want;ats._sig=want;}else{ats.value=String(st.youIdx);}}}
     $("g-cred").textContent=you.cred;$("g-maxbid").textContent=maxBid(you);
     $("g-roles").innerHTML=ROLE_SLOTS.map(function(x){var r=x[0],tt=x[1],cur=(r===st.listRole),done=you.f[r]>=tt;
       return "<span class='grole"+(cur?" cur":"")+(done?" done":"")+"'><span class='gr-l'>"+r+"</span><span class='gr-v'>"+you.f[r]+"/"+tt+"</span></span>";}).join("");
@@ -2474,6 +2510,7 @@
     window.scrollTo(0,0);
   }
   document.querySelectorAll(".seg button").forEach(function(b){b.addEventListener("click",function(){setView(b.dataset.view);});});
+  $("mode-switch").addEventListener("click",function(){if(typeof reopenGate==="function")reopenGate();});
   try{if(localStorage.getItem("astaChromeHidden")==="1")document.body.classList.add("chrome-hidden");}catch(e){}
   $("chrome-toggle").addEventListener("click",function(){
     var h=document.body.classList.toggle("chrome-hidden");
@@ -2540,6 +2577,12 @@
   $("g-list-search").addEventListener("input",renderGiocListone);
   $("g-list-role").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.gListRole=b.dataset.r;document.querySelectorAll("#g-list-role button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});renderGiocListone();});
   $("g-list-sort").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.gSort=b.dataset.sort;document.querySelectorAll("#g-list-sort button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});renderGiocListone();});
+  // filtro "solo miei obiettivi" (combinabile con ruolo/squadra/ordinamento/ricerca)
+  $("g-list-star").addEventListener("click",function(){st.gStarOnly=!st.gStarOnly;this.setAttribute("aria-pressed",st.gStarOnly?"true":"false");renderGiocListone();});
+  // stellina su una riga: segna/rimuovi obiettivo (locale)
+  $("g-list-out").addEventListener("click",function(e){var b=e.target.closest(".pstar");if(!b)return;toggleObj(b.dataset.pid);renderGiocListone();});
+  // admin: cambia squadra vista nella sezione giocatore
+  $("g-adminteam").addEventListener("change",function(){var i=parseInt(this.value,10);if(!isNaN(i)){st.youIdx=i;renderAll();}});
 
   // tabellone: click su una squadra → ingrandisci (rosa completa)
   $("t-grid").addEventListener("click",function(e){var c=e.target.closest(".tcard");if(!c)return;st.modalIdx=parseInt(c.dataset.i,10);st.modalOp=false;renderTeamModal(st.modalIdx);});
@@ -2671,10 +2714,13 @@
     else if(p.kind==="raise_by"){var inc=parseInt(p.amount,10)||1;if(inc<1||st.lot.bid+inc>maxBid(t))return;st.lot.bid+=inc;st.lot.leaderIdx=idx;stopBattuta();renderAll();}
     else if(p.kind==="raise_to"){var v=parseInt(p.amount,10);if(isNaN(v)||v<=st.lot.bid||v>maxBid(t))return;st.lot.bid=v;st.lot.leaderIdx=idx;stopBattuta();renderAll();}
   }
-  function gateRoom(){return (($("gate-room").value||CFG.ROOM||"ASTA").trim().toUpperCase())||"ASTA";}
+  var ADMIN_PASS="BNM";
+  function gateRoom(){return (($("gate-room").value||CFG.ROOM||"FANTABRIGATA").trim().toUpperCase())||"FANTABRIGATA";}
   function makeSync(role){return {role:role,room:gateRoom(),sb:window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY),ch:null,ready:false,applying:false,_t:null};}
   function sendAction(kind,payload){if(!Sync||!Sync.ch)return;try{Sync.ch.send({type:"broadcast",event:"action",payload:{kind:kind,teamIdx:payload.teamIdx,amount:payload.amount}});}catch(e){}}
   function connect(role,onReady){
+    // se stiamo cambiando modalità, chiudi il canale precedente per non lasciare sottoscrizioni doppie
+    if(Sync&&Sync.sb){try{if(Sync.ch)Sync.sb.removeChannel(Sync.ch);}catch(e){}}
     Sync=makeSync(role);var sb=Sync.sb;
     var ch=sb.channel("asta-"+Sync.room,{config:{broadcast:{self:false}}});Sync.ch=ch;
     if(role==="operator"){
@@ -2697,34 +2743,47 @@
   function saveJoin(o){try{localStorage.setItem("asta-join",JSON.stringify(o));}catch(e){}}
   function loadJoin(){try{return JSON.parse(localStorage.getItem("asta-join")||"null");}catch(e){return null;}}
 
-  function startOperatorOrBoard(role){
+  // ADMIN: accesso completo (banditore + tabellone + setup + giocatore), è l'autorità (operator)
+  function startAdmin(){
+    st.access="admin";
     $("gate-status").textContent="Connessione…";
-    if(role==="operator"){setNav(["banditore","tabellone","setup"]);connect("operator",function(){$("gate").hidden=true;renderExportPreview();setView("banditore");renderAll();saveJoin({role:"operator",room:gateRoom()});});}
-    else{setNav(["tabellone"]);connect("board",function(){$("gate").hidden=true;setView("tabellone");renderAll();saveJoin({role:"board",room:gateRoom()});});}
+    setNav(["banditore","giocatore","tabellone","setup"]);
+    connect("operator",function(){$("gate").hidden=true;renderExportPreview();setView("banditore");renderAll();saveJoin({access:"admin",room:gateRoom()});});
   }
   function startPlayerConnect(preIdx){
-    $("gate-status").textContent="Connessione…";$("gate-roles").hidden=true;
+    st.access="giocatore";
+    $("gate-status").textContent="Connessione…";$("gate-roles").hidden=true;$("gate-admin").hidden=true;
     connect("player",function(){
       var sel=$("gate-teamsel");sel.innerHTML=teams.map(function(t,i){return "<option value='"+i+"'>"+t.name+" — "+t.fanta+"</option>";}).join("");
       if(preIdx!=null){sel.value=preIdx;finalizePlayer(preIdx);return;}
-      $("gate-team").hidden=false;$("gate-status").textContent="Scegli chi sei, poi Entra.";
+      $("gate-team").hidden=false;$("gate-status").textContent="Scegli la tua squadra, poi Entra.";
     });
   }
-  function finalizePlayer(idx){st.youIdx=idx;setNav(["giocatore","tabellone"]);$("gate").hidden=true;setView("giocatore");renderAll();saveJoin({role:"player",teamIdx:idx,room:gateRoom()});}
+  // GIOCATORE: vede solo la propria sezione + tabellone, squadra fissa (nessuna modifica nomi)
+  function finalizePlayer(idx){st.access="giocatore";st.youIdx=idx;setNav(["giocatore","tabellone"]);$("gate").hidden=true;setView("giocatore");renderAll();saveJoin({access:"giocatore",teamIdx:idx,room:gateRoom()});}
 
+  function gateReset(){$("gate-team").hidden=true;$("gate-admin").hidden=true;$("gate-roles").hidden=false;$("gate-status").textContent="";var p=$("gate-pass");if(p)p.value="";}
+  function tryAdmin(){var p=($("gate-pass").value||"").trim();if(p!==ADMIN_PASS){$("gate-status").textContent="Password errata.";return;}startAdmin();}
   function wireGate(){
-    $("gate-roles").addEventListener("click",function(e){var b=e.target.closest("button[data-role]");if(!b)return;
-      if(b.dataset.role==="player")startPlayerConnect(null);else startOperatorOrBoard(b.dataset.role);});
+    $("gate-roles").addEventListener("click",function(e){var b=e.target.closest("button[data-acc]");if(!b)return;
+      if(b.dataset.acc==="giocatore")startPlayerConnect(null);
+      else{$("gate-roles").hidden=true;$("gate-admin").hidden=false;$("gate-status").textContent="";var p=$("gate-pass");if(p){p.value="";p.focus();}}});
+    $("gate-adminok").addEventListener("click",tryAdmin);
+    $("gate-pass").addEventListener("keydown",function(e){if(e.key==="Enter")tryAdmin();});
     $("gate-join").addEventListener("click",function(){var idx=parseInt($("gate-teamsel").value,10);if(!isNaN(idx))finalizePlayer(idx);});
-    $("gate-back").addEventListener("click",function(){$("gate-team").hidden=true;$("gate-roles").hidden=false;$("gate-status").textContent="";});
+    $("gate-back").addEventListener("click",gateReset);
+    $("gate-back2").addEventListener("click",gateReset);
   }
+  // riapre il gate per cambiare modalità (admin sempre protetto da password)
+  function reopenGate(){gateReset();$("gate-roles").hidden=false;$("gate").hidden=false;$("gate-status").textContent="";}
   function setupGate(){
     wireGate();
     var j=loadJoin(),force=false;try{force=new URLSearchParams(location.search).has("join");}catch(e){}
-    $("gate-room").value=(j&&j.room)||CFG.ROOM||"ASTA";
-    if(j&&j.role&&!force){
-      if(j.role==="player"&&j.teamIdx!=null)startPlayerConnect(j.teamIdx);
-      else if(j.role==="operator"||j.role==="board")startOperatorOrBoard(j.role);
+    $("gate-room").value=(j&&j.room)||CFG.ROOM||"FANTABRIGATA";
+    if(j&&!force){
+      var acc=j.access||(j.role==="player"?"giocatore":(j.role?"admin":null));  // compat vecchi salvataggi
+      if(acc==="giocatore"&&j.teamIdx!=null)startPlayerConnect(j.teamIdx);
+      else if(acc==="admin")startAdmin();
       else $("gate").hidden=false;
     } else $("gate").hidden=false;
   }
@@ -2734,6 +2793,8 @@
   renderSetupTeams();
   if(MP){ setupGate(); }
   else {
+    // modalità locale (nessun realtime): niente gate, accesso admin completo
+    st.access="admin";$("mode-switch").hidden=true;
     var d=demoParam();
     if(["P","D","C","A"].indexOf(d)>=0)seedMidRole(d);else freshStart();
     renderExportPreview();setView("banditore");renderAll();
