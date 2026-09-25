@@ -753,6 +753,12 @@
   .crank-row.leader{background:color-mix(in srgb,var(--gold) 16%,transparent);border:1px solid color-mix(in srgb,var(--gold) 48%,transparent)}
   .crank-row.leader + .crank-row{border-top:0}
   .crank-row.leader .crank-name{color:var(--text);font-weight:700}
+  /* modalità giocatore: la MIA squadra in verde nel tabellone (in classifica e nella griglia); l'admin resta neutro */
+  #t-rank .crank-row.me{background:color-mix(in srgb,var(--good) 18%,transparent);border:1px solid color-mix(in srgb,var(--good) 55%,transparent)}
+  #t-rank .crank-row.me + .crank-row{border-top:0}
+  #t-rank .crank-row.me .crank-name{color:var(--good);font-weight:700}
+  #t-grid .tcard.mine{border-color:color-mix(in srgb,var(--good) 60%,transparent);box-shadow:inset 4px 0 0 var(--good),0 0 22px color-mix(in srgb,var(--good) 20%,transparent),var(--shadow)}
+  #t-grid .tcard.mine .th b{color:var(--good)}
 
   /* modal ingrandimento squadra */
   .tmodal{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(3px)}
@@ -2372,7 +2378,9 @@
     $("t-recap").hidden=!recap;$("t-hero").hidden=recap;$("t-main").hidden=recap;
     if(recap){renderRecap();if(st.modalIdx!=null)renderTeamModal(st.modalIdx);return;}
     var leadIdx=L?L.leaderIdx:-1;
-    renderRank("t-rank",-1,leadIdx);
+    // solo in modalità giocatore evidenzio la mia squadra (l'admin resta neutro)
+    var meIdx=(st.access==="giocatore"?st.youIdx:-1);
+    renderRank("t-rank",meIdx,leadIdx);
     var ic=inCorsoIdx();
     var upc=upcoming(1),nextI=upc.length?upc[0]:null;
     function callBlock(){
@@ -2416,6 +2424,7 @@
     var html="";
     teams.forEach(function(t,i){
       var cls=["tcard","card"];if(st.drawn&&i===ic)cls.push("calling");if(isDim(i))cls.push("out");
+      if(st.access==="giocatore"&&i===st.youIdx)cls.push("mine");
       var slots=ROLE_SLOTS.map(function(x){var r=x[0],tt=x[1],got=t.f[r],cur=(r===phase),pips="";
         for(var k=0;k<tt;k++)pips+="<i class='"+(k<got?"on":"")+"'></i>";
         return "<div class='slotrow sr-"+r+(cur?" cur":"")+(got>=tt?" full":"")+"'><span class='rl'>"+r+"</span>"+
