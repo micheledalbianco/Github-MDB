@@ -401,7 +401,7 @@
   .rgroup{border-top:1px solid var(--border);padding:11px 0 5px}
   .rgh{display:flex;align-items:center;gap:9px}
   .rgh b{font-size:14px}
-  .rgh .rgc{margin-left:auto;font-family:var(--ff-disp);font-weight:700;font-size:15px;color:var(--text);font-variant-numeric:tabular-nums}
+  .rgh .rgc{font-family:var(--ff-disp);font-weight:700;font-size:15px;color:var(--muted);font-variant-numeric:tabular-nums}
   .rglist{margin-top:8px;display:flex;flex-direction:column}
   .rgtot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 10px 2px;margin-top:2px;border-top:1px solid var(--border)}
   .rgtot .rgtl,.rgtot .rgtv{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--faint);font-weight:700}
@@ -759,6 +759,10 @@
   #t-rank .crank-row.me .crank-name{color:var(--good);font-weight:700}
   #t-grid .tcard.mine{border-color:color-mix(in srgb,var(--good) 60%,transparent);box-shadow:inset 4px 0 0 var(--good),0 0 22px color-mix(in srgb,var(--good) 20%,transparent),var(--shadow)}
   #t-grid .tcard.mine .th b{color:var(--good)}
+  /* sezione giocatore: in classifica crediti, io stesso in verde (non arancio) */
+  #g-rank .crank-row.me{background:color-mix(in srgb,var(--good) 18%,transparent);border:1px solid color-mix(in srgb,var(--good) 55%,transparent)}
+  #g-rank .crank-row.me + .crank-row{border-top:0}
+  #g-rank .crank-row.me .crank-name{color:var(--good);font-weight:700}
 
   /* modal ingrandimento squadra */
   .tmodal{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(3px)}
