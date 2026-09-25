@@ -2825,16 +2825,24 @@
   function gateRoom(){return (CFG.ROOM||"FANTABRIGATA").toString().trim().toUpperCase()||"FANTABRIGATA";}
   function makeSync(role){return {role:role,room:gateRoom(),sb:window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY),ch:null,ready:false,applying:false,_t:null};}
   function sendAction(kind,payload){if(!Sync||!Sync.ch)return;try{Sync.ch.send({type:"broadcast",event:"action",payload:{kind:kind,teamIdx:payload.teamIdx,amount:payload.amount,pid:payload.pid}});}catch(e){}}
+  // c'è già un'asta viva in memoria? (es. stavo guardando come giocatore/tabellone prima di passare ad admin)
+  function liveInMemory(){return !!(st.drawn||st.lot||(st.saleLog&&st.saleLog.length)||teams.some(function(t){return t.bought&&t.bought.length;}));}
   function connect(role,onReady){
     // se stiamo cambiando modalità, chiudi il canale precedente per non lasciare sottoscrizioni doppie
     if(Sync&&Sync.sb){try{if(Sync.ch)Sync.sb.removeChannel(Sync.ch);}catch(e){}}
     Sync=makeSync(role);var sb=Sync.sb;
     var ch=sb.channel("asta-"+Sync.room,{config:{broadcast:{self:false}}});Sync.ch=ch;
     if(role==="operator"){
+      var haveLive=liveInMemory();   // valutato PRIMA della fetch: è lo stato che stavo già vedendo
       ch.on("broadcast",{event:"action"},function(m){handleAction(m.payload);});
       ch.on("broadcast",{event:"hello"},function(){syncPush();});   // ri-invia lo stato a chi entra
       sb.from("rooms").select("state").eq("id",Sync.room).maybeSingle().then(function(res){
-        if(res&&res.data&&res.data.state&&res.data.state.teams){Sync.applying=true;applyState(res.data.state);Sync.applying=false;}
+        var dbState=(res&&res.data&&res.data.state&&res.data.state.teams)?res.data.state:null;
+        // priorità: (1) stato canonico salvato nel DB; (2) asta viva già in memoria
+        // (stavo guardando come giocatore) — divento solo l'autorità, NON azzerare;
+        // (3) solo se non c'è NULLA, nuova asta.
+        if(dbState){Sync.applying=true;applyState(dbState);Sync.applying=false;}
+        else if(haveLive){/* mantengo lo stato corrente e lo ripubblico appena connesso */}
         else{var d=demoParam();if(["P","D","C","A"].indexOf(d)>=0)seedMidRole(d);else freshStart();}
         ch.subscribe(function(status){if(status==="SUBSCRIBED"){Sync.ready=true;syncPush();onReady&&onReady();}});
       });
