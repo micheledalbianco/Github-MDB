@@ -376,11 +376,14 @@
     .g-ring.idle .num,.g-ring.waiting .num{font-size:15px!important}
     .g-ring.done .num{font-size:15px!important}
   }
-  /* Mobile: nav compatta (non deve creare scroll orizzontale) */
+  /* Mobile: nav scorrevole lateralmente (admin ha piu' voci di quante ne stiano) */
   @media(max-width:520px){
-    .top-inner{padding:8px 48px 8px 12px}
+    .top-inner{padding:8px 52px 8px 12px;justify-content:flex-start;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+    .top-inner::-webkit-scrollbar{display:none}
+    .seg,.top-inner .mode-switch{flex:0 0 auto}
     .seg{gap:1px;padding:2px}
     .seg button{padding:6px 9px;font-size:12.5px}
+    .top-inner .mode-switch{height:auto;padding:7px 11px;font-size:12.5px}
     .g-top-right{gap:14px}
     .g-lot-top .role-pill{width:44px;height:44px;font-size:21px}
     .g-ring{width:70px;height:70px}
@@ -887,9 +890,9 @@
     #t-rank{display:block}
     #t-rank .crank-row{flex:0 0 auto;min-height:0;padding:7px 6px}
 
-    /* tabellone mobile: squadra allineata all'inizio del nome giocatore */
-    .board-hero .bh-player{justify-content:flex-start;text-align:left}
-    .board-hero .bh-ptext{text-align:left}
+    /* tabellone mobile: blocco giocatore centrato come offerta/countdown */
+    .board-hero .bh-player{justify-content:center;text-align:center}
+    .board-hero .bh-ptext{text-align:center}
 
     /* --- BANDITORE: coda e regia leggibili --- */
     #v-banditore{padding-inline:14px}
@@ -909,6 +912,8 @@
     .tchip .cr{font-size:13px;margin-left:5px}
     .tchip .cr::before{width:13px;height:13px;margin-right:3px}
     /* lot card: impila offerta e anello centrati, dimensioni da telefono */
+    #b-lotcard .lot-head{justify-content:center;text-align:center}
+    #b-lotcard .lot-player{justify-content:center}
     #b-lotcard .lot-body{flex-direction:column;align-items:center;gap:18px;margin-top:18px}
     #b-lotcard .bid-block{text-align:center}
     #b-lotcard .bid-line{align-items:center}
@@ -918,6 +923,11 @@
     #b-lotcard .btn-row{flex-wrap:wrap}
     #b-lotcard .btn-row .btn{flex:1 1 auto}
 
+    /* --- GIOCATORE: blocco giocatore + offerta centrati come il countdown --- */
+    #g-lotcard .g-lot-top{justify-content:center;text-align:center}
+    #g-lotcard .g-lot-id{flex:0 1 auto}
+    #g-lotcard .g-bidinfo{text-align:center}
+    #g-lotcard .g-bidrow{justify-content:center}
     /* --- GIOCATORE: anello countdown grande e centrato sotto il nome (impilato) --- */
     #g-ring{width:150px;height:150px}
     #g-ring .num{font-size:52px}
@@ -1899,7 +1909,7 @@
     if(maxBid(t)<st.lot.bid+1)return false;      // non può più rilanciare (budget)
     return true; }
   function isDim(i){ return st.lot ? (i!==st.lot.leaderIdx && !canBidLot(i)) : !validCaller(i); }
-  function toast(m){var el=$("toast");el.textContent=m;el.classList.add("show");clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove("show");},1600);}
+  function toast(m){/* notifiche a schermo disattivate su richiesta */}
   function showAssegnato(pn,tn,price){if(st.view==="tabellone")return;var el=$("assegnato");el.innerHTML="<div class='ass-name'>"+pn+"</div><div class='ass-sub'>→ "+tn+" · "+price+" cr.</div>";el.classList.add("show");clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove("show");},2600);}
   function active(){return st.counting||st.pending;}
   function rosterGroupsHTML(t,opTeamIdx){
