@@ -178,12 +178,13 @@
   #g-grid .tchip.out{opacity:.4}
   #g-grid .tchip.out::after{content:none}
   /* ultimo assegnato (sezione giocatore) — neutro, come le altre card */
-  .g-lastsale{display:flex;align-items:center;gap:10px;padding:11px 15px;border:1px solid var(--border-strong);background:var(--surface);border-radius:12px;font-size:14px;box-shadow:var(--shadow)}
-  .g-lastsale .ls-lab{font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--faint);font-weight:700;flex:none}
-  .g-lastsale .ls-nm{font-family:var(--ff-disp);font-weight:700;font-size:15px;color:var(--text);flex:none}
-  .g-lastsale .ls-to{color:var(--muted);font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1 1 auto}
-  .g-lastsale .ls-pr{margin-left:auto;color:var(--muted);font-weight:600;font-size:12.5px;flex:none;white-space:nowrap}
-  .g-lastsale .ls-pr b{font-family:var(--ff-disp);font-weight:700;font-size:16px;color:var(--text);font-variant-numeric:tabular-nums}
+  /* ultimo assegnato: una riga sola, stesso font dell'etichetta, prezzo subito dopo la squadra */
+  .g-lastsale{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;padding:10px 15px;border:1px solid var(--border-strong);background:var(--surface);border-radius:12px;box-shadow:var(--shadow);font-size:13px;letter-spacing:.4px;font-weight:700;text-transform:uppercase}
+  .g-lastsale .ls-lab{color:var(--faint)}
+  .g-lastsale .ls-nm{color:var(--text)}
+  .g-lastsale .ls-arr{color:var(--faint);font-weight:600}
+  .g-lastsale .ls-to{color:var(--muted)}
+  .g-lastsale .ls-pr{color:var(--text);font-variant-numeric:tabular-nums}
   .regia-hint{font-size:12px;color:var(--faint);margin-top:10px}
 
   input[type=text],input[type=number]{font-family:inherit;font-size:15px;padding:10px 12px;border:1px solid var(--border-strong);border-radius:10px;background:var(--surface-2);color:var(--text);width:100%}
@@ -2394,8 +2395,9 @@
     el.hidden=false;
     el.innerHTML="<span class='ls-lab'>Ultimo assegnato</span>"+
       "<span class='ls-nm'>"+s.n+"</span>"+
-      "<span class='ls-to'>a "+s.tName+"</span>"+
-      "<span class='ls-pr'><b>"+s.price+"</b> cr</span>";
+      "<span class='ls-arr'>→</span>"+
+      "<span class='ls-to'>"+s.tName+"</span>"+
+      "<span class='ls-pr'>"+s.price+" cr</span>";
   }
   function selfRaiseOk(){return confirm("Ti stai autorilanciando: sei già in testa e rilanci contro te stesso. Sei sicuro?");}
   function gBidBy(inc){
@@ -2850,6 +2852,9 @@
       var haveLive=liveInMemory();   // valutato PRIMA della fetch: è lo stato che stavo già vedendo
       ch.on("broadcast",{event:"action"},function(m){handleAction(m.payload);});
       ch.on("broadcast",{event:"hello"},function(){syncPush();});   // ri-invia lo stato a chi entra
+      // se c'è un secondo admin (es. desktop + mobile), allineo lo stato che arriva dall'altro.
+      // Tengo applying=true anche durante renderAll così NON lo ri-pubblico (niente loop tra i due).
+      ch.on("broadcast",{event:"state"},function(m){if(m.payload&&m.payload.teams){Sync.applying=true;applyState(m.payload);renderAll();Sync.applying=false;refreshGateTeam();}});
       sb.from("rooms").select("state").eq("id",Sync.room).maybeSingle().then(function(res){
         var dbState=(res&&res.data&&res.data.state&&res.data.state.teams)?res.data.state:null;
         var d=demoParam(),isDemo=(["P","D","C","A"].indexOf(d)>=0);
