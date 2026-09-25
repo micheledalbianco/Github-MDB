@@ -239,6 +239,11 @@
   .grole.done .gr-v{color:var(--good)}
   /* asta in corso */
   .g-lot{padding:16px}
+  /* struttura lot: mobile-first impilata (giocatore + anello + offerta) */
+  .g-lot-main{display:flex;flex-direction:column;gap:14px}
+  .g-lot-main .g-lot-top{order:1}
+  .g-lot-main .g-ring{order:2;align-self:center}
+  .g-lot-main .g-bidinfo{order:3}
   /* coda chiamate nel giocatore: tutte le squadre, chi chiama evidenziato (come banditone) */
   .g-rail{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
   .g-railchip{flex:0 0 auto;padding:7px 12px;border:1px solid var(--border);border-radius:20px;font-size:13.5px;font-weight:600;color:var(--muted);white-space:nowrap;line-height:1}
@@ -254,7 +259,7 @@
   .g-lot-id{flex:1 1 auto;min-width:0}
   .g-lot-id .lot-name{font-family:var(--ff-disp);font-weight:700;font-size:30px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .g-lot-id .lot-meta{font-size:14px;color:var(--muted);margin-top:5px}
-  .g-ring{position:relative;width:78px;height:78px;flex:0 0 auto}
+  .g-ring{position:relative;width:120px;height:120px;flex:0 0 auto}
   .g-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
   .g-ring svg circle{transition:stroke-dashoffset .35s linear,stroke .3s}
   .g-ring .num{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--ff-disp);font-weight:700;font-size:30px;font-variant-numeric:tabular-nums;line-height:1}
@@ -262,7 +267,7 @@
   .g-ring.waiting circle:first-of-type{stroke:color-mix(in srgb,var(--accent) 40%,var(--border))}
   .g-ring.done circle:first-of-type{stroke:color-mix(in srgb,var(--good) 60%,var(--border))}
   .g-ring.done .num{color:var(--good)!important;font-size:12px!important}
-  .g-bidinfo{margin-top:14px}
+  .g-bidinfo{margin-top:0}
   .g-bidrow{display:flex;align-items:center;gap:14px;margin-top:4px}
   .g-bidinfo .bid-amount{font-size:52px;color:var(--text);line-height:.9}
   .g-lot.g-idle .bid-amount{color:var(--faint)}
@@ -298,15 +303,20 @@
   /* PC: hero più grande, cerchio "in asta" più prominente */
   @media(min-width:721px){
     .g-wrap{max-width:1040px}                 /* più largo: la coda squadre sta in una riga sola */
-    .g-rail{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
-    .g-rail::-webkit-scrollbar{display:none}
+    /* coda: i chip occupano tutta la larghezza in una riga */
+    .g-rail{flex-wrap:nowrap;gap:6px}
+    .g-railchip{flex:1 1 auto;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .g-lot{padding:22px 26px}
-    .g-lot-top{gap:22px}
+    /* header orizzontale: nome (sx) · offerta+leader (centro) · anello (dx) */
+    .g-lot-main{flex-direction:row;align-items:center;gap:28px}
+    .g-lot-main .g-lot-top{order:1;flex:0 1 auto;min-width:0;gap:18px}
+    .g-lot-main .g-bidinfo{order:2;flex:1 1 auto;text-align:center;min-width:0}
+    .g-lot-main .g-bidinfo .g-bidrow{justify-content:center}
+    .g-lot-main .g-ring{order:3;flex:0 0 auto}
     .g-lot-top .role-pill{width:60px;height:60px;font-size:29px}
-    .g-lot-id .lot-name{font-size:42px}
+    .g-lot-id .lot-name{font-size:40px}
     .g-lot-id .lot-meta{font-size:15px}
-    .g-bidinfo{margin-top:18px}
-    .g-bidinfo .bid-amount{font-size:66px}
+    .g-bidinfo .bid-amount{font-size:60px}
     .g-ring{width:150px;height:150px}
     .g-ring .num{font-size:52px}
     .g-ring.idle .num,.g-ring.waiting .num{font-size:15px!important}
@@ -841,9 +851,8 @@
     #b-lotcard .btn-row{flex-wrap:wrap}
     #b-lotcard .btn-row .btn{flex:1 1 auto}
 
-    /* --- GIOCATORE: anello countdown grande e centrato sotto il nome --- */
-    .g-lot-top{flex-wrap:wrap}
-    #g-ring{flex:1 0 100%;width:150px;height:150px;margin:8px auto 0}
+    /* --- GIOCATORE: anello countdown grande e centrato sotto il nome (impilato) --- */
+    #g-ring{width:150px;height:150px}
     #g-ring .num{font-size:52px}
     #g-ring.idle .num,#g-ring.waiting .num,#g-ring.done .num{font-size:15px!important}
   }
@@ -991,11 +1000,17 @@
       <!-- ASTA IN CORSO -->
       <div class="card g-lot" id="g-lotcard">
         <div class="g-callline" id="g-callstrip"></div>
-        <div class="g-lot-top">
-          <span class="role-pill role-A" id="g-role">A</span>
-          <div class="g-lot-id">
-            <div class="lot-name" id="g-lotname">—</div>
-            <div class="lot-meta" id="g-lotmeta">In attesa di chiamata</div>
+        <div class="g-lot-main">
+          <div class="g-lot-top">
+            <span class="role-pill role-A" id="g-role">A</span>
+            <div class="g-lot-id">
+              <div class="lot-name" id="g-lotname">—</div>
+              <div class="lot-meta" id="g-lotmeta">In attesa di chiamata</div>
+            </div>
+          </div>
+          <div class="g-bidinfo">
+            <span class="eyebrow">Offerta più alta</span>
+            <div class="g-bidrow"><span class="bid-amount tnum" id="g-bid">—</span><span class="bid-leader" id="g-leaderwrap"><b id="g-leader">nessuno</b></span></div>
           </div>
           <div class="ring idle g-ring" id="g-ring">
             <svg viewBox="0 0 132 132">
@@ -1004,10 +1019,6 @@
             </svg>
             <div class="num" id="g-count">attesa</div>
           </div>
-        </div>
-        <div class="g-bidinfo">
-          <span class="eyebrow">Offerta più alta</span>
-          <div class="g-bidrow"><span class="bid-amount tnum" id="g-bid">—</span><span class="bid-leader" id="g-leaderwrap"><b id="g-leader">nessuno</b></span></div>
         </div>
         <div class="g-bidbtns" id="g-bidbtns">
           <button class="bidb" data-inc="1">+1</button>
@@ -2178,7 +2189,7 @@
     $("g-lotcard").classList.toggle("g-idle",!L);
     if(L){
       $("g-role").style.display="";$("g-role").textContent=L.player.r;$("g-role").className="role-pill role-"+L.player.r;
-      $("g-lotname").textContent=L.player.n;$("g-lotmeta").textContent=ROLE_NAME[L.player.r]+" · "+L.player.sq;
+      $("g-lotname").textContent=L.player.n;$("g-lotmeta").textContent=L.player.sq;
       $("g-bid").textContent=L.bid;
       var meLead=(L.leaderIdx===st.youIdx),R=L.player.r,roleFull=you.f[R]>=SLOTS[R];
       $("g-leader").textContent=meLead?"Sei in testa":teams[L.leaderIdx].name;
