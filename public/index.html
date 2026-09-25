@@ -245,12 +245,13 @@
   .g-lot-main .g-lot-top{order:1}
   .g-lot-main .g-ring{order:2;align-self:center}
   .g-lot-main .g-bidinfo{order:3}
-  /* coda chiamate nel giocatore: tutte le squadre, chi chiama evidenziato (come banditone) */
-  .g-rail{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+  /* coda partecipanti nel giocatore (card a sé, come nel banditore) */
+  .g-railcard{padding:12px 14px}
+  .g-rail{display:flex;flex-wrap:wrap;gap:6px}
   .g-railchip{flex:0 0 auto;padding:7px 12px;border:1px solid var(--border);border-radius:20px;font-size:13.5px;font-weight:600;color:var(--muted);white-space:nowrap;line-height:1}
   .g-railchip.corso{border-color:var(--evid);background:var(--evid-soft);color:var(--evid-ink);font-weight:800}
   .g-railchip.you{border-color:var(--good);color:var(--text);box-shadow:inset 0 0 0 2px var(--good)}   /* sei tu: contorno verde */
-  .g-railchip.corso.you{box-shadow:none}   /* quando è il tuo turno vince l'arancione "Tocca a te" */
+  .g-railchip.corso.you{box-shadow:none;border-color:var(--evid)}   /* quando è il tuo turno vince tutto l'arancione "Tocca a te" */
   .g-railchip.lab{color:var(--faint);border-style:dashed}
   /* mobile: una sola riga scorrevole, chi chiama in testa */
   .g-rail-mob{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
@@ -307,8 +308,9 @@
     #v-giocatore{width:100vw;margin-left:calc(50% - 50vw);padding-inline:24px;overflow-x:hidden}
     /* layout: barra in alto a tutta larghezza, asta a sinistra, i 3 menù a destra */
     .g-wrap{max-width:1560px;display:grid;grid-template-columns:minmax(0,1.85fr) minmax(0,1fr);gap:14px;
-            grid-template-areas:"top top" "lot menus";align-items:start}
+            grid-template-areas:"top top" "rail rail" "lot menus";align-items:start}
     .g-top{grid-area:top}
+    .g-railcard{grid-area:rail}
     .g-lot{grid-area:lot;align-self:start;position:sticky;top:70px}   /* l'asta resta in vista mentre scorri i menù */
     .g-menus{grid-area:menus}
     .g-list-out{max-height:60vh}
@@ -1007,9 +1009,13 @@
         <div class="g-roles" id="g-roles"></div>
       </div>
 
+      <!-- CODA PARTECIPANTI (riga a sé, come nel banditore) -->
+      <div class="card g-railcard">
+        <div id="g-callstrip"></div>
+      </div>
+
       <!-- ASTA IN CORSO -->
       <div class="card g-lot" id="g-lotcard">
-        <div class="g-callline" id="g-callstrip"></div>
         <div class="g-lot-main">
           <div class="g-lot-top">
             <span class="role-pill role-A" id="g-role">A</span>
