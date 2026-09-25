@@ -321,6 +321,9 @@
   .g-sec-body #g-rank.crank,.g-sec-body .crank{padding:0}
   .g-list-filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
   .g-list-filters select{flex:1 1 150px;min-width:0;height:40px;border-radius:11px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text);font-size:14.5px;font-weight:600;padding:0 12px}
+  .g-list-rolesort{display:flex;align-items:center;gap:8px;flex:1 1 auto;min-width:0}
+  .g-list-search-row{display:flex;align-items:center;gap:8px}
+  .g-list-search-row input{flex:1 1 auto;min-width:0}
   /* filtro obiettivi: stellina come toggle */
   .starfilter{flex:none;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:11px;border:1px solid var(--border-strong);background:var(--bg);color:var(--faint);font-size:17px;cursor:pointer;line-height:1}
   .starfilter[aria-pressed="true"]{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 60%,transparent);background:color-mix(in srgb,var(--gold) 14%,transparent)}
@@ -648,8 +651,6 @@
   .crank-cr{font-family:var(--ff-disp);font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums;font-size:16px}
   .crank-mx{font-variant-numeric:tabular-nums;color:var(--accent-ink);font-weight:700;font-size:12px;white-space:nowrap}
   .crank-cr{min-width:38px;text-align:right}
-  .crank-title{display:flex;align-items:center}
-  .crank-hint{margin-left:auto;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:var(--accent-ink);font-weight:700}
   .crank-row.me{background:color-mix(in srgb,var(--evid) 16%,transparent);border:1px solid color-mix(in srgb,var(--evid) 46%,transparent)}
   .crank-row.me .crank-name{color:var(--evid-ink);font-weight:700}
   .crank-row.me + .crank-row{border-top:0}
@@ -884,8 +885,11 @@
     .board-main .board-grid{height:auto}
     .board-grid.big{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-auto-rows:auto;height:auto}
     .board-grid.big .tcard{min-width:0}
-    .board-grid.big .th b{font-size:15px}
-    .board-grid.big .th-stats{gap:9px}
+    .board-grid.big .th b{font-size:15px;flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .board-grid.big .th-stats{gap:9px;flex:0 0 auto}
+    /* mobile: niente pallini (solo "P 2/3"), niente max nella card (è nei Crediti), header su una riga */
+    .board-grid.big .slotrow .sp{display:none}
+    .board-grid.big .th-max{display:none}
     /* classifica crediti: righe ad altezza naturale (non più schiacciate) */
     #t-rank{display:block}
     #t-rank .crank-row{flex:0 0 auto;min-height:0;padding:7px 6px}
@@ -932,6 +936,12 @@
     #g-ring{width:150px;height:150px}
     #g-ring .num{font-size:52px}
     #g-ring.idle .num,#g-ring.waiting .num,#g-ring.done .num{font-size:15px!important}
+    /* --- GIOCATORE listone mobile: squadra a tutta riga, ruoli + Quot/A-Z sulla stessa riga --- */
+    #g-sec-list .g-list-filters select{flex:1 1 100%}
+    #g-sec-list .g-list-rolesort{flex-wrap:nowrap;justify-content:space-between}
+    #g-sec-list .roletabs button{width:30px;height:30px;font-size:14px}
+    #g-sec-list .roletabs button[data-r=""]{width:auto;padding:0 9px}
+    #g-sec-list .sortpick button{padding:5px 9px;font-size:12px}
   }
 
   [hidden]{display:none!important}
@@ -1136,17 +1146,21 @@
         <div class="g-sec-body">
           <div class="g-list-filters">
             <select id="g-list-club" aria-label="Squadra"></select>
-            <div class="roletabs" id="g-list-role" role="group" aria-label="Ruolo">
-              <button data-r="" aria-pressed="true">Tutti</button>
-              <button data-r="P">P</button><button data-r="D">D</button><button data-r="C">C</button><button data-r="A">A</button>
-            </div>
-            <button class="starfilter" id="g-list-star" aria-pressed="false" title="Mostra solo i miei obiettivi">★</button>
-            <div class="sortpick" id="g-list-sort" role="group" aria-label="Ordinamento">
-              <button data-sort="quot" aria-pressed="true">Quot.</button>
-              <button data-sort="alfa">A‑Z</button>
+            <div class="g-list-rolesort">
+              <div class="roletabs" id="g-list-role" role="group" aria-label="Ruolo">
+                <button data-r="" aria-pressed="true">Tutti</button>
+                <button data-r="P">P</button><button data-r="D">D</button><button data-r="C">C</button><button data-r="A">A</button>
+              </div>
+              <div class="sortpick" id="g-list-sort" role="group" aria-label="Ordinamento">
+                <button data-sort="quot" aria-pressed="true">Quot.</button>
+                <button data-sort="alfa">A‑Z</button>
+              </div>
             </div>
           </div>
-          <input type="text" id="g-list-search" placeholder="Cerca giocatore…" autocomplete="off">
+          <div class="g-list-search-row">
+            <input type="text" id="g-list-search" placeholder="Cerca giocatore…" autocomplete="off">
+            <button class="starfilter" id="g-list-star" aria-pressed="false" title="Mostra solo i miei obiettivi">★</button>
+          </div>
           <div class="plist g-list-out" id="g-list-out" style="margin-top:8px"></div>
           <div class="btn-row" style="margin-top:12px">
             <button class="btn primary big" id="g-call" disabled>Chiama giocatore</button>
@@ -2261,7 +2275,7 @@
         (showMax?"<span class='crank-mx'>max "+maxBid(t)+"</span>":"")+
         "<span class='crank-cr'>"+t.cred+"</span></div>";
     }).join("");
-    el.innerHTML="<div class='crank-title'>Crediti"+(showMax?"<span class='crank-hint'>max rilancio</span>":"")+"</div>"+rows;
+    el.innerHTML="<div class='crank-title'>Crediti</div>"+rows;
   }
 
   function renderGiocCall(){
@@ -2424,7 +2438,7 @@
     var leadIdx=L?L.leaderIdx:-1;
     // solo in modalità giocatore evidenzio la mia squadra (l'admin resta neutro)
     var meIdx=(st.access==="giocatore"?st.youIdx:-1);
-    renderRank("t-rank",meIdx,leadIdx);
+    renderRank("t-rank",meIdx,leadIdx,true);
     var ic=inCorsoIdx();
     var upc=upcoming(1),nextI=upc.length?upc[0]:null;
     function callBlock(){
