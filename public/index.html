@@ -788,7 +788,6 @@
     #v-tabellone{height:auto}
     /* --- SETUP: tabella squadre compatta (niente scroll orizzontale) --- */
     .setup-table th:first-child,.setup-table td.drag{display:none}
-    .setup-table th:nth-child(5),.setup-table td:nth-child(5){display:none}   /* alias voce: solo desktop */
     .setup-table th,.setup-table td{padding:4px 5px}
     .setup-table input{padding:6px 8px;width:100%;min-width:0}
     .setup-table td.ord{width:60px}
@@ -1111,8 +1110,7 @@
         <div class="eyebrow">2 · Partecipanti e squadre</div>
         <p class="setup-p">Nell'asta identifichi ognuno con il <b>nome della persona</b>; l'export usa il <b>nome della squadra</b> registrata su fantacalcio.it (es. Michele → Partizan Degrado).</p>
         <p class="setup-p" style="color:var(--faint)">Trascina le righe (o usa ▲▼) per metterle nell'<b>ordine in cui siedono</b>: questo ordine vale ovunque — banditore, tabellone, rose — e detta la sequenza dei turni dopo il sorteggio.</p>
-        <table class="setup-table"><thead><tr><th></th><th>#</th><th>Persona (nell'asta)</th><th>Squadra fantacalcio.it (per l'export)</th><th>Varianti voce</th><th>Ordine</th></tr></thead><tbody id="setup-teams"></tbody></table>
-        <p class="setup-p" style="color:var(--faint);margin-top:8px"><b>Varianti voce</b> (facoltativo): come l'app potrebbe sentire il nome, separate da virgola — es. Jon → «gion, john», Sugar → «sciugar». Serve solo se i rilanci a voce sbagliano quel nome.</p>
+        <table class="setup-table"><thead><tr><th></th><th>#</th><th>Persona (nell'asta)</th><th>Squadra fantacalcio.it (per l'export)</th><th>Ordine</th></tr></thead><tbody id="setup-teams"></tbody></table>
       </div>
 
       <div class="card" style="padding:16px">
@@ -2364,7 +2362,6 @@
          "<td class='idx'>"+(i+1)+"</td>"+
          "<td><input type='text' data-i='"+i+"' data-k='name' value='"+escAttr(t.name)+"'></td>"+
          "<td><input type='text' data-i='"+i+"' data-k='fanta' value='"+escAttr(t.fanta)+"'></td>"+
-         "<td><input type='text' data-i='"+i+"' data-k='alias' placeholder='es. gion, john' value='"+escAttr(t.alias||"")+"'></td>"+
          "<td class='ord'><button class='ordbtn' data-mv='up' data-i='"+i+"' aria-label='Su'"+(i===0?" disabled":"")+">▲</button>"+
          "<button class='ordbtn' data-mv='down' data-i='"+i+"' aria-label='Giù'"+(i===teams.length-1?" disabled":"")+">▼</button></td></tr>";
     });
@@ -2447,7 +2444,6 @@
   $("voice-ptt").addEventListener("click",function(){setVoicePTT(!st.voicePTT);});
   try{var vm=localStorage.getItem("astaVoiceMode");if(vm)setVoiceMode(vm);}catch(e){}
   try{setVoicePTT(localStorage.getItem("astaVoicePTT")==="1");}catch(e){}
-  loadAliases();renderSetupTeams();
   $("b-speed").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.speed=b.dataset.speed;document.querySelectorAll("#b-speed button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});if(st.counting)batti();else renderAll();});
   $("b-assign").addEventListener("click",assign);
   $("b-undo").addEventListener("click",function(){
@@ -2512,7 +2508,7 @@
   });
 
   // setup
-  $("setup-teams").addEventListener("input",function(e){var el=e.target;if(el.tagName!=="INPUT")return;var i=+el.dataset.i;teams[i][el.dataset.k]=el.value;if(el.dataset.k==="alias")saveAliases();renderAll();renderExportPreview();});
+  $("setup-teams").addEventListener("input",function(e){var el=e.target;if(el.tagName!=="INPUT")return;var i=+el.dataset.i;teams[i][el.dataset.k]=el.value;renderAll();renderExportPreview();});
   // riordino squadre: pulsanti ▲▼
   $("setup-teams").addEventListener("click",function(e){var b=e.target.closest(".ordbtn");if(!b)return;var i=+b.dataset.i;moveTeam(i,b.dataset.mv==="up"?i-1:i+1);});
   // riordino squadre: drag & drop
