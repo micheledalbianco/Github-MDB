@@ -100,6 +100,8 @@
   #b-lotcard .bid-amount{font-size:84px;line-height:.9}
   #b-lotcard .bid-leader{margin-top:0;padding:10px 20px}
   #b-lotcard .bid-leader b{font-size:26px}
+  #b-lotcard .ring-col{display:flex;flex-direction:column;align-items:center;gap:12px}
+  #b-lotcard .ring-col .pips{margin-top:0}
   @keyframes pop{0%{transform:scale(.62);opacity:.35}55%{transform:scale(1.16);opacity:1}100%{transform:scale(1)}}
   .num.pop{animation:pop .5s cubic-bezier(.2,.9,.25,1)}
   @media(prefers-reduced-motion:reduce){.num.pop{animation:none}}
@@ -900,7 +902,6 @@
     <div class="card voice-bar" id="voice-bar" hidden>
       <div class="vb-row">
         <button class="btn voice-toggle" id="voice-toggle" aria-pressed="false">🎤 Ascolto: off</button>
-        <div class="vb-heard" id="voice-heard">Attiva l'ascolto e detta i rilanci: «Ale 30», «Michele 31»…</div>
       </div>
       <div class="vb-undo" id="voice-undo" hidden></div>
       <div class="vb-confirm" id="voice-confirm" hidden></div>
@@ -923,15 +924,17 @@
                 <div class="bid-leader"><b id="b-leader">nessuno</b></div>
               </div>
             </div>
-            <div class="ring idle" id="b-ring">
-              <svg width="176" height="176" viewBox="0 0 176 176">
-                <circle cx="88" cy="88" r="78" fill="none" stroke="var(--border)" stroke-width="14"/>
-                <circle id="b-ringfg" cx="88" cy="88" r="78" fill="none" stroke="var(--crit)" stroke-width="14" stroke-linecap="round" stroke-dasharray="490.1" stroke-dashoffset="490.1"/>
-              </svg>
-              <div class="num" id="b-count">pronto</div>
+            <div class="ring-col">
+              <div class="ring idle" id="b-ring">
+                <svg width="176" height="176" viewBox="0 0 176 176">
+                  <circle cx="88" cy="88" r="78" fill="none" stroke="var(--border)" stroke-width="14"/>
+                  <circle id="b-ringfg" cx="88" cy="88" r="78" fill="none" stroke="var(--crit)" stroke-width="14" stroke-linecap="round" stroke-dasharray="490.1" stroke-dashoffset="490.1"/>
+                </svg>
+                <div class="num" id="b-count">pronto</div>
+              </div>
+              <div class="pips" id="b-pips"></div>
             </div>
           </div>
-          <div class="pips" id="b-pips"></div>
           <div class="btn-row">
             <button class="btn countdown" id="b-batti">Countdown ▸</button>
             <button class="btn cta" id="b-assign" disabled>Assegna a <span id="b-assignwho">—</span></button>
