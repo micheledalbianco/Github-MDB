@@ -1313,20 +1313,21 @@
   var COLORS=["#c4472f","#2f77c9","#2f9e6b","#d6a419","#8e44ad","#16a085","#e67e22","#34506b","#b03a2e","#1e8449","#2471a3","#ba4a00"];
   // name = nome persona (usato nell'asta) · fanta = nome squadra su fantacalcio.it (usato nell'export)
   var ZERO={P:0,D:0,C:0,A:0};
-  function fresh(name,fanta){return {name:name,fanta:fanta,cred:500,f:{P:0,D:0,C:0,A:0}};}
+  function fresh(name,fanta,pass){return {name:name,fanta:fanta,pass:pass||"",cred:500,f:{P:0,D:0,C:0,A:0}};}
+  // password numeriche a 4 cifre pre-impostate (modificabili dal Setup, restano in memoria come i nomi)
   var teams=[
-    fresh("Michele","Manchester Sinty"),
-    fresh("Facco","Mordor United"),
-    fresh("Sugar","Scarsenal"),
-    fresh("Jon","Joana-United"),
-    fresh("Gullo","Zanzarosi FC"),
-    fresh("Trega","Happy Milf"),
-    fresh("Ale","Dinamo Drugo"),
-    fresh("Brando","Coca & Jack Aficionados"),
-    fresh("Richi","Berlusca Dortmund"),
-    fresh("Chicco","La Brunellona"),
-    fresh("Pupi","Rolando United"),
-    fresh("Paolo","Botafiga")
+    fresh("Michele","Manchester Sinty","3730"),
+    fresh("Facco","Mordor United","8654"),
+    fresh("Sugar","Scarsenal","3360"),
+    fresh("Jon","Joana-United","1190"),
+    fresh("Gullo","Zanzarosi FC","2515"),
+    fresh("Trega","Happy Milf","6467"),
+    fresh("Ale","Dinamo Drugo","2030"),
+    fresh("Brando","Coca & Jack Aficionados","9553"),
+    fresh("Richi","Berlusca Dortmund","1113"),
+    fresh("Chicco","La Brunellona","9921"),
+    fresh("Pupi","Rolando United","4071"),
+    fresh("Paolo","Botafiga","9190")
   ];
   teams.forEach(function(t,i){t.color=COLORS[i];t.id="tm"+i;});   // id stabile: sopravvive al riordino
 
@@ -2838,7 +2839,8 @@
   }
   var ADMIN_PASS="BNM";
   // stanza fissa per ora (in futuro differenzieremo)
-  function gateRoom(){return (CFG.ROOM||"FANTABRIGATA").toString().trim().toUpperCase()||"FANTABRIGATA";}
+  // stanza "pulita" nuova: la vecchia ("FANTABRIGATA") conteneva lo stato demo di prova e viene abbandonata
+  function gateRoom(){return (CFG.ROOM||"FANTABRIGATA-ASTA").toString().trim().toUpperCase()||"FANTABRIGATA-ASTA";}
   function makeSync(role){return {role:role,room:gateRoom(),sb:window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY),ch:null,ready:false,applying:false,_t:null};}
   function sendAction(kind,payload){if(!Sync||!Sync.ch)return;try{Sync.ch.send({type:"broadcast",event:"action",payload:{kind:kind,teamIdx:payload.teamIdx,amount:payload.amount,pid:payload.pid}});}catch(e){}}
   // c'è già un'asta viva in memoria? (es. stavo guardando come giocatore/tabellone prima di passare ad admin)
@@ -2857,13 +2859,10 @@
       ch.on("broadcast",{event:"state"},function(m){if(m.payload&&m.payload.teams){Sync.applying=true;applyState(m.payload);renderAll();Sync.applying=false;refreshGateTeam();}});
       sb.from("rooms").select("state").eq("id",Sync.room).maybeSingle().then(function(res){
         var dbState=(res&&res.data&&res.data.state&&res.data.state.teams)?res.data.state:null;
-        var d=demoParam(),isDemo=(["P","D","C","A"].indexOf(d)>=0);
-        // priorità: (0) scenario demo esplicito nell'URL (?demo=A) — l'admin vuole caricarlo
-        // e verrà propagato a tutti; (1) stato canonico salvato nel DB; (2) asta viva già in
-        // memoria (stavo guardando come giocatore) — divento solo l'autorità, NON azzerare;
-        // (3) solo se non c'è NULLA, nuova asta.
-        if(isDemo){seedMidRole(d);}
-        else if(dbState){Sync.applying=true;applyState(dbState);Sync.applying=false;}
+        // priorità: (1) stato canonico salvato nel DB; (2) asta viva già in memoria
+        // (stavo guardando come giocatore) — divento solo l'autorità, NON azzerare;
+        // (3) solo se non c'è NULLA, nuova asta con le squadre di default.
+        if(dbState){Sync.applying=true;applyState(dbState);Sync.applying=false;}
         else if(haveLive){/* mantengo lo stato corrente e lo ripubblico appena connesso */}
         else{freshStart();}
         ch.subscribe(function(status){if(status==="SUBSCRIBED"){Sync.ready=true;syncPush();onReady&&onReady();}});
