@@ -54,7 +54,8 @@
   .seg{display:inline-flex;margin-left:auto;background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:3px;gap:2px}
   .seg button{border:0;background:transparent;color:var(--muted);padding:7px 13px;border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer;letter-spacing:.2px}
   .seg button[aria-current="true"]{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
-  .top-brand{font-family:var(--ff-disp);font-weight:700;font-size:16px;letter-spacing:.5px;color:var(--accent-ink)}
+  .top-inner{justify-content:flex-end}
+  .seg{margin-left:0}
   .mode-switch{padding:7px 12px;font-size:12.5px;white-space:nowrap}
 
   .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow)}
@@ -314,6 +315,11 @@
   .pstar{flex:none;border:0;background:transparent;color:var(--border-strong);font-size:17px;line-height:1;cursor:pointer;padding:0 2px}
   .pstar:hover{color:var(--gold)}
   .pstar[aria-pressed="true"]{color:var(--gold)}
+  /* chiamata dalla pagina giocatore quando è il tuo turno */
+  .g-callhint{margin-top:8px;font-size:12.5px;font-weight:700;color:var(--evid-ink);background:var(--evid-soft);border:1px solid color-mix(in srgb,var(--evid) 40%,transparent);border-radius:9px;padding:7px 10px}
+  .prow.callable{cursor:pointer}
+  .prow.callable:hover{background:color-mix(in srgb,var(--evid) 12%,transparent)}
+  .callbadge{font-size:10px;letter-spacing:.5px;text-transform:uppercase;font-weight:700;color:var(--evid-ink);background:var(--evid-soft);border:1px solid color-mix(in srgb,var(--evid) 45%,transparent);border-radius:20px;padding:1px 8px}
   .g-list-out{max-height:52vh;overflow:auto}
   .g-roster-sel{width:100%;height:42px;border-radius:11px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text);font-size:15px;font-weight:600;padding:0 12px;margin-bottom:12px}
   #g-rank.crank{padding:0}
@@ -916,6 +922,7 @@
     </div>
     <div id="gate-team" hidden>
       <label class="gate-field">Chi sei?<select id="gate-teamsel"></select></label>
+      <label class="gate-field" id="gate-teampass-wrap" hidden>Password squadra<input type="password" id="gate-teampass" autocomplete="off"></label>
       <button class="btn primary big" id="gate-join">Entra come giocatore</button>
       <button class="btn ghost" id="gate-back">Indietro</button>
     </div>
@@ -924,7 +931,6 @@
 </div>
 <header class="top">
   <div class="top-inner">
-    <span class="top-brand">FANTABRIGATA</span>
     <div class="seg" role="tablist" aria-label="Vista">
       <button data-view="banditore" aria-current="true">Banditore</button>
       <button data-view="giocatore">Giocatore</button>
@@ -1106,6 +1112,7 @@
             </div>
           </div>
           <input type="text" id="g-list-search" placeholder="Cerca giocatore…" autocomplete="off">
+          <div class="g-callhint" id="g-list-callhint" hidden></div>
           <div class="plist g-list-out" id="g-list-out" style="margin-top:8px"></div>
         </div>
       </details>
@@ -1170,7 +1177,7 @@
         <div class="eyebrow">2 · Partecipanti e squadre</div>
         <p class="setup-p">Nell'asta identifichi ognuno con il <b>nome della persona</b>; l'export usa il <b>nome della squadra</b> registrata su fantacalcio.it (es. Michele → Partizan Degrado).</p>
         <p class="setup-p" style="color:var(--faint)">Trascina le righe (o usa ▲▼) per metterle nell'<b>ordine in cui siedono</b>: questo ordine vale ovunque — banditore, tabellone, rose — e detta la sequenza dei turni dopo il sorteggio.</p>
-        <table class="setup-table"><thead><tr><th></th><th>#</th><th>Persona (nell'asta)</th><th>Squadra fantacalcio.it (per l'export)</th><th>Ordine</th></tr></thead><tbody id="setup-teams"></tbody></table>
+        <table class="setup-table"><thead><tr><th></th><th>#</th><th>Persona (nell'asta)</th><th>Squadra fantacalcio.it (per l'export)</th><th>Password (accesso squadra)</th><th>Ordine</th></tr></thead><tbody id="setup-teams"></tbody></table>
       </div>
 
       <div class="card" style="padding:16px">
@@ -1809,6 +1816,7 @@
 {id:"7627",r:"A",n:"Enem",sq:"Bologna",q:1}
 ];
   function findP(name){for(var i=0;i<LISTONE.length;i++)if(LISTONE[i].n===name)return LISTONE[i];return null;}
+  function findById(id){for(var i=0;i<LISTONE.length;i++)if(String(LISTONE[i].id)===String(id))return LISTONE[i];return null;}
 
   // ---- rose già acquistate (dati d'esempio) ----
   var POOL={
@@ -1841,11 +1849,13 @@
   // ultima assegnazione = cima dello storico vendite (stack cronologico)
   function lastSaleRec(){return (st.saleLog&&st.saleLog.length)?st.saleLog[st.saleLog.length-1]:null;}
 
-  // obiettivi personali (stellina) — salvati localmente sul dispositivo, non condivisi
-  var myObj={};
-  try{myObj=JSON.parse(localStorage.getItem("fb-obiettivi")||"{}")||{};}catch(e){myObj={};}
-  function isObj(id){return !!myObj[id];}
-  function toggleObj(id){if(myObj[id])delete myObj[id];else myObj[id]=1;try{localStorage.setItem("fb-obiettivi",JSON.stringify(myObj));}catch(e){}}
+  // obiettivi personali (stellina) — per squadra, salvati SOLO in locale sul dispositivo (gli altri non li vedono)
+  var myObjAll={};
+  try{myObjAll=JSON.parse(localStorage.getItem("fb-obiettivi-team")||"{}")||{};}catch(e){myObjAll={};}
+  function curTeamId(){return (teams[st.youIdx]||{}).id||"";}
+  function objBucket(){var k=curTeamId();return myObjAll[k]||(myObjAll[k]={});}
+  function isObj(id){var b=myObjAll[curTeamId()];return !!(b&&b[id]);}
+  function toggleObj(id){var b=objBucket();if(b[id])delete b[id];else b[id]=1;try{localStorage.setItem("fb-obiettivi-team",JSON.stringify(myObjAll));}catch(e){}}
 
   var $=function(id){return document.getElementById(id);};
   var N=teams.length;
@@ -1979,6 +1989,25 @@
     st.lot={player:st.selPlayer,bid:base,base:base,leaderIdx:caller,caller:caller};
     stopBattuta();st.selPlayer=null;$("b-search").value="";renderAll();
     toast("Chiamato "+st.lot.player.n+" — base "+base+" · premi Batti");
+  }
+  // operatore: chiama un giocatore per conto della squadra 'idx' (validato) — usato dai giocatori dai loro dispositivi
+  function operatorCall(idx,pid){
+    if(st.lot)return;
+    if(idx!==inCorsoIdx())return;                 // solo di chi è davvero il turno
+    var pl=findById(pid);
+    if(!pl||pl.taken||pl.r!==callRole())return;   // deve esistere, libero e del ruolo in corso
+    st.selPlayer=pl;callPlayer();
+  }
+  // lato giocatore/admin: chiama dalla pagina giocatore se è il proprio turno
+  function gCall(pid){
+    if(st.lot){toast("C'è già un'asta in corso");return;}
+    if(inCorsoIdx()!==st.youIdx){toast("Non è il tuo turno di chiamata");return;}
+    var pl=findById(pid);
+    if(!pl){return;}
+    if(pl.taken){toast(pl.n+" è già stato assegnato");return;}
+    if(pl.r!==callRole()){toast("Ora si chiamano i "+ROLE_PLUR[callRole()]);return;}
+    if(amPlayer()){sendAction("call",{teamIdx:st.youIdx,pid:pid});toast("Chiamata inviata: "+pl.n);}
+    else{st.selPlayer=pl;callPlayer();}
   }
   function regiaPick(idx){
     if(!st.lot){toast("Nessun giocatore all'asta");return;}
@@ -2237,11 +2266,15 @@
     var list=LISTONE.filter(function(p){return (!role||p.r===role)&&(!club||p.sq===club)&&(!starOnly||isObj(p.id))&&p.n.toLowerCase().indexOf(q)>=0;});
     var ord={P:0,D:1,C:2,A:3};
     list.sort(sort==="quot"?function(a,b){return (ord[a.r]-ord[b.r])||(b.q-a.q)||a.n.localeCompare(b.n);}:function(a,b){return (ord[a.r]-ord[b.r])||a.n.localeCompare(b.n);});
+    // posso chiamare? (è il mio turno e nessuna asta in corso)
+    var canCall=(!st.lot&&st.drawn&&inCorsoIdx()===st.youIdx),cr=callRole();
+    var hint=$("g-list-callhint");
+    if(hint)hint.hidden=!canCall,hint.textContent=canCall?("È il tuo turno: tocca un "+({P:"portiere",D:"difensore",C:"centrocampista",A:"attaccante"}[cr]||"giocatore")+" per chiamarlo"):"";
     out.innerHTML=list.map(function(p){
-      var on=isObj(p.id);
-      return "<div class='prow"+(p.taken?" taken":"")+"'><span class='role-pill role-"+p.r+"'>"+p.r+"</span><span class='pn'>"+p.n+"</span>"+
+      var on=isObj(p.id),callable=canCall&&!p.taken&&p.r===cr;
+      return "<div class='prow"+(p.taken?" taken":"")+(callable?" callable":"")+"' data-pid='"+p.id+"'><span class='role-pill role-"+p.r+"'>"+p.r+"</span><span class='pn'>"+p.n+"</span>"+
         "<button class='pstar' data-pid='"+p.id+"' aria-pressed='"+(on?"true":"false")+"' title='Segna obiettivo'>"+(on?"★":"☆")+"</button>"+
-        (p.taken?"<span class='takenbadge'>preso</span>":"")+"<span class='ps'>"+p.sq+" · "+p.q+"</span></div>";
+        (callable?"<span class='callbadge'>chiama</span>":(p.taken?"<span class='takenbadge'>preso</span>":""))+"<span class='ps'>"+p.sq+" · "+p.q+"</span></div>";
     }).join("")||"<div class='prow faint' style='cursor:default'>Nessun giocatore</div>";
   }
   function renderGiocatore(){
@@ -2267,10 +2300,14 @@
       $("g-leaderwrap").classList.toggle("me",meLead);
       setBidEnabled(!roleFull);
     } else {
+      var myTurn=(st.drawn&&inCorsoIdx()===st.youIdx);
       $("g-role").style.display="none";
-      $("g-lotname").textContent="—";$("g-lotmeta").textContent="In attesa di chiamata";
+      $("g-lotname").textContent=myTurn?"Tocca a te":"—";
+      $("g-lotmeta").textContent=myTurn?("Apri il Listone e chiama un "+({P:"portiere",D:"difensore",C:"centrocampista",A:"attaccante"}[callRole()]||"giocatore")):"In attesa di chiamata";
       $("g-bid").textContent="—";$("g-leader").textContent="nessuno";$("g-leaderwrap").classList.remove("me");
       setBidEnabled(false);
+      // apri automaticamente il listone quando parte il tuo turno, così puoi chiamare subito
+      if(myTurn){var d=$("g-sec-list");if(d&&!d.open&&st._lastTurnOpen!==st.turnIdx){d.open=true;st._lastTurnOpen=st.turnIdx;}}
     }
     var rf=$("g-rolefull"),youRoleFull=you.f[st.listRole]>=SLOTS[st.listRole];
     rf.hidden=!youRoleFull;
@@ -2443,6 +2480,7 @@
          "<td class='idx'>"+(i+1)+"</td>"+
          "<td><input type='text' data-i='"+i+"' data-k='name' value='"+escAttr(t.name)+"'></td>"+
          "<td><input type='text' data-i='"+i+"' data-k='fanta' value='"+escAttr(t.fanta)+"'></td>"+
+         "<td><input type='text' data-i='"+i+"' data-k='pass' value='"+escAttr(t.pass||"")+"' placeholder='(nessuna)' autocomplete='off'></td>"+
          "<td class='ord'><button class='ordbtn' data-mv='up' data-i='"+i+"' aria-label='Su'"+(i===0?" disabled":"")+">▲</button>"+
          "<button class='ordbtn' data-mv='down' data-i='"+i+"' aria-label='Giù'"+(i===teams.length-1?" disabled":"")+">▼</button></td></tr>";
     });
@@ -2580,7 +2618,10 @@
   // filtro "solo miei obiettivi" (combinabile con ruolo/squadra/ordinamento/ricerca)
   $("g-list-star").addEventListener("click",function(){st.gStarOnly=!st.gStarOnly;this.setAttribute("aria-pressed",st.gStarOnly?"true":"false");renderGiocListone();});
   // stellina su una riga: segna/rimuovi obiettivo (locale)
-  $("g-list-out").addEventListener("click",function(e){var b=e.target.closest(".pstar");if(!b)return;toggleObj(b.dataset.pid);renderGiocListone();});
+  $("g-list-out").addEventListener("click",function(e){
+    var s=e.target.closest(".pstar");if(s){toggleObj(s.dataset.pid);renderGiocListone();return;}
+    var row=e.target.closest(".prow.callable");if(row){gCall(row.dataset.pid);}
+  });
   // admin: cambia squadra vista nella sezione giocatore
   $("g-adminteam").addEventListener("change",function(){var i=parseInt(this.value,10);if(!isNaN(i)){st.youIdx=i;renderAll();}});
 
@@ -2671,7 +2712,7 @@
   // ================= REAL-TIME (Supabase) =================
   function serialize(){
     return {v:1,
-      teams:teams.map(function(t){return {id:t.id,name:t.name,fanta:t.fanta,cred:t.cred,f:t.f,bought:t.bought};}),
+      teams:teams.map(function(t){return {id:t.id,name:t.name,fanta:t.fanta,cred:t.cred,f:t.f,bought:t.bought,pass:t.pass||""};}),
       taken:LISTONE.filter(function(p){return p.taken;}).map(function(p){return p.id;}),
       listRole:st.listRole,turnIdx:st.turnIdx,speed:st.speed,
       counting:st.counting,pending:st.pending,count:st.count,saleLog:st.saleLog,drawn:st.drawn,
@@ -2685,7 +2726,7 @@
     teams=d.teams.map(function(td,i){
       var t=(td.id&&byId[td.id])||old[i]||fresh(td.name,td.fanta);
       t.id=td.id||t.id||("tm"+i);
-      t.name=td.name;t.fanta=td.fanta;t.cred=td.cred;t.f=td.f;t.bought=td.bought||[];
+      t.name=td.name;t.fanta=td.fanta;t.cred=td.cred;t.f=td.f;t.bought=td.bought||[];t.pass=td.pass||"";
       if(t.color==null)t.color=COLORS[i%COLORS.length];
       return t;
     });
@@ -2707,8 +2748,10 @@
     Sync._t=setTimeout(function(){try{Sync.sb.from("rooms").upsert({id:Sync.room,state:s,updated_at:new Date().toISOString()});}catch(e){}},250);
   }
   function handleAction(p){
-    if(!p||!Sync||Sync.role!=="operator"||!st.lot)return;
+    if(!p||!Sync||Sync.role!=="operator")return;
     var idx=p.teamIdx;if(idx==null||!teams[idx])return;
+    if(p.kind==="call"){operatorCall(idx,p.pid);return;}
+    if(!st.lot)return;
     var R=st.lot.player.r,t=teams[idx];if(t.f[R]>=SLOTS[R])return;
     if(p.kind==="raise"){if(st.lot.bid+1>maxBid(t))return;st.lot.bid+=1;st.lot.leaderIdx=idx;stopBattuta();renderAll();}
     else if(p.kind==="raise_by"){var inc=parseInt(p.amount,10)||1;if(inc<1||st.lot.bid+inc>maxBid(t))return;st.lot.bid+=inc;st.lot.leaderIdx=idx;stopBattuta();renderAll();}
@@ -2717,7 +2760,7 @@
   var ADMIN_PASS="BNM";
   function gateRoom(){return (($("gate-room").value||CFG.ROOM||"FANTABRIGATA").trim().toUpperCase())||"FANTABRIGATA";}
   function makeSync(role){return {role:role,room:gateRoom(),sb:window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY),ch:null,ready:false,applying:false,_t:null};}
-  function sendAction(kind,payload){if(!Sync||!Sync.ch)return;try{Sync.ch.send({type:"broadcast",event:"action",payload:{kind:kind,teamIdx:payload.teamIdx,amount:payload.amount}});}catch(e){}}
+  function sendAction(kind,payload){if(!Sync||!Sync.ch)return;try{Sync.ch.send({type:"broadcast",event:"action",payload:{kind:kind,teamIdx:payload.teamIdx,amount:payload.amount,pid:payload.pid}});}catch(e){}}
   function connect(role,onReady){
     // se stiamo cambiando modalità, chiudi il canale precedente per non lasciare sottoscrizioni doppie
     if(Sync&&Sync.sb){try{if(Sync.ch)Sync.sb.removeChannel(Sync.ch);}catch(e){}}
@@ -2755,14 +2798,25 @@
     $("gate-status").textContent="Connessione…";$("gate-roles").hidden=true;$("gate-admin").hidden=true;
     connect("player",function(){
       var sel=$("gate-teamsel");sel.innerHTML=teams.map(function(t,i){return "<option value='"+i+"'>"+t.name+" — "+t.fanta+"</option>";}).join("");
-      if(preIdx!=null){sel.value=preIdx;finalizePlayer(preIdx);return;}
-      $("gate-team").hidden=false;$("gate-status").textContent="Scegli la tua squadra, poi Entra.";
+      if(preIdx!=null){sel.value=preIdx;finalizePlayer(preIdx,true);return;}   // ri-accesso dallo stesso dispositivo: password già verificata
+      $("gate-team").hidden=false;syncTeamPassField();$("gate-status").textContent="Scegli la tua squadra, poi Entra.";
     });
   }
+  // mostra il campo password solo se la squadra selezionata ne ha una
+  function syncTeamPassField(){
+    var idx=parseInt($("gate-teamsel").value,10),t=teams[idx],need=!!(t&&t.pass);
+    $("gate-teampass-wrap").hidden=!need;if(!need)$("gate-teampass").value="";
+  }
+  function tryJoinPlayer(){
+    var idx=parseInt($("gate-teamsel").value,10);if(isNaN(idx))return;var t=teams[idx];
+    if(t&&t.pass){var entered=($("gate-teampass").value||"").trim();
+      if(entered!==t.pass){$("gate-status").textContent="Password squadra errata.";return;}}
+    finalizePlayer(idx,false);
+  }
   // GIOCATORE: vede solo la propria sezione + tabellone, squadra fissa (nessuna modifica nomi)
-  function finalizePlayer(idx){st.access="giocatore";st.youIdx=idx;setNav(["giocatore","tabellone"]);$("gate").hidden=true;setView("giocatore");renderAll();saveJoin({access:"giocatore",teamIdx:idx,room:gateRoom()});}
+  function finalizePlayer(idx,skipPass){st.access="giocatore";st.youIdx=idx;setNav(["giocatore","tabellone"]);$("gate").hidden=true;setView("giocatore");renderAll();saveJoin({access:"giocatore",teamIdx:idx,room:gateRoom()});}
 
-  function gateReset(){$("gate-team").hidden=true;$("gate-admin").hidden=true;$("gate-roles").hidden=false;$("gate-status").textContent="";var p=$("gate-pass");if(p)p.value="";}
+  function gateReset(){$("gate-team").hidden=true;$("gate-admin").hidden=true;$("gate-roles").hidden=false;$("gate-status").textContent="";var p=$("gate-pass");if(p)p.value="";var tp=$("gate-teampass");if(tp)tp.value="";}
   function tryAdmin(){var p=($("gate-pass").value||"").trim();if(p!==ADMIN_PASS){$("gate-status").textContent="Password errata.";return;}startAdmin();}
   function wireGate(){
     $("gate-roles").addEventListener("click",function(e){var b=e.target.closest("button[data-acc]");if(!b)return;
@@ -2770,7 +2824,9 @@
       else{$("gate-roles").hidden=true;$("gate-admin").hidden=false;$("gate-status").textContent="";var p=$("gate-pass");if(p){p.value="";p.focus();}}});
     $("gate-adminok").addEventListener("click",tryAdmin);
     $("gate-pass").addEventListener("keydown",function(e){if(e.key==="Enter")tryAdmin();});
-    $("gate-join").addEventListener("click",function(){var idx=parseInt($("gate-teamsel").value,10);if(!isNaN(idx))finalizePlayer(idx);});
+    $("gate-teamsel").addEventListener("change",syncTeamPassField);
+    $("gate-teampass").addEventListener("keydown",function(e){if(e.key==="Enter")tryJoinPlayer();});
+    $("gate-join").addEventListener("click",tryJoinPlayer);
     $("gate-back").addEventListener("click",gateReset);
     $("gate-back2").addEventListener("click",gateReset);
   }
