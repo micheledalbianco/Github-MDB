@@ -307,14 +307,14 @@
     .g-rail{flex-wrap:nowrap;gap:6px}
     .g-railchip{flex:1 1 auto;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .g-lot{padding:22px 26px}
-    /* header orizzontale: nome (sx) · offerta+leader (centro) · anello (dx) */
-    .g-lot-main{flex-direction:row;align-items:center;gap:28px}
-    .g-lot-main .g-lot-top{order:1;flex:0 1 auto;min-width:0;gap:18px}
-    .g-lot-main .g-bidinfo{order:2;flex:1 1 auto;text-align:center;min-width:0}
+    /* header orizzontale su griglia 1fr auto 1fr: offerta centrata nella card */
+    .g-lot-main{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px}
+    .g-lot-main .g-lot-top{grid-column:1;grid-row:1;order:0;justify-self:start;min-width:0;gap:18px}
+    .g-lot-main .g-bidinfo{grid-column:2;grid-row:1;order:0;justify-self:center;text-align:center;min-width:0}
     .g-lot-main .g-bidinfo .g-bidrow{flex-direction:column;align-items:center;gap:12px;margin-top:8px}   /* leader sotto il numero */
     .g-lot-main .g-bidinfo .bid-leader{padding:9px 20px}
     .g-lot-main .g-bidinfo .bid-leader b{font-size:24px}
-    .g-lot-main .g-ring{order:3;flex:0 0 auto}
+    .g-lot-main .g-ring{grid-column:3;grid-row:1;order:0;justify-self:end}
     .g-lot-top .role-pill{width:60px;height:60px;font-size:29px}
     .g-lot-id .lot-name{font-size:40px}
     .g-lot-id .lot-meta{font-size:15px}
