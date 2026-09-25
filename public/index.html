@@ -316,11 +316,9 @@
   .pstar{flex:none;border:0;background:transparent;color:var(--border-strong);font-size:17px;line-height:1;cursor:pointer;padding:0 2px}
   .pstar:hover{color:var(--gold)}
   .pstar[aria-pressed="true"]{color:var(--gold)}
-  /* chiamata dalla pagina giocatore quando è il tuo turno */
-  .g-callhint{margin-top:8px;font-size:12.5px;font-weight:700;color:var(--evid-ink);background:var(--evid-soft);border:1px solid color-mix(in srgb,var(--evid) 40%,transparent);border-radius:9px;padding:7px 10px}
-  .prow.callable{cursor:pointer}
-  .prow.callable:hover{background:color-mix(in srgb,var(--evid) 12%,transparent)}
-  .callbadge{font-size:10px;letter-spacing:.5px;text-transform:uppercase;font-weight:700;color:var(--evid-ink);background:var(--evid-soft);border:1px solid color-mix(in srgb,var(--evid) 45%,transparent);border-radius:20px;padding:1px 8px}
+  /* selezione nel listone giocatore (come nel banditore) */
+  .g-list-out .prow.selectable{cursor:pointer}
+  #g-call:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.3)}
   .g-list-out{max-height:52vh;overflow:auto}
   .g-roster-sel{width:100%;height:42px;border-radius:11px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text);font-size:15px;font-weight:600;padding:0 12px;margin-bottom:12px}
   #g-rank.crank{padding:0}
@@ -1113,8 +1111,10 @@
             </div>
           </div>
           <input type="text" id="g-list-search" placeholder="Cerca giocatore…" autocomplete="off">
-          <div class="g-callhint" id="g-list-callhint" hidden></div>
           <div class="plist g-list-out" id="g-list-out" style="margin-top:8px"></div>
+          <div class="btn-row" style="margin-top:12px">
+            <button class="btn primary big" id="g-call" disabled>Chiama giocatore</button>
+          </div>
         </div>
       </details>
 
@@ -1845,7 +1845,7 @@
 
   var st={view:"banditore",phase:"A",turnIdx:0,lot:null,count:0,counting:false,pending:false,timer:null,
           speed:"veloce",selPlayer:null,youIdx:0,step:1,modalIdx:null,modalOp:false,saleLog:[],drawn:false,
-          sort:"quot",bClub:"",listRole:"P",gSort:"quot",gListRole:"",gClub:"",gStarOnly:false,rosterTeamIdx:null,voiceMode:"off",voicePTT:false,access:"admin"};
+          sort:"quot",bClub:"",listRole:"P",gSort:"quot",gListRole:"",gClub:"",gStarOnly:false,gSelPid:null,rosterTeamIdx:null,voiceMode:"off",voicePTT:false,access:"admin"};
 
   // ultima assegnazione = cima dello storico vendite (stack cronologico)
   function lastSaleRec(){return (st.saleLog&&st.saleLog.length)?st.saleLog[st.saleLog.length-1]:null;}
@@ -2007,6 +2007,7 @@
     if(!pl){return;}
     if(pl.taken){toast(pl.n+" è già stato assegnato");return;}
     if(pl.r!==callRole()){toast("Ora si chiamano i "+ROLE_PLUR[callRole()]);return;}
+    st.gSelPid=null;
     if(amPlayer()){sendAction("call",{teamIdx:st.youIdx,pid:pid});toast("Chiamata inviata: "+pl.n);}
     else{st.selPlayer=pl;callPlayer();}
   }
@@ -2267,16 +2268,19 @@
     var list=LISTONE.filter(function(p){return (!role||p.r===role)&&(!club||p.sq===club)&&(!starOnly||isObj(p.id))&&p.n.toLowerCase().indexOf(q)>=0;});
     var ord={P:0,D:1,C:2,A:3};
     list.sort(sort==="quot"?function(a,b){return (ord[a.r]-ord[b.r])||(b.q-a.q)||a.n.localeCompare(b.n);}:function(a,b){return (ord[a.r]-ord[b.r])||a.n.localeCompare(b.n);});
-    // posso chiamare? (è il mio turno e nessuna asta in corso)
-    var canCall=(!st.lot&&st.drawn&&inCorsoIdx()===st.youIdx),cr=callRole();
-    var hint=$("g-list-callhint");
-    if(hint)hint.hidden=!canCall,hint.textContent=canCall?("È il tuo turno: tocca un "+({P:"portiere",D:"difensore",C:"centrocampista",A:"attaccante"}[cr]||"giocatore")+" per chiamarlo"):"";
+    // seleziona (come nel banditore) i giocatori del ruolo in corso ancora liberi; il tasto Chiama si attiva solo se è il tuo turno
+    var cr=callRole(),myTurn=(!st.lot&&st.drawn&&inCorsoIdx()===st.youIdx);
     out.innerHTML=list.map(function(p){
-      var on=isObj(p.id),callable=canCall&&!p.taken&&p.r===cr;
-      return "<div class='prow"+(p.taken?" taken":"")+(callable?" callable":"")+"' data-pid='"+p.id+"'><span class='role-pill role-"+p.r+"'>"+p.r+"</span><span class='pn'>"+p.n+"</span>"+
+      var on=isObj(p.id),selectable=(!p.taken&&p.r===cr),isSel=selectable&&String(st.gSelPid)===String(p.id);
+      return "<div class='prow"+(p.taken?" taken":"")+(selectable?" selectable":"")+"' data-pid='"+p.id+"' aria-selected='"+(isSel?"true":"false")+"'><span class='role-pill role-"+p.r+"'>"+p.r+"</span><span class='pn'>"+p.n+"</span>"+
         "<button class='pstar' data-pid='"+p.id+"' aria-pressed='"+(on?"true":"false")+"' title='Segna obiettivo'>"+(on?"★":"☆")+"</button>"+
-        (callable?"<span class='callbadge'>chiama</span>":(p.taken?"<span class='takenbadge'>preso</span>":""))+"<span class='ps'>"+p.sq+" · "+p.q+"</span></div>";
+        (p.taken?"<span class='takenbadge'>preso</span>":"")+"<span class='ps'>"+p.sq+" · "+p.q+"</span></div>";
     }).join("")||"<div class='prow faint' style='cursor:default'>Nessun giocatore</div>";
+    // stato del tasto Chiama
+    var selP=st.gSelPid!=null?findById(st.gSelPid):null;
+    var selValid=!!(selP&&!selP.taken&&selP.r===cr);
+    var cb=$("g-call");
+    if(cb){cb.disabled=!(myTurn&&selValid);cb.textContent=selValid?("Chiama "+selP.n):"Chiama giocatore";}
   }
   function renderGiocatore(){
     var you=teams[st.youIdx];
@@ -2304,11 +2308,15 @@
       var myTurn=(st.drawn&&inCorsoIdx()===st.youIdx);
       $("g-role").style.display="none";
       $("g-lotname").textContent=myTurn?"Tocca a te":"—";
-      $("g-lotmeta").textContent=myTurn?("Apri il Listone e chiama un "+({P:"portiere",D:"difensore",C:"centrocampista",A:"attaccante"}[callRole()]||"giocatore")):"In attesa di chiamata";
+      $("g-lotmeta").textContent=myTurn?("Seleziona un "+({P:"portiere",D:"difensore",C:"centrocampista",A:"attaccante"}[callRole()]||"giocatore")+" dal Listone e premi Chiama"):"In attesa di chiamata";
       $("g-bid").textContent="—";$("g-leader").textContent="nessuno";$("g-leaderwrap").classList.remove("me");
       setBidEnabled(false);
-      // apri automaticamente il listone quando parte il tuo turno, così puoi chiamare subito
-      if(myTurn){var d=$("g-sec-list");if(d&&!d.open&&st._lastTurnOpen!==st.turnIdx){d.open=true;st._lastTurnOpen=st.turnIdx;}}
+      // all'inizio del tuo turno apri il listone e filtralo sul ruolo in corso, così puoi chiamare subito
+      if(myTurn&&st._lastTurnOpen!==st.turnIdx){
+        var d=$("g-sec-list");if(d&&!d.open)d.open=true;
+        st.gListRole=callRole();var rt=$("g-list-role");if(rt)document.querySelectorAll("#g-list-role button").forEach(function(x){x.setAttribute("aria-pressed",x.dataset.r===callRole()?"true":"false");});
+        st._lastTurnOpen=st.turnIdx;
+      }
     }
     var rf=$("g-rolefull"),youRoleFull=you.f[st.listRole]>=SLOTS[st.listRole];
     rf.hidden=!youRoleFull;
@@ -2621,8 +2629,9 @@
   // stellina su una riga: segna/rimuovi obiettivo (locale)
   $("g-list-out").addEventListener("click",function(e){
     var s=e.target.closest(".pstar");if(s){toggleObj(s.dataset.pid);renderGiocListone();return;}
-    var row=e.target.closest(".prow.callable");if(row){gCall(row.dataset.pid);}
+    var row=e.target.closest(".prow.selectable");if(row){st.gSelPid=(String(st.gSelPid)===String(row.dataset.pid))?null:row.dataset.pid;renderGiocListone();}
   });
+  $("g-call").addEventListener("click",function(){if(st.gSelPid!=null)gCall(st.gSelPid);});
   // admin: cambia squadra vista nella sezione giocatore
   $("g-adminteam").addEventListener("change",function(){var i=parseInt(this.value,10);if(!isNaN(i)){st.youIdx=i;renderAll();}});
 
