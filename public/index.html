@@ -163,6 +163,10 @@
   .tchip .nm{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .tchip.lead{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
   .tchip.turn{border-color:var(--evid);box-shadow:inset 0 0 0 1px var(--evid)}
+  .tchip.mine{border-color:var(--good);box-shadow:inset 0 0 0 2px var(--good)}                 /* la tua squadra: verde */
+  .tchip.turn.mine{border-color:var(--evid);box-shadow:inset 0 0 0 1px var(--evid)}            /* tuo turno: vince l'arancione */
+  #g-grid .tchip{cursor:default}
+  #g-grid .tchip:active{transform:none}
   .tchip .slot{margin-left:auto;font-variant-numeric:tabular-nums;font-size:11.5px;color:var(--faint);letter-spacing:.3px;flex:none}
   .tchip .cr{margin-left:10px;font-variant-numeric:tabular-nums;color:var(--gold);font-family:var(--ff-disp);font-weight:700;font-size:14px;flex:none}
   .regia-hint{font-size:12px;color:var(--faint);margin-top:10px}
@@ -240,6 +244,8 @@
   /* asta in corso */
   .g-lot{padding:16px}
   .g-menus{display:flex;flex-direction:column;gap:12px}
+  .g-left{display:flex;flex-direction:column;gap:12px}
+  .g-gridcard{display:none}   /* le card squadre stile banditore: solo desktop (su mobile resta la fila nomi) */
   /* struttura lot: mobile-first impilata (giocatore + anello + offerta) */
   .g-lot-main{display:flex;flex-direction:column;gap:14px}
   .g-lot-main .g-lot-top{order:1}
@@ -308,11 +314,16 @@
     #v-giocatore{width:100vw;margin-left:calc(50% - 50vw);padding-inline:24px;overflow-x:hidden}
     /* layout: barra in alto a tutta larghezza, asta a sinistra, i 3 menù a destra */
     .g-wrap{max-width:1560px;display:grid;grid-template-columns:minmax(0,1.85fr) minmax(0,1fr);gap:14px;
-            grid-template-areas:"top top" "rail rail" "lot menus";align-items:start}
+            grid-template-rows:auto 1fr;grid-template-areas:"top top" "left menus";align-items:start}
     .g-top{grid-area:top}
-    .g-railcard{grid-area:rail}
-    .g-lot{grid-area:lot;align-self:start;position:sticky;top:70px}   /* l'asta resta in vista mentre scorri i menù */
+    .g-railcard{display:none}          /* su desktop la fila nomi diventa le card sotto l'asta */
+    .g-left{grid-area:left;align-self:stretch;display:flex;flex-direction:column;gap:14px}
+    .g-gridcard{display:block;flex:1 1 auto}
+    #g-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;height:100%;grid-auto-rows:minmax(44px,1fr);align-content:stretch}
+    #g-grid .tchip{font-size:14px}
     .g-menus{grid-area:menus}
+    /* modalità tutto schermo: la colonna sinistra riempie giusto lo schermo */
+    body.chrome-hidden #v-giocatore .g-wrap{min-height:calc(100vh - 20px)}
     .g-list-out{max-height:60vh}
     /* coda: i chip occupano tutta la larghezza in una riga */
     .g-rail{flex-wrap:nowrap;gap:6px}
@@ -1014,6 +1025,7 @@
         <div id="g-callstrip"></div>
       </div>
 
+      <div class="g-left">
       <!-- ASTA IN CORSO -->
       <div class="card g-lot" id="g-lotcard">
         <div class="g-lot-main">
@@ -1047,6 +1059,12 @@
         </div>
         <div class="g-rolefull" id="g-rolefull" hidden></div>
       </div>
+
+      <!-- SITUAZIONE SQUADRE (card stile banditore, sotto l'asta — solo desktop) -->
+      <div class="card regia g-gridcard" id="g-gridcard">
+        <div class="regia-grid" id="g-grid"></div>
+      </div>
+      </div><!-- /g-left -->
 
       <div class="g-menus">
       <!-- COLLASSABILE: listone giocatori -->
@@ -2221,9 +2239,17 @@
     var rf=$("g-rolefull"),youRoleFull=you.f[st.listRole]>=SLOTS[st.listRole];
     rf.hidden=!youRoleFull;
     if(youRoleFull)rf.textContent="Hai completato i "+ROLE_PLUR[st.listRole];
-    renderMyRoster();
+    renderMyRoster();renderGiocGrid();
     if($("g-sec-list")&&$("g-sec-list").open)renderGiocListone();
     renderRank("g-rank",st.youIdx,-1);
+  }
+  // card squadre stile banditore (situazione: nome + slot ruolo + crediti), sotto l'asta su desktop
+  function renderGiocGrid(){
+    var el=$("g-grid");if(!el)return;var ic=inCorsoIdx(),R=st.listRole,html="";
+    teams.forEach(function(t,i){var turn=(st.drawn&&i===ic),me=(i===st.youIdx);
+      var nm=(turn&&me)?"Tocca a te":t.name;
+      html+="<div class='tchip"+(turn?" turn":"")+(me?" mine":"")+"'><span class='nm'>"+nm+"</span><span class='slot'>"+R+" "+t.f[R]+"/"+SLOTS[R]+"</span><span class='cr'>"+t.cred+"</span></div>";});
+    el.innerHTML=html;
   }
   function selfRaiseOk(){return confirm("Ti stai autorilanciando: sei già in testa e rilanci contro te stesso. Sei sicuro?");}
   function gBidBy(inc){
@@ -2508,8 +2534,6 @@
   $("g-roster-team").addEventListener("change",function(){st.rosterTeamIdx=parseInt(this.value,10);renderMyRoster();});
   // ricalcola la coda del giocatore quando si passa desktop<->mobile
   (function(){var t;window.addEventListener("resize",function(){clearTimeout(t);t=setTimeout(renderGiocCall,150);});})();
-  // su desktop apri i 3 menù come anteprima (restano comunque richiudibili)
-  try{if(window.matchMedia&&window.matchMedia("(min-width:721px)").matches){document.querySelectorAll("#v-giocatore details.g-sec").forEach(function(d){d.open=true;});}}catch(e){}
   // listone giocatore: filtri squadra + ruolo + ordinamento + ricerca
   $("g-sec-list").addEventListener("toggle",function(){if(this.open)renderGiocListone();});
   $("g-list-club").addEventListener("change",function(){st.gClub=this.value;renderGiocListone();});
