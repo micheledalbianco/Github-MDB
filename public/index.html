@@ -1220,7 +1220,7 @@
 
       <div class="card" style="padding:16px">
         <div class="eyebrow">1 · Importa il listone (Quotazioni fantacalcio.it)</div>
-        <p class="setup-p">Carica il CSV delle <b>Quotazioni</b> ufficiali: servono le colonne <b>Id, Ruolo (R), Nome, Squadra, Qt.A</b>. Gli <b>Id</b> sono indispensabili per l'export finale su fantacalcio.it. Riconosco separatore «,» o «;».</p>
+        <p class="setup-p">Il listone ufficiale <b>2026/27 è già caricato</b> — importare è facoltativo. Per aggiornarlo carica un <b>CSV</b> con le colonne <b>Id, R, Nome, Squadra, Qt.A</b> (separatore «,» o «;», eventuale riga-titolo ignorata). Il file <b>.xlsx</b> va prima salvato come CSV (Excel → «Salva come» → CSV).</p>
         <input type="file" id="imp-file" accept=".csv,text/csv,text/plain">
         <div class="setup-status" id="imp-status"></div>
       </div>
@@ -1422,6 +1422,7 @@
 {id:"7485",r:"D",n:"Mangas",sq:"Monza",q:10},
 {id:"5555",r:"D",n:"Kamara H.",sq:"Udinese",q:10},
 {id:"5982",r:"D",n:"Spence",sq:"Inter",q:10},
+{id:"2404",r:"D",n:"Alaba",sq:"Udinese",q:10},
 {id:"4210",r:"D",n:"Mina",sq:"Cagliari",q:9},
 {id:"7414",r:"D",n:"Kaiki",sq:"Como",q:9},
 {id:"7469",r:"D",n:"Bracaglia",sq:"Frosinone",q:9},
@@ -2573,12 +2574,14 @@
   function parseListone(text){
     var lines=text.split(/\r?\n/).filter(function(l){return l.trim().length;});
     if(!lines.length)return null;
-    var semi=(lines[0].split(";").length-1),comma=(lines[0].split(",").length-1);
-    var d=semi>comma?";":",";
-    var hi=-1,cols=null;
-    for(var i=0;i<Math.min(6,lines.length);i++){
-      var c=lines[i].split(d).map(function(s){return s.trim().toLowerCase();});
-      if(c.indexOf("nome")>=0){hi=i;cols=c;break;}
+    // trova la riga di intestazione (quella con la colonna "Nome") e il suo separatore,
+    // saltando eventuali righe-titolo iniziali (es. export fantacalcio.it: ";" e riga titolo)
+    function delimOf(line){var semi=line.split(";").length-1,comma=line.split(",").length-1,tab=line.split("\t").length-1;
+      return (tab>=semi&&tab>=comma&&tab>0)?"\t":(semi>comma?";":",");}
+    var hi=-1,d=",",cols=null;
+    for(var i=0;i<Math.min(10,lines.length);i++){
+      var dd=delimOf(lines[i]),c=lines[i].split(dd).map(function(s){return s.trim().toLowerCase();});
+      if(c.indexOf("nome")>=0){hi=i;d=dd;cols=c;break;}
     }
     if(hi<0)return null;
     function col(names){for(var j=0;j<cols.length;j++)for(var k=0;k<names.length;k++)if(cols[j]===names[k])return j;return -1;}
