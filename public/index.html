@@ -650,7 +650,7 @@
   .crank-row .dot{width:11px;height:11px;border-radius:50%;flex:none}
   .crank-name{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .crank-cr{font-family:var(--ff-disp);font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums;font-size:16px}
-  .crank-mx{font-variant-numeric:tabular-nums;color:var(--accent-ink);font-weight:700;font-size:12px;white-space:nowrap}
+  .crank-mx{font-variant-numeric:tabular-nums;color:var(--accent-ink);font-weight:700;font-size:12px;white-space:nowrap;min-width:52px;text-align:right}
   .crank-cr{min-width:38px;text-align:right}
   .crank-row.me{background:color-mix(in srgb,var(--evid) 16%,transparent);border:1px solid color-mix(in srgb,var(--evid) 46%,transparent)}
   .crank-row.me .crank-name{color:var(--evid-ink);font-weight:700}
@@ -2275,8 +2275,8 @@
     var rows=sorted.map(function(o,r){var t=o.t;
       return "<div class='crank-row"+(r===0?" top":"")+(o.i===meIdx?" me":"")+(o.i===leadIdx?" leader":"")+"'><span class='crank-n'>"+(r+1)+"</span>"+
         "<span class='crank-name'>"+t.name+"</span>"+
-        (showMax?"<span class='crank-mx'>max "+maxBid(t)+"</span>":"")+
-        "<span class='crank-cr'>"+t.cred+"</span></div>";
+        "<span class='crank-cr'>"+t.cred+"</span>"+
+        (showMax?"<span class='crank-mx'>max "+maxBid(t)+"</span>":"")+"</div>";
     }).join("");
     el.innerHTML="<div class='crank-title'>Crediti</div>"+rows;
   }
