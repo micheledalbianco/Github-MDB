@@ -2823,9 +2823,13 @@
     st.saleLog=d.saleLog||(d.lastSale?[d.lastSale]:[]);st.drawn=!!d.drawn;
     document.querySelectorAll("#b-phasesel button").forEach(function(x){x.setAttribute("aria-pressed",x.dataset.r===st.listRole?"true":"false");});
   }
+  // BACKUP LOCALE: copia dello stato sul dispositivo admin, sopravvive a riavvio/crash e funziona anche offline
+  function saveLocalBackup(s){try{localStorage.setItem("fb-backup",JSON.stringify({room:(Sync&&Sync.room)||"",ts:Date.now(),state:s}));}catch(e){}}
+  function loadLocalBackup(room){try{var o=JSON.parse(localStorage.getItem("fb-backup")||"null");return (o&&o.room===room&&o.state&&o.state.teams)?o.state:null;}catch(e){return null;}}
   function syncPush(){
     if(!Sync||!Sync.ready||Sync.role!=="operator")return;
     var s=serialize();
+    saveLocalBackup(s);                                                          // backup locale immediato (anche senza rete)
     try{Sync.ch.send({type:"broadcast",event:"state",payload:s});}catch(e){}   // live istantaneo
     clearTimeout(Sync._t);                                                       // persistenza per chi entra dopo
     Sync._t=setTimeout(function(){try{Sync.sb.from("rooms").upsert({id:Sync.room,state:s,updated_at:new Date().toISOString()});}catch(e){}},250);
@@ -2860,16 +2864,23 @@
       // se c'è un secondo admin (es. desktop + mobile), allineo lo stato che arriva dall'altro.
       // Tengo applying=true anche durante renderAll così NON lo ri-pubblico (niente loop tra i due).
       ch.on("broadcast",{event:"state"},function(m){if(m.payload&&m.payload.teams){Sync.applying=true;applyState(m.payload);renderAll();Sync.applying=false;refreshGateTeam();}});
-      sb.from("rooms").select("state").eq("id",Sync.room).maybeSingle().then(function(res){
-        var dbState=(res&&res.data&&res.data.state&&res.data.state.teams)?res.data.state:null;
+      var opBooted=false;
+      function bootOperator(dbState){
+        if(opBooted)return;opBooted=true;
+        var local=loadLocalBackup(Sync.room);
         // priorità: (1) stato canonico salvato nel DB; (2) asta viva già in memoria
-        // (stavo guardando come giocatore) — divento solo l'autorità, NON azzerare;
-        // (3) solo se non c'è NULLA, nuova asta con le squadre di default.
+        // (stavo guardando come giocatore) — divento l'autorità, NON azzerare; (3) backup
+        // locale di questo dispositivo (ripristino dopo crash/riavvio, anche offline);
+        // (4) solo se non c'è proprio NULLA, nuova asta con le squadre di default.
         if(dbState){Sync.applying=true;applyState(dbState);Sync.applying=false;}
         else if(haveLive){/* mantengo lo stato corrente e lo ripubblico appena connesso */}
+        else if(local){Sync.applying=true;applyState(local);Sync.applying=false;}
         else{freshStart();}
         ch.subscribe(function(status){if(status==="SUBSCRIBED"){Sync.ready=true;syncPush();onReady&&onReady();}});
-      });
+      }
+      sb.from("rooms").select("state").eq("id",Sync.room).maybeSingle().then(function(res){
+        bootOperator((res&&res.data&&res.data.state&&res.data.state.teams)?res.data.state:null);
+      },function(){bootOperator(null);});   // rete assente/errore: riparto da backup locale, senza restare bloccato
     } else {
       ch.on("broadcast",{event:"state"},function(m){if(m.payload){Sync.applying=true;applyState(m.payload);Sync.applying=false;renderAll();refreshGateTeam();}});
       sb.from("rooms").select("state").eq("id",Sync.room).maybeSingle().then(function(res){
