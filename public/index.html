@@ -2893,11 +2893,11 @@
   function saveJoin(o){try{localStorage.setItem("asta-join",JSON.stringify(o));}catch(e){}}
   function loadJoin(){try{return JSON.parse(localStorage.getItem("asta-join")||"null");}catch(e){return null;}}
 
-  // ADMIN: accesso completo (banditore + tabellone + setup + giocatore), è l'autorità (operator)
+  // ADMIN: banditore + tabellone + setup (niente vista giocatore), è l'autorità (operator)
   function startAdmin(){
     st.access="admin";
     $("gate-status").textContent="Connessione…";
-    setNav(["banditore","giocatore","tabellone","setup"]);
+    setNav(["banditore","tabellone","setup"]);
     connect("operator",function(){$("gate").hidden=true;renderExportPreview();setView("banditore");renderAll();saveJoin({access:"admin",room:gateRoom()});});
   }
   function startPlayerConnect(preIdx){
